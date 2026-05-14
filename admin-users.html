@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 교육 플랫폼 — 수강생 관리</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #ECEAE6; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .nav-item { transition: background 0.12s; border-radius: 12px; }
+    .nav-item:hover { background: #F5F3F0; }
+    .nav-item.active { background: #F0EDEA; }
+    .badge-green { background:#F0FDF4; color:#16A34A; }
+    .badge-amber { background:#FFFBEB; color:#D97706; }
+    .badge-red   { background:#FEF2F2; color:#DC2626; }
+    .badge-gray  { background:#F5F3F0; color:#6B7280; }
+    .progress-bar { height:5px; background:#E4E1DD; border-radius:99px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:99px; }
+    .btn-sm { padding:7px 16px; border-radius:12px; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.12s; border:none; }
+    .btn-dark    { background:#1A1A1A; color:white; }
+    .btn-dark:hover { background:#333; }
+    .btn-outline { background:white; color:#374151; border:1.5px solid #E4E1DD; }
+    .btn-outline:hover { background:#F5F3F0; }
+    .btn-danger  { background:#FEF2F2; color:#DC2626; border:1.5px solid #FECACA; }
+    .btn-danger:hover { background:#FEE2E2; }
+    .input-field {
+      padding:10px 14px; border-radius:12px; border:1.5px solid #E4E1DD;
+      background:#FAF9F7; font-size:13px; color:#1a1a1a; outline:none;
+      transition:border-color 0.15s;
+    }
+    .input-field:focus { border-color:#1A1A1A; }
+    .input-field::placeholder { color:#B0ADA9; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter:blur(4px); z-index:40; display:flex; align-items:center; justify-content:center; }
+    .modal-box { background:white; border-radius:24px; padding:28px; width:440px; box-shadow:0 20px 60px rgba(0,0,0,0.15); }
+    .row-hover:hover { background:#FAFAF9; }
+  </style>
+</head>
+<body class="h-screen overflow-hidden">
+
+<div class="flex h-full">
+
+  <!-- ── Sidebar (공통) ── -->
+  <aside class="w-64 flex-shrink-0 p-4 flex flex-col gap-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#1A1A1A;">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-900">보안 교육 관리</p>
+          <p class="text-xs" style="color:#B0ADA9;">Administrator</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <p id="admin-name" class="text-sm font-medium text-gray-800">이담당</p>
+          <p class="text-xs" style="color:#B0ADA9;">보안팀</p>
+        </div>
+        <button onclick="logout()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+          <svg class="w-4 h-4" style="color:#B0ADA9;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </button>
+      </div>
+      <div style="height:1px; background:#F0EDEA;"></div>
+      <nav class="flex flex-col gap-0.5">
+        <a href="admin.html"       class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span class="text-sm text-gray-500">대시보드</span>
+        </a>
+        <a href="admin-users.html" class="nav-item active flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <span class="text-sm text-gray-700">수강생 관리</span>
+        </a>
+        <a href="admin-phishing.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="text-sm text-gray-500">피싱 훈련</span>
+        </a>
+        <a href="admin-report.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span class="text-sm text-gray-500">리포트</span>
+        </a>
+        <a href="admin-settings.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          </svg>
+          <span class="text-sm text-gray-500">설정</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="flex-1 overflow-y-auto p-4 pl-0 pr-5">
+
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900">수강생 관리</h1>
+        <p class="text-xs mt-0.5" style="color:#B0ADA9;">총 <span id="total-count">0</span>명 등록</p>
+      </div>
+      <div class="flex gap-2">
+        <input id="search-input" type="text" class="input-field w-52" placeholder="이름 또는 부서 검색"
+          oninput="filterUsers(this.value)">
+        <button class="btn-sm btn-outline" onclick="openModal()">
+          <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          계정 추가
+        </button>
+      </div>
+    </div>
+
+    <!-- 필터 탭 -->
+    <div class="flex gap-2 mb-4">
+      <button class="btn-sm btn-dark" id="filter-all"       onclick="filterByStatus('all', this)">전체</button>
+      <button class="btn-sm btn-outline" id="filter-done"   onclick="filterByStatus('done', this)">완료</button>
+      <button class="btn-sm btn-outline" id="filter-prog"   onclick="filterByStatus('prog', this)">진행중</button>
+      <button class="btn-sm btn-outline" id="filter-none"   onclick="filterByStatus('none', this)">미시작</button>
+      <button class="btn-sm btn-outline" id="filter-click"  onclick="filterByStatus('click', this)">피싱 클릭</button>
+    </div>
+
+    <!-- 사용자 테이블 -->
+    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr style="border-bottom:1.5px solid #F0EDEA;">
+            <th class="text-left text-xs font-medium px-5 py-3.5" style="color:#B0ADA9;">이름</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">이메일</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">부서</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">이수율</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">사전→사후</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">피싱 훈련</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">등록일</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;"></th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+      <div id="empty-state" class="hidden py-16 text-center">
+        <p class="text-sm" style="color:#B0ADA9;">검색 결과가 없습니다</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── 계정 추가 모달 ── -->
+<div id="modal" class="modal-backdrop hidden" onclick="closeModalOnBackdrop(event)">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-base font-bold text-gray-900">수강생 계정 추가</h2>
+      <button onclick="closeModal()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">이름 *</label>
+        <input id="new-name"  type="text"  class="input-field w-full" placeholder="홍길동">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">이메일 *</label>
+        <input id="new-email" type="email" class="input-field w-full" placeholder="user@company.com">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">부서</label>
+        <select id="new-dept" class="input-field w-full" style="cursor:pointer;">
+          <option value="IT 인프라팀">IT 인프라팀</option>
+          <option value="보안팀">보안팀</option>
+          <option value="인사팀">인사팀</option>
+          <option value="법무팀">법무팀</option>
+          <option value="개발팀">개발팀</option>
+          <option value="마케팅팀">마케팅팀</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">임시 비밀번호 *</label>
+        <input id="new-pw" type="text" class="input-field w-full" placeholder="초기 비밀번호 설정">
+      </div>
+      <div id="modal-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2; color:#DC2626;"></div>
+      <div class="flex gap-2 pt-1">
+        <button class="btn-sm btn-outline flex-1" onclick="closeModal()">취소</button>
+        <button class="btn-sm btn-dark flex-1"    onclick="addUser()">계정 생성</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 상세 모달 ── -->
+<div id="detail-modal" class="modal-backdrop hidden" onclick="closeDetailOnBackdrop(event)">
+  <div class="modal-box" style="width:500px;">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-base font-bold text-gray-900" id="detail-name">김보안</h2>
+      <button onclick="closeDetail()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div id="detail-body"></div>
+    <button class="btn-sm btn-outline w-full mt-4" onclick="closeDetail()">닫기</button>
+  </div>
+</div>
+
+<script>
+  // ── 인증 체크 ──
+  const stored = sessionStorage.getItem('user');
+  if (!stored) location.href = 'login.html';
+  else {
+    const u = JSON.parse(stored);
+    if (u.role !== 'admin') location.href = 'index.html';
+    document.getElementById('admin-name').textContent = u.name || '관리자';
+  }
+  function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
+
+  let users = [];
+  let currentFilter = 'all';
+  let searchQuery   = '';
+
+  // ── Supabase에서 수강생 목록 불러오기 ──
+  async function loadUsers() {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-sm" style="color:#B0ADA9;">불러오는 중...</td></tr>`;
+
+    const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: true });
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-sm" style="color:#DC2626;">데이터를 불러오지 못했습니다 (${error.message})</td></tr>`;
+      return;
+    }
+
+    users = (data || []).map(r => ({
+      id:         r.id,
+      name:       r.name,
+      email:      r.email,
+      dept:       r.dept || '미지정',
+      completion: r.completion  || 0,
+      preScore:   r.pre_score   || 0,
+      postScore:  r.post_score  || 0,
+      phishing:   r.phishing_clicked || false,
+      createdAt:  r.created_at ? r.created_at.slice(0, 10) : '-',
+    }));
+
+    renderUsers();
+  }
+
+  // ── 필터 ──
+  function getFilteredUsers() {
+    return users.filter(u => {
+      const matchSearch = !searchQuery ||
+        u.name.includes(searchQuery) || u.dept.includes(searchQuery) || u.email.includes(searchQuery);
+      const matchFilter =
+        currentFilter === 'all'   ? true :
+        currentFilter === 'done'  ? u.completion === 100 :
+        currentFilter === 'prog'  ? u.completion > 0 && u.completion < 100 :
+        currentFilter === 'none'  ? u.completion === 0 :
+        currentFilter === 'click' ? u.phishing : true;
+      return matchSearch && matchFilter;
+    });
+  }
+
+  // ── 테이블 렌더링 ──
+  function renderUsers() {
+    const list = getFilteredUsers();
+    document.getElementById('total-count').textContent = users.length;
+    const tbody = document.getElementById('users-tbody');
+    const empty = document.getElementById('empty-state');
+    if (!list.length) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    tbody.innerHTML = list.map(u => {
+      const diff      = u.postScore - u.preScore;
+      const status    = u.completion === 100 ? ['완료','badge-green'] : u.completion > 0 ? ['진행중','badge-amber'] : ['미시작','badge-gray'];
+      const progColor = u.completion === 100 ? '#16A34A' : u.completion >= 60 ? '#1A1A1A' : '#DC2626';
+      return `<tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
+        <td class="px-5 py-3.5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-semibold text-white flex-shrink-0"
+              style="background:#1A1A1A;">${u.name[0]}</div>
+            <div>
+              <p class="font-medium text-gray-900 text-sm">${u.name}</p>
+              <p class="text-xs" style="color:#B0ADA9;">${status[0] === '완료' ? '이수 완료' : status[0]}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-3.5 text-xs" style="color:#8C8984;">${u.email}</td>
+        <td class="px-4 py-3.5 text-xs text-gray-600">${u.dept}</td>
+        <td class="px-4 py-3.5">
+          <div class="flex items-center gap-2">
+            <div class="progress-bar w-16">
+              <div class="progress-fill" style="width:${u.completion}%; background:${progColor};"></div>
+            </div>
+            <span class="text-xs font-medium text-gray-700">${u.completion}%</span>
+          </div>
+        </td>
+        <td class="px-4 py-3.5 text-sm">
+          <span class="text-gray-500">${u.preScore}점</span>
+          <span style="color:#B0ADA9;"> → </span>
+          <span class="font-medium" style="color:#16A34A;">${u.postScore}점</span>
+          <span class="text-xs ml-1" style="color:${diff>0?'#2563EB':'#DC2626'};">(${diff>0?'+':''}${diff})</span>
+        </td>
+        <td class="px-4 py-3.5">
+          <span class="text-xs px-2.5 py-1 rounded-full font-medium ${u.phishing ? 'badge-red' : 'badge-green'}">
+            ${u.phishing ? '클릭함' : '안전'}
+          </span>
+        </td>
+        <td class="px-4 py-3.5 text-xs" style="color:#B0ADA9;">${u.createdAt}</td>
+        <td class="px-4 py-3.5">
+          <div class="flex gap-1.5">
+            <button class="btn-sm btn-outline text-xs px-3 py-1.5" onclick="openDetail('${u.id}')">상세</button>
+            <button class="btn-sm btn-danger text-xs px-3 py-1.5"  onclick="deleteUser('${u.id}')">삭제</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterByStatus(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('[id^="filter-"]').forEach(b => { b.className = 'btn-sm btn-outline'; });
+    btn.className = 'btn-sm btn-dark';
+    renderUsers();
+  }
+  function filterUsers(q) { searchQuery = q; renderUsers(); }
+
+  // ── 계정 추가 모달 ──
+  function openModal() { document.getElementById('modal').classList.remove('hidden'); }
+  function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
+    document.getElementById('modal-error').classList.add('hidden');
+    ['new-name','new-email','new-pw'].forEach(id => document.getElementById(id).value = '');
+  }
+  function closeModalOnBackdrop(e) { if (e.target === document.getElementById('modal')) closeModal(); }
+
+  async function addUser() {
+    const name  = document.getElementById('new-name').value.trim();
+    const email = document.getElementById('new-email').value.trim();
+    const dept  = document.getElementById('new-dept').value;
+    const pw    = document.getElementById('new-pw').value.trim();
+    const err   = document.getElementById('modal-error');
+
+    if (!name || !email || !pw) {
+      err.textContent = '이름, 이메일, 비밀번호는 필수입니다.';
+      err.classList.remove('hidden'); return;
+    }
+
+    const { error } = await sb.from('profiles').insert({
+      name, email, dept,
+      completion: 0, pre_score: 0, post_score: 0, phishing_clicked: false
+    });
+
+    if (error) {
+      err.textContent = error.code === '23505' ? '이미 등록된 이메일입니다.' : '오류: ' + error.message;
+      err.classList.remove('hidden'); return;
+    }
+
+    closeModal();
+    await loadUsers();
+  }
+
+  // ── 상세 모달 ──
+  function openDetail(id) {
+    const u = users.find(u => u.id === id);
+    if (!u) return;
+    document.getElementById('detail-name').textContent = `${u.name} 상세 정보`;
+    document.getElementById('detail-body').innerHTML = `
+      <div class="flex flex-col gap-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-2xl p-3.5" style="background:#F5F3F0;">
+            <p class="text-xs" style="color:#B0ADA9;">부서</p>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">${u.dept}</p>
+          </div>
+          <div class="rounded-2xl p-3.5" style="background:#F5F3F0;">
+            <p class="text-xs" style="color:#B0ADA9;">이메일</p>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">${u.email}</p>
+          </div>
+        </div>
+        <div class="rounded-2xl p-4" style="background:#F5F3F0;">
+          <p class="text-xs font-medium mb-3" style="color:#8C8984;">교육 이수 현황</p>
+          <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600">이수율</span>
+            <div class="flex-1 progress-bar" style="height:7px;">
+              <div class="progress-fill" style="width:${u.completion}%; background:${u.completion===100?'#16A34A':'#1A1A1A'};"></div>
+            </div>
+            <span class="text-sm font-bold text-gray-900">${u.completion}%</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="rounded-2xl p-3.5 text-center" style="background:#F5F3F0;">
+            <p class="text-xs" style="color:#B0ADA9;">사전 점수</p>
+            <p class="text-xl font-bold text-gray-900 mt-1">${u.preScore}<span class="text-xs font-normal">점</span></p>
+          </div>
+          <div class="rounded-2xl p-3.5 text-center" style="background:#F0FDF4;">
+            <p class="text-xs" style="color:#B0ADA9;">사후 점수</p>
+            <p class="text-xl font-bold mt-1" style="color:#16A34A;">${u.postScore}<span class="text-xs font-normal">점</span></p>
+          </div>
+          <div class="rounded-2xl p-3.5 text-center" style="background:#EFF6FF;">
+            <p class="text-xs" style="color:#B0ADA9;">향상도</p>
+            <p class="text-xl font-bold mt-1" style="color:#2563EB;">+${u.postScore - u.preScore}<span class="text-xs font-normal">점</span></p>
+          </div>
+        </div>
+        <div class="rounded-2xl p-3.5 flex items-center justify-between ${u.phishing ? 'badge-red' : 'badge-green'}" style="border-radius:16px;">
+          <p class="text-sm font-medium">피싱 모의훈련 결과</p>
+          <p class="text-sm font-bold">${u.phishing ? '클릭함 (위험)' : '클릭 안 함 (안전)'}</p>
+        </div>
+        <p class="text-xs text-right" style="color:#B0ADA9;">등록일: ${u.createdAt}</p>
+      </div>`;
+    document.getElementById('detail-modal').classList.remove('hidden');
+  }
+  function closeDetail() { document.getElementById('detail-modal').classList.add('hidden'); }
+  function closeDetailOnBackdrop(e) { if (e.target === document.getElementById('detail-modal')) closeDetail(); }
+
+  // ── 계정 삭제 ──
+  async function deleteUser(id) {
+    if (!confirm('정말 이 계정을 삭제하시겠습니까?')) return;
+    const { error } = await sb.from('profiles').delete().eq('id', id);
+    if (error) { alert('삭제 실패: ' + error.message); return; }
+    await loadUsers();
+  }
+
+  // ── 초기 로드 ──
+  loadUsers();
+</script>
+</body>
+</html>

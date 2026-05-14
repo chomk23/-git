@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 교육 플랫폼 — 피싱 훈련</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #ECEAE6; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .nav-item { transition: background 0.12s; border-radius: 12px; }
+    .nav-item:hover { background: #F5F3F0; }
+    .nav-item.active { background: #F0EDEA; }
+    .card { background: white; border-radius: 24px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .stat-card { background: white; border-radius: 24px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .badge-green { background: #F0FDF4; color: #16A34A; }
+    .badge-red   { background: #FEF2F2; color: #DC2626; }
+    .badge-amber { background: #FFFBEB; color: #D97706; }
+    .badge-gray  { background: #F5F3F0; color: #6B7280; }
+    .btn-sm { padding: 7px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.12s; border: none; }
+    .btn-dark    { background: #1A1A1A; color: white; }
+    .btn-dark:hover { background: #333; }
+    .btn-outline { background: white; color: #374151; border: 1.5px solid #E4E1DD; }
+    .btn-outline:hover { background: #F5F3F0; }
+    .progress-bar { height: 6px; background: #E4E1DD; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter:blur(4px); z-index:40; display:flex; align-items:center; justify-content:center; }
+    .modal-box { background:white; border-radius:24px; padding:28px; width:500px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.15); }
+    .row-hover:hover { background: #FAFAF9; }
+  </style>
+</head>
+<body class="h-screen overflow-hidden">
+
+<div class="flex h-full">
+
+  <!-- ── Sidebar ── -->
+  <aside class="w-64 flex-shrink-0 p-4 flex flex-col gap-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#1A1A1A;">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-900">보안 교육 관리</p>
+          <p class="text-xs" style="color:#B0ADA9;">Administrator</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <p id="admin-name" class="text-sm font-medium text-gray-800">이담당</p>
+          <p class="text-xs" style="color:#B0ADA9;">보안팀</p>
+        </div>
+        <button onclick="logout()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+          <svg class="w-4 h-4" style="color:#B0ADA9;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </button>
+      </div>
+      <div style="height:1px; background:#F0EDEA;"></div>
+      <nav class="flex flex-col gap-0.5">
+        <a href="admin.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span class="text-sm text-gray-500">대시보드</span>
+        </a>
+        <a href="admin-users.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <span class="text-sm text-gray-500">수강생 관리</span>
+        </a>
+        <a href="admin-phishing.html" class="nav-item active flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="text-sm text-gray-700">피싱 훈련</span>
+        </a>
+        <a href="admin-report.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span class="text-sm text-gray-500">리포트</span>
+        </a>
+        <a href="admin-settings.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          </svg>
+          <span class="text-sm text-gray-500">설정</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="flex-1 overflow-y-auto p-4 pl-0 pr-5">
+
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900">피싱 훈련</h1>
+        <p class="text-xs mt-0.5" style="color:#B0ADA9;">모의 피싱 메일 발송 및 결과 관리</p>
+      </div>
+      <button class="btn-sm btn-dark" onclick="openSendModal()">훈련 메일 발송</button>
+    </div>
+
+    <!-- 요약 KPI -->
+    <div class="grid grid-cols-4 gap-3 mb-4">
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">이번 회차 발송</p>
+        <p class="text-3xl font-bold text-gray-900">8명</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">2026-05-01 발송</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">클릭률</p>
+        <p class="text-3xl font-bold" style="color:#DC2626;">37.5%</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">3명 클릭</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">안전 통과</p>
+        <p class="text-3xl font-bold" style="color:#16A34A;">62.5%</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">5명 미클릭</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">누적 훈련 회차</p>
+        <p class="text-3xl font-bold text-gray-900">3회</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">2026년 기준</p>
+      </div>
+    </div>
+
+    <!-- 훈련 회차 이력 -->
+    <div class="card mb-4">
+      <p class="text-sm font-semibold text-gray-900 mb-4">훈련 회차 이력</p>
+      <table class="w-full text-sm">
+        <thead>
+          <tr style="border-bottom:1.5px solid #F0EDEA;">
+            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">회차</th>
+            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">발송일</th>
+            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">메일 유형</th>
+            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">발송 수</th>
+            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">클릭 수</th>
+            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">클릭률</th>
+            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
+            <td class="py-3 text-gray-700 font-medium">3회차</td>
+            <td class="py-3 text-gray-500 text-xs">2026-05-01</td>
+            <td class="py-3 text-gray-600 text-xs">계정 보안 알림 (네이버)</td>
+            <td class="py-3 text-gray-700">8명</td>
+            <td class="py-3 font-medium" style="color:#DC2626;">3명</td>
+            <td class="py-3 font-medium" style="color:#DC2626;">37.5%</td>
+            <td class="py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium badge-green">완료</span></td>
+          </tr>
+          <tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
+            <td class="py-3 text-gray-700 font-medium">2회차</td>
+            <td class="py-3 text-gray-500 text-xs">2026-03-10</td>
+            <td class="py-3 text-gray-600 text-xs">비밀번호 변경 요청 (카카오)</td>
+            <td class="py-3 text-gray-700">8명</td>
+            <td class="py-3 font-medium" style="color:#DC2626;">4명</td>
+            <td class="py-3 font-medium" style="color:#DC2626;">50%</td>
+            <td class="py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium badge-green">완료</span></td>
+          </tr>
+          <tr class="row-hover">
+            <td class="py-3 text-gray-700 font-medium">1회차</td>
+            <td class="py-3 text-gray-500 text-xs">2026-01-15</td>
+            <td class="py-3 text-gray-600 text-xs">업무 공유 문서 (Google Docs)</td>
+            <td class="py-3 text-gray-700">6명</td>
+            <td class="py-3 font-medium" style="color:#D97706;">2명</td>
+            <td class="py-3 font-medium" style="color:#D97706;">33%</td>
+            <td class="py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium badge-green">완료</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 이번 회차 수강생별 결과 -->
+    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+      <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1.5px solid #F0EDEA;">
+        <p class="text-sm font-semibold text-gray-800">이번 회차 수강생별 결과 (3회차)</p>
+        <div class="flex gap-2">
+          <button class="btn-sm btn-outline" onclick="filterPhishing('all', this)" id="pf-all" style="background:#1A1A1A;color:white;border-color:#1A1A1A;">전체</button>
+          <button class="btn-sm btn-outline" onclick="filterPhishing('clicked', this)" id="pf-clicked">클릭함</button>
+          <button class="btn-sm btn-outline" onclick="filterPhishing('safe', this)"   id="pf-safe">안전</button>
+        </div>
+      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr style="border-bottom:1.5px solid #F0EDEA;">
+            <th class="text-left text-xs font-medium px-5 py-3" style="color:#B0ADA9;">이름</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">부서</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">결과</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">클릭 시각</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">교육 이수율</th>
+          </tr>
+        </thead>
+        <tbody id="phishing-tbody"></tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- 훈련 메일 발송 모달 -->
+<div id="send-modal" class="modal-backdrop hidden" onclick="closeSendOnBackdrop(event)">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-base font-bold text-gray-900">피싱 훈련 메일 발송</h2>
+      <button onclick="closeSendModal()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="flex flex-col gap-4">
+      <div class="rounded-2xl p-4" style="background:#FFFBEB;">
+        <p class="text-xs font-medium" style="color:#D97706;">Supabase + Resend 연동 후 실제 발송이 가능합니다</p>
+        <p class="text-xs mt-1" style="color:#92400E;">현재는 데모 미리보기 모드입니다. 실제 메일은 발송되지 않습니다.</p>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">피싱 메일 유형</label>
+        <select class="w-full rounded-xl border border-gray-200 p-2.5 text-sm outline-none focus:border-gray-800" style="background:#FAF9F7;">
+          <option>계정 보안 알림 (네이버)</option>
+          <option>비밀번호 변경 요청 (카카오)</option>
+          <option>업무 공유 문서 (Google Docs)</option>
+          <option>택배 배송 안내 (CJ대한통운)</option>
+          <option>국세청 세금 환급 안내</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-2">발송 대상 (전체 8명)</label>
+        <div class="flex flex-col gap-1.5" id="target-list" style="max-height:180px;overflow-y:auto;">
+        </div>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button class="btn-sm btn-outline flex-1" onclick="closeSendModal()">취소</button>
+        <button class="btn-sm btn-dark flex-1" onclick="sendDemo()">발송 (데모)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const stored = sessionStorage.getItem('user');
+  if (!stored) location.href = 'login.html';
+  else {
+    const u = JSON.parse(stored);
+    if (u.role !== 'admin') location.href = 'index.html';
+    document.getElementById('admin-name').textContent = u.name || '관리자';
+  }
+  function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
+
+  const phishingData = [
+    { name:'김보안', dept:'IT 인프라팀', clicked:false, clickedAt:'-',  completion:90  },
+    { name:'이수현', dept:'보안팀',       clicked:false, clickedAt:'-',  completion:100 },
+    { name:'박민준', dept:'인사팀',       clicked:true,  clickedAt:'14:23', completion:75 },
+    { name:'최지영', dept:'법무팀',       clicked:false, clickedAt:'-',  completion:60  },
+    { name:'정태호', dept:'개발팀',       clicked:true,  clickedAt:'09:41', completion:50 },
+    { name:'한소영', dept:'마케팅팀',     clicked:true,  clickedAt:'11:05', completion:33 },
+    { name:'오동현', dept:'IT 인프라팀',  clicked:false, clickedAt:'-',  completion:100 },
+    { name:'윤지수', dept:'인사팀',       clicked:false, clickedAt:'-',  completion:66  },
+  ];
+
+  let pfFilter = 'all';
+
+  function renderPhishing() {
+    const list = pfFilter === 'all' ? phishingData
+      : pfFilter === 'clicked' ? phishingData.filter(u => u.clicked)
+      : phishingData.filter(u => !u.clicked);
+    document.getElementById('phishing-tbody').innerHTML = list.map(u => `
+      <tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
+        <td class="px-5 py-3 font-medium text-gray-900">${u.name}</td>
+        <td class="px-4 py-3 text-xs text-gray-500">${u.dept}</td>
+        <td class="px-4 py-3">
+          <span class="text-xs px-2.5 py-1 rounded-full font-medium ${u.clicked ? 'badge-red' : 'badge-green'}">
+            ${u.clicked ? '클릭함' : '안전'}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-xs" style="color:#B0ADA9;">${u.clicked ? '2026-05-01 ' + u.clickedAt : '-'}</td>
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-2">
+            <div class="progress-bar w-16">
+              <div class="progress-fill" style="width:${u.completion}%; background:${u.completion===100?'#16A34A':'#1A1A1A'};"></div>
+            </div>
+            <span class="text-xs text-gray-600">${u.completion}%</span>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function filterPhishing(f, btn) {
+    pfFilter = f;
+    document.querySelectorAll('[id^="pf-"]').forEach(b => {
+      b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
+    });
+    btn.style.background = '#1A1A1A'; btn.style.color = 'white'; btn.style.borderColor = '#1A1A1A';
+    renderPhishing();
+  }
+
+  renderPhishing();
+
+  // 모달
+  function openSendModal() {
+    document.getElementById('target-list').innerHTML = phishingData.map((u, i) => `
+      <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 cursor-pointer">
+        <input type="checkbox" checked class="rounded" id="target-${i}">
+        <span class="text-sm text-gray-700">${u.name}</span>
+        <span class="text-xs ml-auto" style="color:#B0ADA9;">${u.dept}</span>
+      </label>`).join('');
+    document.getElementById('send-modal').classList.remove('hidden');
+  }
+  function closeSendModal() { document.getElementById('send-modal').classList.add('hidden'); }
+  function closeSendOnBackdrop(e) { if (e.target === document.getElementById('send-modal')) closeSendModal(); }
+  function sendDemo() {
+    closeSendModal();
+    alert('데모 모드: 피싱 훈련 메일이 발송되었습니다.\nSupabase + Resend 연동 후 실제 발송이 가능합니다.');
+  }
+</script>
+</body>
+</html>

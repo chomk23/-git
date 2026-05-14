@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 교육 플랫폼 — 로그인</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #ECEAE6; }
+    .input-field {
+      width: 100%; padding: 12px 16px; border-radius: 14px;
+      border: 1.5px solid #E4E1DD; background: #FAF9F7;
+      font-size: 14px; color: #1a1a1a; outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .input-field:focus { border-color: #1a1a1a; box-shadow: 0 0 0 3px rgba(26,26,26,0.08); }
+    .input-field::placeholder { color: #B0ADA9; }
+    .btn-primary {
+      width: 100%; padding: 13px; border-radius: 14px;
+      background: #1A1A1A; color: #fff; font-size: 14px; font-weight: 600;
+      border: none; cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { background: #333; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:focus { outline: none; box-shadow: 0 0 0 3px rgba(26,26,26,0.2); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+  <div class="w-full max-w-sm">
+
+    <!-- 로고/타이틀 -->
+    <div class="text-center mb-8">
+      <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style="background:#1A1A1A;">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+      </div>
+      <h1 class="text-xl font-bold text-gray-900">보안 교육 플랫폼</h1>
+      <p class="text-sm mt-1" style="color:#B0ADA9;">Security Awareness Training</p>
+    </div>
+
+    <!-- 로그인 카드 -->
+    <div class="bg-white rounded-3xl p-7 shadow-sm">
+      <h2 class="text-base font-semibold text-gray-900 mb-5">로그인</h2>
+
+      <!-- 에러 메시지 -->
+      <div id="error-msg" class="hidden mb-4 px-4 py-3 rounded-2xl text-sm" style="background:#FEF2F2; color:#DC2626;">
+        이메일 또는 비밀번호를 확인해주세요.
+      </div>
+
+      <form id="login-form" class="flex flex-col gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">이메일</label>
+          <input id="email" type="email" class="input-field" placeholder="이메일 주소 입력" required autocomplete="email">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">비밀번호</label>
+          <input id="password" type="password" class="input-field" placeholder="비밀번호 입력" required autocomplete="current-password">
+        </div>
+        <div class="pt-1">
+          <button type="submit" id="login-btn" class="btn-primary">로그인</button>
+        </div>
+      </form>
+
+      <p class="text-xs text-center mt-4" style="color:#B0ADA9;">
+        계정이 없으신가요? 보안담당자에게 문의하세요.
+      </p>
+    </div>
+
+    <!-- 데모 안내 -->
+    <div class="mt-4 rounded-2xl px-4 py-3 text-xs" style="background:#F5F3F0; color:#8C8984;">
+      <p class="font-medium mb-1" style="color:#6B6864;">데모 계정</p>
+      <p>사용자: user@demo.com / demo1234</p>
+      <p>관리자: admin@demo.com / admin1234</p>
+    </div>
+
+  </div>
+
+  <script>
+    const DEMO_USERS = {
+      'user@demo.com':  { pw: 'demo1234',  role: 'user',  name: '김보안',  dept: 'IT 인프라팀' },
+      'admin@demo.com': { pw: 'admin1234', role: 'admin', name: '이담당',  dept: '보안팀' },
+    };
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const err = document.getElementById('error-msg');
+      err.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = '로그인 중...';
+
+      const email = document.getElementById('email').value.trim();
+      const pw    = document.getElementById('password').value;
+
+      // Supabase 미연동 시 데모 로직
+      await new Promise(r => setTimeout(r, 600));
+      const u = DEMO_USERS[email];
+      if (u && u.pw === pw) {
+        sessionStorage.setItem('user', JSON.stringify({ email, ...u }));
+        location.href = u.role === 'admin' ? 'admin.html' : 'index.html';
+      } else {
+        err.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = '로그인';
+      }
+    });
+
+    // 이미 로그인된 경우 리다이렉트
+    const stored = sessionStorage.getItem('user');
+    if (stored) {
+      const u = JSON.parse(stored);
+      location.href = u.role === 'admin' ? 'admin.html' : 'index.html';
+    }
+  </script>
+</body>
+</html>

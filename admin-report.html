@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 교육 플랫폼 — 리포트</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #ECEAE6; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .nav-item { transition: background 0.12s; border-radius: 12px; }
+    .nav-item:hover { background: #F5F3F0; }
+    .nav-item.active { background: #F0EDEA; }
+    .stat-card { background: white; border-radius: 24px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .badge-green { background: #F0FDF4; color: #16A34A; }
+    .badge-amber { background: #FFFBEB; color: #D97706; }
+    .badge-red   { background: #FEF2F2; color: #DC2626; }
+    .btn-sm { padding: 7px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.12s; border: none; }
+    .btn-dark    { background: #1A1A1A; color: white; }
+    .btn-dark:hover { background: #333; }
+    .btn-outline { background: white; color: #374151; border: 1.5px solid #E4E1DD; }
+    .btn-outline:hover { background: #F5F3F0; }
+    .progress-bar { height: 6px; background: #E4E1DD; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; }
+  </style>
+</head>
+<body class="h-screen overflow-hidden">
+
+<div class="flex h-full">
+
+  <!-- ── Sidebar ── -->
+  <aside class="w-64 flex-shrink-0 p-4 flex flex-col gap-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#1A1A1A;">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-900">보안 교육 관리</p>
+          <p class="text-xs" style="color:#B0ADA9;">Administrator</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <p id="admin-name" class="text-sm font-medium text-gray-800">이담당</p>
+          <p class="text-xs" style="color:#B0ADA9;">보안팀</p>
+        </div>
+        <button onclick="logout()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+          <svg class="w-4 h-4" style="color:#B0ADA9;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </button>
+      </div>
+      <div style="height:1px; background:#F0EDEA;"></div>
+      <nav class="flex flex-col gap-0.5">
+        <a href="admin.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span class="text-sm text-gray-500">대시보드</span>
+        </a>
+        <a href="admin-users.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <span class="text-sm text-gray-500">수강생 관리</span>
+        </a>
+        <a href="admin-phishing.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="text-sm text-gray-500">피싱 훈련</span>
+        </a>
+        <a href="admin-report.html" class="nav-item active flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span class="text-sm text-gray-700">리포트</span>
+        </a>
+        <a href="admin-settings.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          </svg>
+          <span class="text-sm text-gray-500">설정</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="flex-1 overflow-y-auto p-4 pl-0 pr-5">
+
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900">리포트</h1>
+        <p class="text-xs mt-0.5" style="color:#B0ADA9;">2026년 5월 기준</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-sm btn-outline" onclick="exportFullCSV()">CSV 내보내기</button>
+        <button class="btn-sm btn-outline" onclick="window.print()">인쇄 / PDF</button>
+      </div>
+    </div>
+
+    <!-- 요약 KPI -->
+    <div class="grid grid-cols-4 gap-3 mb-4">
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">전체 이수율</p>
+        <p class="text-3xl font-bold text-gray-900">72%</p>
+        <p class="text-xs mt-1.5" style="color:#16A34A;">전월 대비 +7%p</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">평균 점수 향상</p>
+        <p class="text-3xl font-bold text-gray-900">+24점</p>
+        <p class="text-xs mt-1.5" style="color:#16A34A;">사전 → 사후</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">피싱 클릭률</p>
+        <p class="text-3xl font-bold text-gray-900">12%</p>
+        <p class="text-xs mt-1.5" style="color:#16A34A;">전월 대비 -6%p</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">총 수강생</p>
+        <p class="text-3xl font-bold text-gray-900">8명</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">완료 3 / 진행중 4 / 미시작 1</p>
+      </div>
+    </div>
+
+    <!-- 차트 2개 row -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="stat-card">
+        <p class="text-sm font-semibold text-gray-800 mb-4">월별 이수율 추이 (%)</p>
+        <div style="height:200px;">
+          <canvas id="chart-completion"></canvas>
+        </div>
+      </div>
+      <div class="stat-card">
+        <p class="text-sm font-semibold text-gray-800 mb-4">부서별 이수율 (%)</p>
+        <div style="height:200px;">
+          <canvas id="chart-dept"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 수강생별 상세 테이블 -->
+    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+      <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1.5px solid #F0EDEA;">
+        <p class="text-sm font-semibold text-gray-800">수강생별 교육 결과</p>
+      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr style="border-bottom:1.5px solid #F0EDEA;">
+            <th class="text-left text-xs font-medium px-5 py-3" style="color:#B0ADA9;">이름</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">부서</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">이수율</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">사전 점수</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">사후 점수</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">향상도</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">피싱 결과</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">상태</th>
+          </tr>
+        </thead>
+        <tbody id="report-tbody"></tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const stored = sessionStorage.getItem('user');
+  if (!stored) location.href = 'login.html';
+  else {
+    const u = JSON.parse(stored);
+    if (u.role !== 'admin') location.href = 'index.html';
+    document.getElementById('admin-name').textContent = u.name || '관리자';
+  }
+  function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
+
+  let _reportUsers = [];
+  const chartColor = { grid: '#F5F3F0', text: '#B0ADA9' };
+  let deptChart;
+
+  async function loadReport() {
+    const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: true });
+    if (error || !data) return;
+
+    _reportUsers = data.map(r => ({
+      name:       r.name,
+      dept:       r.dept || '미지정',
+      completion: r.completion  || 0,
+      preScore:   r.pre_score   || 0,
+      postScore:  r.post_score  || 0,
+      phishing:   r.phishing_clicked || false,
+    }));
+
+    const total   = _reportUsers.length;
+    const avgComp = total ? Math.round(_reportUsers.reduce((s,u)=>s+u.completion,0)/total) : 0;
+    const avgPre  = total ? Math.round(_reportUsers.reduce((s,u)=>s+u.preScore,0)/total) : 0;
+    const avgPost = total ? Math.round(_reportUsers.reduce((s,u)=>s+u.postScore,0)/total) : 0;
+    const phishN  = _reportUsers.filter(u=>u.phishing).length;
+    const doneN   = _reportUsers.filter(u=>u.completion===100).length;
+    const progN   = _reportUsers.filter(u=>u.completion>0&&u.completion<100).length;
+
+    // KPI 업데이트
+    document.querySelectorAll('.stat-card p.text-3xl')[0].textContent = avgComp + '%';
+    document.querySelectorAll('.stat-card p.text-3xl')[1].textContent = (avgPost-avgPre>=0?'+':'')+(avgPost-avgPre)+'점';
+    document.querySelectorAll('.stat-card p.text-3xl')[2].textContent = Math.round(phishN/total*100)+'%';
+    document.querySelectorAll('.stat-card p.text-3xl')[3].textContent = total + '명';
+    document.querySelectorAll('.stat-card p.text-xs.mt-1\\.5')[3].textContent = `완료 ${doneN} / 진행중 ${progN} / 미시작 ${total-doneN-progN}`;
+
+    // 테이블 렌더
+    document.getElementById('report-tbody').innerHTML = _reportUsers.map(u => {
+      const diff   = u.postScore - u.preScore;
+      const status = u.completion===100?['완료','badge-green']:u.completion>0?['진행중','badge-amber']:['미시작','badge-red'];
+      return `<tr style="border-bottom:1px solid #F5F3F0;">
+        <td class="px-5 py-3 font-medium text-gray-900">${u.name}</td>
+        <td class="px-4 py-3 text-xs text-gray-500">${u.dept}</td>
+        <td class="px-4 py-3 text-sm text-gray-700">${u.completion}%</td>
+        <td class="px-4 py-3 text-sm text-gray-600">${u.preScore}점</td>
+        <td class="px-4 py-3 text-sm text-gray-600">${u.postScore}점</td>
+        <td class="px-4 py-3 text-sm font-medium" style="color:${diff>0?'#16A34A':'#DC2626'};">${diff>0?'+':''}${diff}점</td>
+        <td class="px-4 py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium ${u.phishing?'badge-red':'badge-green'}">${u.phishing?'클릭함':'안전'}</span></td>
+        <td class="px-4 py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium ${status[1]}">${status[0]}</span></td>
+      </tr>`;
+    }).join('');
+
+    // 부서별 차트 데이터를 실제 DB에서 계산
+    const depts = [...new Set(_reportUsers.map(u=>u.dept))];
+    const deptAvg = depts.map(d => {
+      const du = _reportUsers.filter(u=>u.dept===d);
+      return Math.round(du.reduce((s,u)=>s+u.completion,0)/du.length);
+    });
+    const deptColors = deptAvg.map(v => v===100?'#16A34A':v>=60?'#1A1A1A':v>=40?'#D97706':'#DC2626');
+    if (deptChart) deptChart.destroy();
+    deptChart = new Chart(document.getElementById('chart-dept'), {
+      type: 'bar',
+      data: { labels: depts, datasets: [{ label:'이수율 (%)', data: deptAvg, backgroundColor: deptColors, borderRadius:6 }] },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ font:{ family:'Noto Sans KR', size:11 }, color:'#6B7280', boxWidth:10 } } },
+        scales:{
+          x:{ grid:{ color:chartColor.grid }, ticks:{ color:chartColor.text, font:{ size:11 } } },
+          y:{ grid:{ color:chartColor.grid }, ticks:{ color:chartColor.text, font:{ size:11 } }, max:100 },
+        }
+      }
+    });
+  }
+
+  // 이수율 추이 차트 (월별 - 고정 데이터)
+  new Chart(document.getElementById('chart-completion'), {
+    type: 'line',
+    data: {
+      labels: ['1월','2월','3월','4월','5월','6월'],
+      datasets: [{ label:'이수율 (%)', data:[30,42,51,58,65,72],
+        borderColor:'#1A1A1A', backgroundColor:'rgba(26,26,26,0.06)',
+        fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#1A1A1A' }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ font:{ family:'Noto Sans KR', size:11 }, color:'#6B7280', boxWidth:10 } } },
+      scales:{
+        x:{ grid:{ color:chartColor.grid }, ticks:{ color:chartColor.text, font:{ size:11 } } },
+        y:{ grid:{ color:chartColor.grid }, ticks:{ color:chartColor.text, font:{ size:11 } } },
+      }
+    }
+  });
+
+  loadReport();
+
+  function exportFullCSV() {
+    const headers = ['이름','부서','이수율(%)','사전점수','사후점수','향상도','피싱결과','상태'];
+    const rows = _reportUsers.map(u => {
+      const diff = u.postScore - u.preScore;
+      const status = u.completion === 100 ? '완료' : u.completion > 0 ? '진행중' : '미시작';
+      return [u.name, u.dept, u.completion, u.preScore, u.postScore,
+        (diff > 0 ? '+' : '') + diff + '점', u.phishing ? '클릭함' : '안전', status];
+    });
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = '보안교육_리포트_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click(); URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>

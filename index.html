@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 교육 플랫폼 — 대시보드</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #ECEAE6; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .nav-item { transition: background 0.12s; border-radius: 12px; }
+    .nav-item:hover { background: #F5F3F0; }
+    .nav-item.active { background: #F0EDEA; }
+    .course-card { transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: pointer; }
+    .course-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .course-card:active { transform: translateY(0); }
+    .filter-btn { transition: background 0.12s, color 0.12s; }
+    .filter-btn:focus { outline: none; box-shadow: 0 0 0 2px #1a1a1a; }
+    .progress-bar { height: 4px; background: #E4E1DD; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: #1A1A1A; transition: width 0.6s ease; }
+  </style>
+</head>
+<body class="h-screen overflow-hidden">
+
+<div class="flex h-full">
+
+  <!-- ── Sidebar ── -->
+  <aside class="w-72 flex-shrink-0 p-4 flex flex-col gap-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
+
+      <!-- 프로필 -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:#E8E5E1;">
+            <svg class="w-5 h-5" style="color:#BDBAB6;" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+          </div>
+          <div>
+            <p id="user-name" class="text-sm font-semibold text-gray-900 leading-tight">김보안</p>
+            <p id="user-dept" class="text-xs mt-0.5" style="color:#B0ADA9;">IT 인프라팀</p>
+          </div>
+        </div>
+        <button onclick="logout()" title="로그아웃"
+          class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors hover:bg-gray-100">
+          <svg class="w-4 h-4" style="color:#B0ADA9;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 보안 스코어 -->
+      <div class="rounded-2xl px-4 py-3" style="background:#F5F3F0;">
+        <p class="text-xs font-medium tracking-widest uppercase mb-1" style="color:#B0ADA9;">My Security Score</p>
+        <p class="text-3xl font-bold text-gray-900">840</p>
+        <div class="progress-bar mt-2">
+          <div class="progress-fill" style="width:84%"></div>
+        </div>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">목표: 1,000점</p>
+      </div>
+
+      <!-- 네비게이션 -->
+      <nav class="flex flex-col gap-0.5" id="nav-menu">
+        <a href="#" class="nav-item active flex items-center justify-between px-3 py-2.5" onclick="event.preventDefault(); filterCourses('all', this)">
+          <span class="text-sm text-gray-700">전체 교육</span>
+          <span class="text-xs font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5" id="badge-all">5</span>
+        </a>
+        <a href="#" class="nav-item flex items-center justify-between px-3 py-2.5" onclick="event.preventDefault(); filterCourses('inprogress', this)">
+          <span class="text-sm text-gray-700">수강 중</span>
+          <span class="text-xs font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5" id="badge-inprogress">5</span>
+        </a>
+        <a href="#" class="nav-item flex items-center justify-between px-3 py-2.5" onclick="event.preventDefault(); filterCourses('completed', this)">
+          <span class="text-sm text-gray-700">완료된 교육</span>
+          <span class="text-xs font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5" id="badge-completed">0</span>
+        </a>
+        <a href="#" class="nav-item flex items-center justify-between px-3 py-2.5" onclick="event.preventDefault(); filterCourses('exam', this)">
+          <span class="text-sm text-gray-700">시험 결과</span>
+        </a>
+      </nav>
+
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="flex-1 overflow-y-auto p-4 pl-0 pr-5">
+
+    <!-- 강의 그리드 -->
+    <div class="grid grid-cols-3 gap-3" id="course-grid"></div>
+
+  </main>
+</div>
+
+<script>
+  // 로그인 체크
+  const stored = sessionStorage.getItem('user');
+  if (!stored) location.href = 'login.html';
+  const user = stored ? JSON.parse(stored) : {};
+  document.getElementById('user-name').textContent = user.name || '사용자';
+  document.getElementById('user-dept').textContent = user.dept || '';
+
+  function logout() {
+    sessionStorage.removeItem('user');
+    location.href = 'login.html';
+  }
+
+  // 교육 데이터 (status: 'inprogress' | 'completed')
+  const courses = [
+    { id:1, title:'CyberGuard Corp',  sub:'서버실까지 — 6가지 보안 미션 어드벤처', color:'#1565C0', link:'cyberguard.html',           status:'inprogress' },
+    { id:2, title:'피싱 탐정',         sub:'진짜 vs 가짜 이메일 판별 · 6라운드',     color:'#1E3A5F', link:'gamification.html#phishing', status:'inprogress' },
+    { id:3, title:'OX 번개퀴즈',       sub:'빠를수록 높은 점수 · 연속 보너스',       color:'#5B21B6', link:'gamification.html#ox',       status:'inprogress' },
+    { id:4, title:'비밀번호 요새',      sub:'강한 비밀번호 만들기 · 3단계 미션',      color:'#064E3B', link:'gamification.html#password',  status:'inprogress' },
+    { id:5, title:'보안 예산 작전',     sub:'100P 예산으로 회사를 지켜라 · 전략형',   color:'#7C2D12', link:'gamification.html#budget',    status:'inprogress' },
+  ];
+
+  let currentFilter = 'all';
+
+  function renderCourses() {
+    const grid = document.getElementById('course-grid');
+    let list = courses;
+    if (currentFilter === 'inprogress') list = courses.filter(c => c.status === 'inprogress');
+    else if (currentFilter === 'completed') list = courses.filter(c => c.status === 'completed');
+    else if (currentFilter === 'exam') list = [];
+
+    if (list.length === 0) {
+      const msg = currentFilter === 'exam'
+        ? '시험 결과가 없습니다.'
+        : '해당하는 교육이 없습니다.';
+      grid.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-20 gap-2">
+        <p class="text-sm font-medium text-gray-400">${msg}</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(c => `
+      <div class="course-card bg-white rounded-3xl overflow-hidden shadow-sm" onclick="location.href='${c.link}'">
+        <div style="aspect-ratio:16/9; background:${c.color};"></div>
+        <div class="px-4 py-3">
+          <p class="text-sm font-semibold text-gray-900 leading-snug">${c.title}</p>
+          <p class="text-xs mt-1" style="color:#B0ADA9;">${c.sub}</p>
+          <div class="mt-2">
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="${c.status==='completed'?'background:#F0FDF4;color:#16A34A;':'background:#F5F3F0;color:#8C8984;'}">${c.status==='completed'?'완료':'수강 중'}</span>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  function filterCourses(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('#nav-menu a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    // 배지 업데이트
+    document.getElementById('badge-all').textContent = courses.length;
+    document.getElementById('badge-inprogress').textContent = courses.filter(c=>c.status==='inprogress').length;
+    document.getElementById('badge-completed').textContent = courses.filter(c=>c.status==='completed').length;
+    renderCourses();
+  }
+
+  renderCourses();
+</script>
+</body>
+</html>
