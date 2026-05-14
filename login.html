@@ -106,7 +106,8 @@
       const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
 
       if (error) {
-        err.textContent = '이메일 또는 비밀번호를 확인해주세요.';
+        console.error('Auth error:', error.message, error.status);
+        err.textContent = '오류: ' + error.message;
         err.classList.remove('hidden');
         btn.disabled = false;
         btn.textContent = '로그인';
