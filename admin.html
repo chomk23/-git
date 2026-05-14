@@ -247,7 +247,7 @@
 
   // ── Supabase에서 데이터 로드 ──
   async function loadDashboard() {
-    const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: true });
+    const { data, error } = await sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true });
     if (error || !data) return;
 
     const users = data.map(r => ({
@@ -303,62 +303,77 @@
       </tr>`;
     }).join('');
 
-    // ── CSV용 데이터 보존 ──
+    // ── 부서별 이수율 계산 ──
+    const deptMap = {};
+    users.forEach(u => {
+      if (!deptMap[u.dept]) deptMap[u.dept] = { total: 0, done: 0 };
+      deptMap[u.dept].total++;
+      if (u.completion === 100) deptMap[u.dept].done++;
+    });
+    const deptLabels = Object.keys(deptMap);
+    const deptRates  = deptLabels.map(d => deptMap[d].total ? Math.round(deptMap[d].done / deptMap[d].total * 100) : 0);
+    chartData.dept.labels   = deptLabels.length ? deptLabels : ['데이터 없음'];
+    chartData.dept.datasets[0].data = deptLabels.length ? deptRates : [0];
+    chartData.dept.datasets[0].backgroundColor = deptRates.map(r => r === 100 ? '#16A34A' : r >= 60 ? '#1A1A1A' : '#DC2626');
+
+    // ── 게임별 평균 점수 계산 ──
+    const { data: scores } = await sb.from('game_scores').select('game_type, score');
+    if (scores && scores.length) {
+      const gameMap = {};
+      scores.forEach(s => {
+        if (!gameMap[s.game_type]) gameMap[s.game_type] = [];
+        gameMap[s.game_type].push(s.score);
+      });
+      const gameNames = { phishing:'피싱탐정', ox:'OX퀴즈', password:'비밀번호', budget:'예산작전', cyberguard:'CyberGuard' };
+      const gLabels = Object.keys(gameMap).map(k => gameNames[k] || k);
+      const gData   = Object.values(gameMap).map(arr => Math.round(arr.reduce((a,b)=>a+b,0)/arr.length));
+      chartData.score.labels = gLabels;
+      chartData.score.datasets[0].data = new Array(gLabels.length).fill(0);
+      chartData.score.datasets[1].data = gData;
+    }
+
     window._dashUsers = users;
+    if (mainChart) buildChart(currentChartKey);
   }
 
   loadDashboard();
 
-  // ── Chart.js ──
   const chartColors = { grid: '#F5F3F0', text: '#B0ADA9' };
   let mainChart;
+  let currentChartKey = 'completion';
 
   const chartData = {
     completion: {
-      title: '월별 이수율 추이 (%)',
-      type: 'line',
-      labels: ['1월','2월','3월','4월','5월','6월'],
-      datasets: [{
-        label: '이수율 (%)',
-        data: [30, 42, 51, 58, 65, 72],
-        borderColor: '#1A1A1A', backgroundColor: 'rgba(26,26,26,0.06)',
-        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#1A1A1A',
-      }]
+      title: '월별 이수율 추이 (수강생 데이터 누적 시 표시)',
+      type: 'bar',
+      labels: ['데이터 없음'],
+      datasets: [{ label: '이수율 (%)', data: [0], backgroundColor: '#E4E1DD', borderRadius: 6 }]
     },
     score: {
-      title: '교육 전/후 퀴즈 평균 점수',
+      title: '게임별 평균 점수',
       type: 'bar',
-      labels: ['피싱 메일','개인정보','클라우드 보안','랜섬웨어','네트워크'],
+      labels: ['데이터 없음'],
       datasets: [
-        { label: '사전 점수', data: [48, 55, 40, 52, 45], backgroundColor: '#E4E1DD', borderRadius: 6 },
-        { label: '사후 점수', data: [88, 90, 82, 86, 80], backgroundColor: '#1A1A1A', borderRadius: 6 },
+        { label: '최고 점수', data: [0], backgroundColor: '#E4E1DD', borderRadius: 6 },
+        { label: '평균 점수', data: [0], backgroundColor: '#1A1A1A', borderRadius: 6 },
       ]
     },
     phishing: {
-      title: '월별 피싱 모의훈련 클릭률 (%)',
-      type: 'line',
-      labels: ['1월','2월','3월','4월','5월'],
-      datasets: [{
-        label: '클릭률 (%)',
-        data: [33, 28, 24, 18, 12],
-        borderColor: '#DC2626', backgroundColor: 'rgba(220,38,38,0.06)',
-        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#DC2626',
-      }]
+      title: '피싱 클릭률',
+      type: 'bar',
+      labels: ['안전','클릭함'],
+      datasets: [{ label: '인원수', data: [0, 0], backgroundColor: ['#16A34A','#DC2626'], borderRadius: 6 }]
     },
     dept: {
       title: '부서별 이수율 (%)',
       type: 'bar',
-      labels: ['IT 인프라팀','보안팀','인사팀','법무팀','개발팀','마케팅팀'],
-      datasets: [{
-        label: '이수율 (%)',
-        data: [90, 100, 75, 60, 55, 40],
-        backgroundColor: ['#1A1A1A','#16A34A','#1A1A1A','#D97706','#DC2626','#DC2626'],
-        borderRadius: 8,
-      }]
+      labels: ['데이터 없음'],
+      datasets: [{ label: '이수율 (%)', data: [0], backgroundColor: ['#1A1A1A'], borderRadius: 8 }]
     },
   };
 
   function buildChart(key) {
+    currentChartKey = key;
     const d = chartData[key];
     document.getElementById('chart-title').textContent = d.title;
     if (mainChart) mainChart.destroy();
