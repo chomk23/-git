@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 교육 플랫폼 — 로그인</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -82,10 +84,12 @@
   </div>
 
   <script>
-    const DEMO_USERS = {
-      'user@demo.com':  { pw: 'demo1234',  role: 'user',  name: '김보안',  dept: 'IT 인프라팀' },
-      'admin@demo.com': { pw: 'admin1234', role: 'admin', name: '이담당',  dept: '보안팀' },
-    };
+    // 이미 로그인된 경우 리다이렉트
+    const stored = sessionStorage.getItem('user');
+    if (stored) {
+      const u = JSON.parse(stored);
+      location.href = u.role === 'admin' ? 'admin.html' : 'index.html';
+    }
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -95,28 +99,41 @@
       btn.disabled = true;
       btn.textContent = '로그인 중...';
 
-      const email = document.getElementById('email').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
       const pw    = document.getElementById('password').value;
 
-      // Supabase 미연동 시 데모 로직
-      await new Promise(r => setTimeout(r, 600));
-      const u = DEMO_USERS[email];
-      if (u && u.pw === pw) {
-        sessionStorage.setItem('user', JSON.stringify({ email, ...u }));
-        location.href = u.role === 'admin' ? 'admin.html' : 'index.html';
-      } else {
+      // ── Supabase Auth 로그인 ──
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+      if (error) {
+        err.textContent = '이메일 또는 비밀번호를 확인해주세요.';
         err.classList.remove('hidden');
         btn.disabled = false;
         btn.textContent = '로그인';
+        return;
       }
-    });
 
-    // 이미 로그인된 경우 리다이렉트
-    const stored = sessionStorage.getItem('user');
-    if (stored) {
-      const u = JSON.parse(stored);
-      location.href = u.role === 'admin' ? 'admin.html' : 'index.html';
-    }
+      // ── 프로필 조회 ──
+      const { data: profile } = await sb.from('profiles').select('*').eq('email', email).single();
+
+      if (!profile) {
+        err.textContent = '프로필 정보가 없습니다. 관리자에게 문의하세요.';
+        err.classList.remove('hidden');
+        await sb.auth.signOut();
+        btn.disabled = false;
+        btn.textContent = '로그인';
+        return;
+      }
+
+      sessionStorage.setItem('user', JSON.stringify({
+        email,
+        name: profile.name,
+        dept: profile.dept || '',
+        role: profile.role || 'user',
+      }));
+
+      location.href = profile.role === 'admin' ? 'admin.html' : 'index.html';
+    });
   </script>
 </body>
 </html>
