@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 교육 플랫폼 — 로그인</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="supabase.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -106,8 +106,7 @@
       const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
 
       if (error) {
-        console.error('Auth error:', error.message, error.status);
-        err.textContent = '오류: ' + error.message;
+        err.textContent = '이메일 또는 비밀번호를 확인해주세요.';
         err.classList.remove('hidden');
         btn.disabled = false;
         btn.textContent = '로그인';
