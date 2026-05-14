@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 교육 플랫폼 — 설정</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -137,60 +139,10 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">관리자 이메일</label>
-            <input id="admin-email" type="email" class="input-field" value="admin@company.com">
+            <input id="admin-email" type="email" class="input-field" placeholder="이메일" readonly style="background:#F5F3F0; color:#6B7280;">
           </div>
           <div class="flex justify-end pt-1">
             <button class="btn-sm btn-dark" onclick="saveSettings('기본 정보')">저장</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 교육 설정 -->
-      <div class="card">
-        <p class="text-sm font-semibold text-gray-900 mb-4">교육 설정</p>
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-700">사전 테스트 필수 완료</p>
-              <p class="text-xs mt-0.5" style="color:#B0ADA9;">교육 시작 전 사전 테스트를 반드시 완료해야 합니다</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="toggle-pretest" checked>
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-          <div class="section-divider"></div>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-700">수료증 자동 발급</p>
-              <p class="text-xs mt-0.5" style="color:#B0ADA9;">이수율 100% 달성 시 수료증을 자동으로 발급합니다</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="toggle-cert" checked>
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-          <div class="section-divider"></div>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-700">게임 점수 리더보드 공개</p>
-              <p class="text-xs mt-0.5" style="color:#B0ADA9;">수강생 간 게임 점수 순위를 공개합니다</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="toggle-leaderboard">
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-          <div class="section-divider"></div>
-          <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5">교육 이수 기한 (일)</label>
-            <input type="number" class="input-field" value="30" style="width:120px;" min="1" max="365">
-          </div>
-          <div class="flex justify-end pt-1">
-            <button class="btn-sm btn-dark" onclick="saveSettings('교육 설정')">저장</button>
           </div>
         </div>
       </div>
@@ -238,19 +190,16 @@
         <p class="text-sm font-semibold text-gray-900 mb-4">관리자 비밀번호 변경</p>
         <div class="flex flex-col gap-3">
           <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5">현재 비밀번호</label>
-            <input type="password" class="input-field" placeholder="현재 비밀번호 입력">
-          </div>
-          <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">새 비밀번호</label>
-            <input type="password" class="input-field" placeholder="새 비밀번호 입력 (8자 이상)">
+            <input type="password" id="pw-new" class="input-field" placeholder="새 비밀번호 입력 (8자 이상)">
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">새 비밀번호 확인</label>
-            <input type="password" class="input-field" placeholder="새 비밀번호 재입력">
+            <input type="password" id="pw-confirm" class="input-field" placeholder="새 비밀번호 재입력">
           </div>
+          <div id="pw-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2; color:#DC2626;"></div>
           <div class="flex justify-end pt-1">
-            <button class="btn-sm btn-dark" onclick="saveSettings('비밀번호')">변경</button>
+            <button class="btn-sm btn-dark" id="pw-btn" onclick="changePassword()">변경</button>
           </div>
         </div>
       </div>
@@ -260,8 +209,8 @@
         <p class="text-sm font-semibold mb-1" style="color:#DC2626;">위험 구역</p>
         <p class="text-xs mb-4" style="color:#B0ADA9;">아래 작업은 되돌릴 수 없습니다. 신중하게 진행하세요.</p>
         <div class="flex flex-col gap-2">
-          <button class="btn-sm btn-danger text-left" onclick="confirmReset('교육 점수')">모든 교육 점수 초기화</button>
-          <button class="btn-sm btn-danger text-left" onclick="confirmReset('피싱 훈련 결과')">피싱 훈련 결과 초기화</button>
+          <button class="btn-sm btn-danger text-left" onclick="resetScores()">모든 게임 점수 초기화</button>
+          <button class="btn-sm btn-danger text-left" onclick="resetPhishing()">피싱 훈련 결과 초기화</button>
         </div>
       </div>
 
@@ -279,20 +228,67 @@
     const u = JSON.parse(stored);
     if (u.role !== 'admin') location.href = 'index.html';
     document.getElementById('admin-name').textContent = u.name || '관리자';
+    document.getElementById('admin-email').value = u.email || '';
+    // 저장된 기본 정보 불러오기
+    const pName = localStorage.getItem('platform-name');
+    const oName = localStorage.getItem('org-name');
+    if (pName) document.getElementById('platform-name').value = pName;
+    if (oName) document.getElementById('org-name').value = oName;
   }
   function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
 
-  function saveSettings(label) {
+  function showToast(msg) {
     const toast = document.getElementById('save-toast');
-    toast.textContent = label + ' 설정이 저장되었습니다';
+    toast.textContent = msg;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2200);
+    setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  function confirmReset(target) {
-    if (confirm(`정말 ${target}을(를) 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
-      saveSettings(target + ' 초기화 완료');
+  function saveSettings(label) {
+    if (label === '기본 정보') {
+      localStorage.setItem('platform-name', document.getElementById('platform-name').value);
+      localStorage.setItem('org-name', document.getElementById('org-name').value);
     }
+    showToast(label + ' 설정이 저장되었습니다');
+  }
+
+  async function changePassword() {
+    const pw1 = document.getElementById('pw-new').value;
+    const pw2 = document.getElementById('pw-confirm').value;
+    const errEl = document.getElementById('pw-error');
+    const btn = document.getElementById('pw-btn');
+
+    errEl.classList.add('hidden');
+    if (pw1.length < 8) { errEl.textContent = '비밀번호는 8자 이상이어야 합니다.'; errEl.classList.remove('hidden'); return; }
+    if (pw1 !== pw2) { errEl.textContent = '비밀번호가 일치하지 않습니다.'; errEl.classList.remove('hidden'); return; }
+
+    btn.disabled = true; btn.textContent = '변경 중...';
+    const { error } = await sb.auth.updateUser({ password: pw1 });
+    btn.disabled = false; btn.textContent = '변경';
+
+    if (error) {
+      errEl.textContent = '오류: ' + error.message;
+      errEl.classList.remove('hidden');
+    } else {
+      document.getElementById('pw-new').value = '';
+      document.getElementById('pw-confirm').value = '';
+      showToast('비밀번호가 변경되었습니다');
+    }
+  }
+
+  async function resetScores() {
+    if (!confirm('모든 게임 점수를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+    const { error: e1 } = await sb.from('game_scores').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error: e2 } = await sb.from('profiles').update({ pre_score: 0, post_score: 0, completion: 0 }).neq('role', 'admin');
+    if (e1 || e2) { alert('초기화 중 오류가 발생했습니다.'); return; }
+    showToast('게임 점수가 초기화되었습니다');
+  }
+
+  async function resetPhishing() {
+    if (!confirm('피싱 훈련 결과를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+    const { error } = await sb.from('profiles').update({ phishing_clicked: false }).neq('role', 'admin');
+    if (error) { alert('초기화 중 오류가 발생했습니다.'); return; }
+    showToast('피싱 훈련 결과가 초기화되었습니다');
   }
 </script>
 </body>
