@@ -358,13 +358,7 @@
       err.classList.remove('hidden'); return;
     }
 
-    // Auth 계정 + 프로필 동시 생성
-    const { error: authErr } = await sb.auth.signUp({ email, password: pw });
-    if (authErr) {
-      err.textContent = authErr.message.includes('already') ? '이미 등록된 이메일입니다.' : '계정 생성 오류: ' + authErr.message;
-      err.classList.remove('hidden'); return;
-    }
-
+    // 1. 프로필 먼저 저장 (anon 세션 유지 중)
     const { error } = await sb.from('profiles').insert({
       name, email, dept,
       completion: 0, pre_score: 0, post_score: 0, phishing_clicked: false
@@ -372,6 +366,14 @@
 
     if (error) {
       err.textContent = error.code === '23505' ? '이미 등록된 이메일입니다.' : '오류: ' + error.message;
+      err.classList.remove('hidden'); return;
+    }
+
+    // 2. Auth 계정 생성
+    const { error: authErr } = await sb.auth.signUp({ email, password: pw });
+    if (authErr) {
+      await sb.from('profiles').delete().eq('email', email);
+      err.textContent = authErr.message.includes('already') ? '이미 등록된 이메일입니다.' : '계정 생성 오류: ' + authErr.message;
       err.classList.remove('hidden'); return;
     }
 
