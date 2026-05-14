@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 교육 플랫폼 — 피싱 훈련</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -108,24 +110,24 @@
     <!-- 요약 KPI -->
     <div class="grid grid-cols-4 gap-3 mb-4">
       <div class="stat-card">
-        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">이번 회차 발송</p>
-        <p class="text-3xl font-bold text-gray-900">8명</p>
-        <p class="text-xs mt-1.5" style="color:#B0ADA9;">2026-05-01 발송</p>
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">총 수강생</p>
+        <p class="text-3xl font-bold text-gray-900" id="kpi-total">-</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">등록된 수강생 수</p>
       </div>
       <div class="stat-card">
         <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">클릭률</p>
-        <p class="text-3xl font-bold" style="color:#DC2626;">37.5%</p>
-        <p class="text-xs mt-1.5" style="color:#B0ADA9;">3명 클릭</p>
+        <p class="text-3xl font-bold" style="color:#DC2626;" id="kpi-click-rate">-</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;" id="kpi-click-sub">-</p>
       </div>
       <div class="stat-card">
         <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">안전 통과</p>
-        <p class="text-3xl font-bold" style="color:#16A34A;">62.5%</p>
-        <p class="text-xs mt-1.5" style="color:#B0ADA9;">5명 미클릭</p>
+        <p class="text-3xl font-bold" style="color:#16A34A;" id="kpi-safe-rate">-</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;" id="kpi-safe-sub">-</p>
       </div>
       <div class="stat-card">
-        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">누적 훈련 회차</p>
-        <p class="text-3xl font-bold text-gray-900">3회</p>
-        <p class="text-xs mt-1.5" style="color:#B0ADA9;">2026년 기준</p>
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">피싱 미클릭</p>
+        <p class="text-3xl font-bold text-gray-900" id="kpi-safe-count">-</p>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">안전 통과 인원</p>
       </div>
     </div>
 
@@ -252,23 +254,47 @@
   }
   function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
 
-  const phishingData = [
-    { name:'김보안', dept:'IT 인프라팀', clicked:false, clickedAt:'-',  completion:90  },
-    { name:'이수현', dept:'보안팀',       clicked:false, clickedAt:'-',  completion:100 },
-    { name:'박민준', dept:'인사팀',       clicked:true,  clickedAt:'14:23', completion:75 },
-    { name:'최지영', dept:'법무팀',       clicked:false, clickedAt:'-',  completion:60  },
-    { name:'정태호', dept:'개발팀',       clicked:true,  clickedAt:'09:41', completion:50 },
-    { name:'한소영', dept:'마케팅팀',     clicked:true,  clickedAt:'11:05', completion:33 },
-    { name:'오동현', dept:'IT 인프라팀',  clicked:false, clickedAt:'-',  completion:100 },
-    { name:'윤지수', dept:'인사팀',       clicked:false, clickedAt:'-',  completion:66  },
-  ];
-
+  let phishingData = [];
   let pfFilter = 'all';
+
+  async function loadPhishing() {
+    const { data } = await sb.from('profiles').select('*').neq('role', 'admin');
+    if (!data) return;
+
+    phishingData = data.map(r => ({
+      name: r.name,
+      dept: r.dept || '미지정',
+      clicked: r.phishing_clicked || false,
+      completion: r.completion || 0,
+    }));
+
+    const total      = phishingData.length;
+    const clickCount = phishingData.filter(u => u.clicked).length;
+    const safeCount  = total - clickCount;
+    const clickRate  = total ? Math.round(clickCount / total * 100) : 0;
+    const safeRate   = total ? 100 - clickRate : 0;
+
+    document.getElementById('kpi-total').textContent      = total + '명';
+    document.getElementById('kpi-click-rate').textContent = clickRate + '%';
+    document.getElementById('kpi-click-sub').textContent  = `${clickCount}명 클릭`;
+    document.getElementById('kpi-safe-rate').textContent  = safeRate + '%';
+    document.getElementById('kpi-safe-sub').textContent   = `${safeCount}명 미클릭`;
+    document.getElementById('kpi-safe-count').textContent = safeCount + '명';
+
+    renderPhishing();
+  }
 
   function renderPhishing() {
     const list = pfFilter === 'all' ? phishingData
       : pfFilter === 'clicked' ? phishingData.filter(u => u.clicked)
       : phishingData.filter(u => !u.clicked);
+
+    if (list.length === 0) {
+      document.getElementById('phishing-tbody').innerHTML = `
+        <tr><td colspan="5" class="text-center py-10 text-sm" style="color:#B0ADA9;">수강생 데이터가 없습니다.</td></tr>`;
+      return;
+    }
+
     document.getElementById('phishing-tbody').innerHTML = list.map(u => `
       <tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
         <td class="px-5 py-3 font-medium text-gray-900">${u.name}</td>
@@ -278,7 +304,7 @@
             ${u.clicked ? '클릭함' : '안전'}
           </span>
         </td>
-        <td class="px-4 py-3 text-xs" style="color:#B0ADA9;">${u.clicked ? '2026-05-01 ' + u.clickedAt : '-'}</td>
+        <td class="px-4 py-3 text-xs" style="color:#B0ADA9;">${u.clicked ? '기록됨' : '-'}</td>
         <td class="px-4 py-3">
           <div class="flex items-center gap-2">
             <div class="progress-bar w-16">
@@ -299,7 +325,7 @@
     renderPhishing();
   }
 
-  renderPhishing();
+  loadPhishing();
 
   // 모달
   function openSendModal() {
