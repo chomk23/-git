@@ -348,7 +348,7 @@
 
   async function addUser() {
     const name  = document.getElementById('new-name').value.trim();
-    const email = document.getElementById('new-email').value.trim();
+    const email = document.getElementById('new-email').value.trim().toLowerCase();
     const dept  = document.getElementById('new-dept').value;
     const pw    = document.getElementById('new-pw').value.trim();
     const err   = document.getElementById('modal-error');
