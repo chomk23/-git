@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 교육 플랫폼 — CyberGuard Corp</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ── 플랫폼 헤더 ── */
@@ -275,7 +277,7 @@ var SC=[{sit:'직원 PC에서 CPU 90%+,\n알 수 없는 외부 서버로 데이�
 var scI=0;
 function startScen(n){G.mg=true;scI=0;$g('MGT').textContent='보안 사고 시나리오';$g('MGS').textContent='실제 상황에서 올바른 대응을 선택하세요!';show('MG');renderScen();}
 function renderScen(){var s=SC[scI];$g('MGB').innerHTML='<div style="background:#f8fbff;border:1.5px solid #90caf9;border-radius:9px;padding:12px;margin-bottom:9px;color:#1a2a38;"><div style="background:#fff3e0;border-left:3px solid #ff9800;border-radius:0 8px 8px 0;padding:9px;margin-bottom:10px;font-size:11px;line-height:1.6;white-space:pre-wrap;color:#1a2a38;">'+s.sit+'</div><div style="font-size:12px;font-weight:700;margin-bottom:9px;color:#1a2a38;">'+s.q+'</div><div style="display:flex;flex-direction:column;gap:6px;">'+s.op.map(function(o,i){return'<button id="SC'+i+'" class="qo">'+(i+1)+'. '+o+'</button>';}).join('')+'</div></div>';s.op.forEach(function(_,i){$g('SC'+i).onclick=function(){var ok=i===s.ans;if(ok)G.sc+=150;updateHUD();$g('MGB').innerHTML+='<div style="padding:9px 12px;border-radius:8px;margin-bottom:8px;font-size:11px;color:#1a2a38;background:'+(ok?'#e8f5e9':'#ffebee')+';border:1.5px solid '+(ok?'#66bb6a':'#ef9a9a')+';white-space:pre-wrap;">'+(ok?'정답! +150점':'오답')+'\n\n힌트: '+s.fb+'</div>';var nx=$g('MGN');if(scI<SC.length-1){nx.textContent='다음 시나리오 ▶';nx.classList.add('on');nx.onclick=function(){scI++;renderScen();nx.classList.remove('on');nx.textContent='완료 ▶';nx.setAttribute('onclick','mgDone()');};}else{nx.textContent='완료 ▶';nx.classList.add('on');nx.setAttribute('onclick','mgDone()');}};}); }
-function showEnding(){$g('EN1').textContent=G.sc;$g('EN2').textContent=G.lv;$g('EN3').textContent=G.bg.length;var ico,t,s;if(G.sc>=3000){ico='A+';t='사이버 보안 전문가!';s='완벽합니다! 모든 위협을 막아냈어요.';}else if(G.sc>=1800){ico='B+';t='훌륭한 보안 수호자!';s='대부분의 위협을 잘 막아냈습니다!';}else{ico='C';t='보안 교육이 더 필요해요';s='다시 도전해서 높은 점수를 달성해보세요!';}$g('EIC').textContent=ico;$g('ETI').textContent=t;$g('ESI').textContent=s+'\n\n획득 뱃지: '+G.bg.join(' ');show('ED');}
+function showEnding(){try{const u=JSON.parse(sessionStorage.getItem('user')||'{}');if(u.email)sb.from('game_scores').insert({user_email:u.email,game_type:'cyberguard',score:G.sc});}catch(e){}$g('EN1').textContent=G.sc;$g('EN2').textContent=G.lv;$g('EN3').textContent=G.bg.length;var ico,t,s;if(G.sc>=3000){ico='A+';t='사이버 보안 전문가!';s='완벽합니다! 모든 위협을 막아냈어요.';}else if(G.sc>=1800){ico='B+';t='훌륭한 보안 수호자!';s='대부분의 위협을 잘 막아냈습니다!';}else{ico='C';t='보안 교육이 더 필요해요';s='다시 도전해서 높은 점수를 달성해보세요!';}$g('EIC').textContent=ico;$g('ETI').textContent=t;$g('ESI').textContent=s+'\n\n획득 뱃지: '+G.bg.join(' ');show('ED');}
 document.addEventListener('keydown',function(e){K[e.key]=true;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.key===' '){if(G.dlg)closeDlg();else if(running&&!G.qz&&!G.mg&&!G.tr)tryAct();}});
 document.addEventListener('keyup',function(e){K[e.key]=false;});
 $g('GL').onclick=function(){if(!G.dlg&&!G.qz&&!G.mg&&!G.tr)tryAct();};

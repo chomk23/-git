@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 교육 플랫폼 — 대시보드</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -56,9 +58,9 @@
       <!-- 보안 스코어 -->
       <div class="rounded-2xl px-4 py-3" style="background:#F5F3F0;">
         <p class="text-xs font-medium tracking-widest uppercase mb-1" style="color:#B0ADA9;">My Security Score</p>
-        <p class="text-3xl font-bold text-gray-900">840</p>
+        <p class="text-3xl font-bold text-gray-900" id="security-score">0</p>
         <div class="progress-bar mt-2">
-          <div class="progress-fill" style="width:84%"></div>
+          <div class="progress-fill" id="score-bar" style="width:0%"></div>
         </div>
         <p class="text-xs mt-1.5" style="color:#B0ADA9;">목표: 1,000점</p>
       </div>
@@ -95,7 +97,6 @@
 </div>
 
 <script>
-  // 로그인 체크
   const stored = sessionStorage.getItem('user');
   if (!stored) location.href = 'login.html';
   const user = stored ? JSON.parse(stored) : {};
@@ -107,7 +108,6 @@
     location.href = 'login.html';
   }
 
-  // 교육 데이터 (status: 'inprogress' | 'completed')
   const courses = [
     { id:1, title:'CyberGuard Corp',  sub:'서버실까지 — 6가지 보안 미션 어드벤처', color:'#1565C0', link:'cyberguard.html',           status:'inprogress' },
     { id:2, title:'피싱 탐정',         sub:'진짜 vs 가짜 이메일 판별 · 6라운드',     color:'#1E3A5F', link:'gamification.html#phishing', status:'inprogress' },
@@ -116,21 +116,61 @@
     { id:5, title:'보안 예산 작전',     sub:'100P 예산으로 회사를 지켜라 · 전략형',   color:'#7C2D12', link:'gamification.html#budget',    status:'inprogress' },
   ];
 
+  const gameTypeToId = { cyberguard:1, phishing:2, ox:3, password:4, budget:5 };
+  const gameTypeNames = { cyberguard:'CyberGuard Corp', phishing:'피싱 탐정', ox:'OX 번개퀴즈', password:'비밀번호 요새', budget:'보안 예산 작전' };
+  const maxScores = { cyberguard:1200, phishing:300, ox:500, password:200, budget:400 };
+
   let currentFilter = 'all';
+  let examScores = [];
+
+  function updateBadges() {
+    document.getElementById('badge-all').textContent = courses.length;
+    document.getElementById('badge-inprogress').textContent = courses.filter(c=>c.status==='inprogress').length;
+    document.getElementById('badge-completed').textContent = courses.filter(c=>c.status==='completed').length;
+  }
 
   function renderCourses() {
     const grid = document.getElementById('course-grid');
+
+    if (currentFilter === 'exam') {
+      if (examScores.length === 0) {
+        grid.innerHTML = `<div class="col-span-3 flex items-center justify-center py-20">
+          <p class="text-sm font-medium text-gray-400">아직 시험 결과가 없습니다.</p>
+        </div>`;
+        return;
+      }
+      const best = {};
+      examScores.forEach(s => { if (!best[s.game_type] || s.score > best[s.game_type]) best[s.game_type] = s.score; });
+      grid.innerHTML = `<div class="col-span-3 bg-white rounded-3xl overflow-hidden shadow-sm">
+        <table class="w-full text-sm">
+          <thead><tr style="background:#F5F3F0;">
+            <th class="px-5 py-3 text-left text-xs font-medium text-gray-500">교육명</th>
+            <th class="px-5 py-3 text-right text-xs font-medium text-gray-500">최고 점수</th>
+            <th class="px-5 py-3 text-right text-xs font-medium text-gray-500">만점</th>
+            <th class="px-5 py-3 text-center text-xs font-medium text-gray-500">결과</th>
+          </tr></thead>
+          <tbody>${Object.entries(best).map(([type, score]) => {
+            const max = maxScores[type] || 1000;
+            const pass = score / max >= 0.6;
+            return `<tr class="border-t border-gray-50">
+              <td class="px-5 py-3 font-medium text-gray-900">${gameTypeNames[type]||type}</td>
+              <td class="px-5 py-3 text-right font-bold text-gray-900">${score}점</td>
+              <td class="px-5 py-3 text-right text-gray-400">${max}점</td>
+              <td class="px-5 py-3 text-center"><span class="text-xs px-2 py-0.5 rounded-full font-medium" style="${pass?'background:#F0FDF4;color:#16A34A;':'background:#FEF2F2;color:#DC2626;'}">${pass?'통과':'재도전'}</span></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+      return;
+    }
+
     let list = courses;
     if (currentFilter === 'inprogress') list = courses.filter(c => c.status === 'inprogress');
     else if (currentFilter === 'completed') list = courses.filter(c => c.status === 'completed');
-    else if (currentFilter === 'exam') list = [];
 
     if (list.length === 0) {
-      const msg = currentFilter === 'exam'
-        ? '시험 결과가 없습니다.'
-        : '해당하는 교육이 없습니다.';
-      grid.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-20 gap-2">
-        <p class="text-sm font-medium text-gray-400">${msg}</p>
+      grid.innerHTML = `<div class="col-span-3 flex items-center justify-center py-20">
+        <p class="text-sm font-medium text-gray-400">해당하는 교육이 없습니다.</p>
       </div>`;
       return;
     }
@@ -152,14 +192,40 @@
     currentFilter = f;
     document.querySelectorAll('#nav-menu a').forEach(a => a.classList.remove('active'));
     el.classList.add('active');
-    // 배지 업데이트
-    document.getElementById('badge-all').textContent = courses.length;
-    document.getElementById('badge-inprogress').textContent = courses.filter(c=>c.status==='inprogress').length;
-    document.getElementById('badge-completed').textContent = courses.filter(c=>c.status==='completed').length;
     renderCourses();
   }
 
+  async function loadUserData() {
+    try {
+      const { data: scores } = await sb.from('game_scores')
+        .select('*').eq('user_email', user.email);
+      if (!scores || scores.length === 0) return;
+
+      examScores = scores;
+
+      const completedTypes = new Set(scores.map(s => s.game_type));
+      Object.entries(gameTypeToId).forEach(([type, id]) => {
+        if (completedTypes.has(type)) {
+          const c = courses.find(c => c.id === id);
+          if (c) c.status = 'completed';
+        }
+      });
+
+      const best = {};
+      scores.forEach(s => { if (!best[s.game_type] || s.score > best[s.game_type]) best[s.game_type] = s.score; });
+      const total = Object.values(best).reduce((a, b) => a + b, 0);
+      const maxTotal = 2600;
+      document.getElementById('security-score').textContent = total.toLocaleString();
+      document.getElementById('score-bar').style.width = Math.min(100, Math.round(total / maxTotal * 100)) + '%';
+
+      updateBadges();
+      renderCourses();
+    } catch(e) {}
+  }
+
+  updateBadges();
   renderCourses();
+  loadUserData();
 </script>
 </body>
 </html>
