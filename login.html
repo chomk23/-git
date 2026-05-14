@@ -108,10 +108,11 @@
       }
 
       // ── 프로필 조회 ──
-      const { data: profile, error: profileErr } = await sb.from('profiles').select('*').eq('email', email).single();
+      const { data: profiles } = await sb.from('profiles').select('*').eq('email', email).limit(1);
+      const profile = profiles?.[0] || null;
 
       if (!profile) {
-        err.textContent = `[디버그] 이메일: ${email} / 오류: ${profileErr?.message || 'no data'}`;
+        err.textContent = '이메일 또는 비밀번호를 확인해주세요.';
         err.classList.remove('hidden');
         await sb.auth.signOut();
         btn.disabled = false;
