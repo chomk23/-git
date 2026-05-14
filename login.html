@@ -108,10 +108,10 @@
       }
 
       // ── 프로필 조회 ──
-      const { data: profile } = await sb.from('profiles').select('*').eq('email', email).single();
+      const { data: profile, error: profileErr } = await sb.from('profiles').select('*').eq('email', email).single();
 
       if (!profile) {
-        err.textContent = '프로필 정보가 없습니다. 관리자에게 문의하세요.';
+        err.textContent = `[디버그] 이메일: ${email} / 오류: ${profileErr?.message || 'no data'}`;
         err.classList.remove('hidden');
         await sb.auth.signOut();
         btn.disabled = false;
