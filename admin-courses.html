@@ -153,45 +153,74 @@
         </svg>
       </button>
     </div>
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-4">
+      <!-- 1단계: 강의 종류 선택 -->
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-2">강의 종류</label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="type-card cursor-pointer rounded-2xl p-3 border-2 transition" data-type="general" onclick="selectType('general')" style="border-color:#1A1A1A;background:#FAF9F7;">
+            <p class="text-sm font-semibold text-gray-900">일반 강의</p>
+            <p class="text-xs mt-0.5" style="color:#8C8984;">영상/문서 등 점수 없는 콘텐츠</p>
+          </label>
+          <label class="type-card cursor-pointer rounded-2xl p-3 border-2 transition" data-type="game" onclick="selectType('game')" style="border-color:#E4E1DD;background:white;">
+            <p class="text-sm font-semibold text-gray-900">게임 강의</p>
+            <p class="text-xs mt-0.5" style="color:#8C8984;">점수 추적되는 게이미케이션</p>
+          </label>
+        </div>
+      </div>
+
+      <div class="section-divider" style="height:1px;background:#F0EDEA;"></div>
+
+      <!-- 2단계: 표시 정보 -->
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1.5">제목 *</label>
-        <input id="f-title" type="text" class="input-field" placeholder="예: CyberGuard Corp">
+        <input id="f-title" type="text" class="input-field" placeholder="예: 피싱 탐지 훈련">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1.5">설명</label>
-        <input id="f-subtitle" type="text" class="input-field" placeholder="예: 서버실까지 — 6가지 보안 미션 어드벤처">
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">설명 (한 줄)</label>
+        <input id="f-subtitle" type="text" class="input-field" placeholder="예: 진짜 vs 가짜 이메일 판별 · 6라운드">
       </div>
-      <div class="grid grid-cols-2 gap-3">
+
+      <!-- 3단계: 링크 -->
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">강의 페이지 *</label>
+        <input id="f-link" type="text" class="input-field" placeholder="예: gamification.html#phishing">
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">수강생이 강의 카드를 클릭했을 때 이동할 페이지 경로</p>
+      </div>
+
+      <!-- 4단계: 게임 정보 (게임 강의만) -->
+      <div id="game-fields" class="hidden flex flex-col gap-3 p-3 rounded-2xl" style="background:#FAF9F7;">
+        <p class="text-xs font-semibold text-gray-700">게임 설정</p>
         <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1.5">링크 *</label>
-          <input id="f-link" type="text" class="input-field" placeholder="예: gamification.html#phishing">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1.5">게임 ID</label>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">게임 식별자 *</label>
           <input id="f-game-type" type="text" class="input-field" placeholder="예: phishing_game">
-        </div>
-      </div>
-      <div class="grid grid-cols-3 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1.5">색상</label>
-          <input id="f-color" type="color" class="input-field" style="height:42px;padding:4px;" value="#1A1A1A">
+          <p class="text-xs mt-1.5" style="color:#B0ADA9;">게임 코드에서 점수 저장 시 쓰는 ID와 정확히 일치해야 합니다 (영문 소문자, 언더스코어). 점수 추적과 만점 계산에 사용돼요.</p>
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1.5">만점</label>
           <input id="f-max-score" type="number" min="0" class="input-field" value="100">
+          <p class="text-xs mt-1.5" style="color:#B0ADA9;">이 게임에서 받을 수 있는 최대 점수 (통과/재도전 판정 기준 60%)</p>
+        </div>
+      </div>
+
+      <!-- 5단계: 표시 옵션 -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">카드 색상</label>
+          <input id="f-color" type="color" class="input-field" style="height:42px;padding:4px;" value="#1A1A1A">
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1.5">정렬 순서</label>
           <input id="f-sort-order" type="number" min="0" class="input-field" value="0">
         </div>
       </div>
-      <label class="flex items-center gap-2 mt-1 cursor-pointer">
+      <label class="flex items-center gap-2 cursor-pointer">
         <input id="f-active" type="checkbox" checked class="rounded">
         <span class="text-sm text-gray-700">활성화 (수강생에게 표시)</span>
       </label>
+
       <div id="form-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2;color:#DC2626;"></div>
-      <div class="flex gap-2 pt-2">
+      <div class="flex gap-2 pt-1">
         <button class="btn-sm btn-outline flex-1" onclick="closeModal()">취소</button>
         <button id="save-btn" class="btn-sm btn-dark flex-1" onclick="saveCourse()">저장</button>
       </div>
@@ -211,6 +240,17 @@
 
   let courses = [];
   let editingId = null;
+  let currentType = 'general';
+
+  function selectType(type) {
+    currentType = type;
+    document.querySelectorAll('.type-card').forEach(el => {
+      const isActive = el.dataset.type === type;
+      el.style.borderColor = isActive ? '#1A1A1A' : '#E4E1DD';
+      el.style.background = isActive ? '#FAF9F7' : 'white';
+    });
+    document.getElementById('game-fields').classList.toggle('hidden', type !== 'game');
+  }
 
   async function loadCourses() {
     const { data, error } = await sb.from('courses').select('*').order('sort_order', { ascending: true });
@@ -267,6 +307,7 @@
     document.getElementById('f-sort-order').value = courses.length + 1;
     document.getElementById('f-active').checked = true;
     document.getElementById('form-error').classList.add('hidden');
+    selectType('general');
     document.getElementById('course-modal').classList.remove('hidden');
   }
 
@@ -284,6 +325,7 @@
     document.getElementById('f-sort-order').value = c.sort_order ?? 0;
     document.getElementById('f-active').checked = c.active !== false;
     document.getElementById('form-error').classList.add('hidden');
+    selectType(c.game_type ? 'game' : 'general');
     document.getElementById('course-modal').classList.remove('hidden');
   }
 
@@ -294,19 +336,24 @@
     const errEl = document.getElementById('form-error');
     errEl.classList.add('hidden');
 
+    const isGame = currentType === 'game';
     const payload = {
       title: document.getElementById('f-title').value.trim(),
       subtitle: document.getElementById('f-subtitle').value.trim() || null,
       link: document.getElementById('f-link').value.trim(),
-      game_type: document.getElementById('f-game-type').value.trim() || null,
+      game_type: isGame ? (document.getElementById('f-game-type').value.trim() || null) : null,
       color: document.getElementById('f-color').value,
-      max_score: parseInt(document.getElementById('f-max-score').value) || 0,
+      max_score: isGame ? (parseInt(document.getElementById('f-max-score').value) || 0) : 0,
       sort_order: parseInt(document.getElementById('f-sort-order').value) || 0,
       active: document.getElementById('f-active').checked,
     };
 
     if (!payload.title || !payload.link) {
-      errEl.textContent = '제목과 링크는 필수입니다.';
+      errEl.textContent = '제목과 강의 페이지는 필수입니다.';
+      errEl.classList.remove('hidden'); return;
+    }
+    if (isGame && !payload.game_type) {
+      errEl.textContent = '게임 강의는 게임 식별자가 필수입니다.';
       errEl.classList.remove('hidden'); return;
     }
 
