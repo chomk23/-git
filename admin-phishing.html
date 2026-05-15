@@ -141,7 +141,10 @@
 
     <!-- 훈련 회차 이력 -->
     <div class="card mb-4">
-      <p class="text-sm font-semibold text-gray-900 mb-4">훈련 회차 이력</p>
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm font-semibold text-gray-900">훈련 회차 이력</p>
+        <button class="btn-sm btn-outline" onclick="resetSessions()">이력 초기화</button>
+      </div>
       <table class="w-full text-sm">
         <thead>
           <tr style="border-bottom:1.5px solid #F0EDEA;">
@@ -324,6 +327,14 @@
     t.textContent = msg;
     t.style.opacity = '1'; t.style.transform = 'translateY(0)';
     setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 2500);
+  }
+
+  async function resetSessions() {
+    if (!confirm('훈련 회차 이력을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+    const { error } = await sb.from('phishing_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (error) { alert('초기화 중 오류가 발생했습니다.'); return; }
+    showToast('훈련 회차 이력이 초기화되었습니다');
+    await loadSessions();
   }
 
   async function resetPhishing() {
