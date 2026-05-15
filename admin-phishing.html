@@ -331,10 +331,19 @@
 
   async function resetSessions() {
     if (!confirm('훈련 회차 이력을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
-    const { error } = await sb.from('phishing_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    if (error) { alert('초기화 중 오류가 발생했습니다.'); return; }
-    showToast('훈련 회차 이력이 초기화되었습니다');
-    await loadSessions();
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch('/api/reset-phishing-sessions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token || ''}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '초기화 실패');
+      showToast('훈련 회차 이력이 초기화되었습니다');
+      await loadSessions();
+    } catch (err) {
+      alert('초기화 중 오류가 발생했습니다: ' + err.message);
+    }
   }
 
   async function resetPhishing() {
