@@ -104,7 +104,15 @@
         <h1 class="text-lg font-bold text-gray-900">피싱 훈련</h1>
         <p class="text-xs mt-0.5" style="color:#B0ADA9;">모의 피싱 메일 발송 및 결과 관리</p>
       </div>
-      <button class="btn-sm btn-dark" onclick="openSendModal()">훈련 메일 발송</button>
+      <div class="flex gap-2">
+        <button class="btn-sm" onclick="resetPhishing()" style="background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;">
+          <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          피싱 결과 초기화
+        </button>
+        <button class="btn-sm btn-dark" onclick="openSendModal()">훈련 메일 발송</button>
+      </div>
     </div>
 
     <!-- 요약 KPI -->
@@ -299,6 +307,27 @@
     });
     btn.style.background = '#1A1A1A'; btn.style.color = 'white'; btn.style.borderColor = '#1A1A1A';
     renderPhishing();
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById('toast-msg');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast-msg';
+      t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1A1A1A;color:white;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:500;z-index:50;transition:all 0.3s;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 2500);
+  }
+
+  async function resetPhishing() {
+    if (!confirm('피싱 훈련 결과를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+    const { error } = await sb.from('profiles').update({ phishing_clicked: false }).neq('role', 'admin');
+    if (error) { alert('초기화 중 오류가 발생했습니다.'); return; }
+    showToast('피싱 훈련 결과가 초기화되었습니다');
+    await loadPhishing();
   }
 
   loadPhishing();
