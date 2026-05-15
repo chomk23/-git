@@ -11,9 +11,8 @@
     /* ── 플랫폼 헤더 ── */
     body { margin:0; padding:0; background:#ECEAE6; font-family:'Noto Sans KR',sans-serif; }
     .pf-header {
-      position: sticky; top: 0; z-index: 200;
-      background: #ECEAE6; padding: 10px 20px;
-      display: flex; align-items: center; gap: 12px;
+      position:sticky; top:0; z-index:200; background:#ECEAE6;
+      padding:10px 20px; display:flex; align-items:center; gap:12px;
     }
     .pf-back {
       width:36px; height:36px; background:white; border:none; border-radius:12px;
@@ -23,89 +22,82 @@
     .pf-back:hover { background:#F5F3F0; }
     .pf-back svg { width:16px; height:16px; color:#6B7280; }
     .pf-title { font-size:14px; font-weight:500; color:#374151; }
+    .game-outer { max-width:760px; margin:0 auto; padding:0 16px 48px; }
+    .game-wrap { border-radius:20px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.12); }
 
-    /* ── 게임 컨테이너 ── */
-    .game-outer {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 0 16px 48px;
-    }
-    .game-wrap {
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,.12);
-    }
-
-    /* ── 게임 원본 CSS (스코프: #W, #W *) ── */
-    #W, #W *{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace;}
-    #W{width:100%;background:#e8f4fd;border-radius:0;overflow:hidden;display:flex;flex-direction:column;}
-    #HUD{background:linear-gradient(90deg,#1565c0,#42a5f5);border-bottom:2px solid #0d47a1;padding:6px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-    .hp{font-size:10px;color:#fff;background:rgba(0,0,0,.22);padding:2px 9px;border-radius:20px;border:1px solid rgba(255,255,255,.3);}
-    .hp b{color:#ffe082;}
-    #hloc{margin-left:auto;font-size:10px;color:#fff;font-weight:700;background:rgba(0,0,0,.22);padding:2px 9px;border-radius:20px;}
-    #GW{position:relative;width:100%;height:400px;overflow:hidden;}
-    canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
-    #GL{display:none;position:absolute;inset:0;z-index:5;}
-    .ov{display:none;position:absolute;inset:0;z-index:20;}
-    .ov.on{display:flex;}
-    #TS{background:#c8e6f7;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
-    .ts-badge{font-size:9px;letter-spacing:4px;font-weight:700;text-transform:uppercase;color:#0d47a1;}
-    .ts-logo{font-size:32px;font-weight:900;line-height:1.1;text-align:center;color:#1a2a38;}
-    .ts-logo b{color:#1565c0;}
-    .ts-sub{font-size:12px;font-weight:700;color:#1a2a38;}
-    .ts-tip{background:rgba(255,255,255,.85);border-radius:8px;padding:6px 18px;font-size:11px;font-weight:700;color:#1a2a38;border:1px solid #90caf9;}
-    .tb{width:210px;padding:13px 0;border:none;border-radius:9px;font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;display:block;text-align:center;}
-    .tb.go{background:#1565c0;color:#fff;}.tb.go:hover{background:#0d47a1;}
-    .tb.hw{background:#fff;color:#1a2a38;border:2.5px solid #1565c0;}.tb.hw:hover{background:#e3f2fd;}
-    #HO{background:rgba(215,238,255,.97);flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;z-index:30;}
-    .hwg{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:480px;}
-    .hwi{background:#fff;border:1.5px solid #90caf9;border-radius:8px;padding:10px 12px;font-size:10px;line-height:1.5;color:#1a2a38;}
-    .hwi b{font-size:11px;display:block;margin-bottom:2px;color:#1a2a38;}
-    #DLG{display:none;position:absolute;bottom:58px;left:50%;transform:translateX(-50%);z-index:25;width:94%;max-width:560px;}
-    #DLG.on{display:block;}
-    #DB{background:#fff;border:2px solid #1565c0;border-radius:12px;padding:12px 16px;cursor:pointer;}
-    #DSP{font-size:11px;font-weight:700;color:#1565c0;letter-spacing:1px;margin-bottom:4px;}
-    #DTX{font-size:11px;color:#1a2a38;line-height:1.7;white-space:pre-wrap;}
-    .pn{display:none;position:absolute;inset:8px;z-index:25;pointer-events:auto;background:#fff;border:2px solid #90caf9;border-radius:12px;overflow-y:auto;padding:14px 16px;}
-    .pn.on{display:block;}.pn *{color:#1a2a38;}
-    .pt{font-size:13px;font-weight:900;margin-bottom:3px;}.ps{font-size:10px;margin-bottom:12px;font-weight:600;}
-    #QZ{display:none;position:absolute;inset:8px;z-index:25;pointer-events:auto;background:#fff;border:2px solid #90caf9;border-radius:12px;overflow:hidden;flex-direction:column;}
-    #QZ.on{display:flex;}#QZ *{color:#1a2a38;}
-    #QSC{flex:1;overflow-y:auto;padding:14px 16px 8px;}
-    #QFT{padding:8px 16px 12px;background:#f0f8ff;border-top:1px solid #e3f2fd;display:flex;justify-content:flex-end;}
-    #QSC2{background:#e8f5e9;border-left:3px solid #43a047;border-radius:0 6px 6px 0;padding:8px 10px;font-size:10px;margin-bottom:10px;line-height:1.6;white-space:pre-wrap;}
-    #QQ{font-size:12px;font-weight:700;margin-bottom:10px;line-height:1.5;}
-    #QOP{display:flex;flex-direction:column;gap:6px;}
-    .qo{padding:9px 12px;background:#f0f8ff;border:1.5px solid #b3d9f7;border-radius:8px;font-size:11px;color:#1a2a38;cursor:pointer;text-align:left;font-family:'Courier New',monospace;}
-    .qo:hover{background:#dbeeff;}.qo.ok{background:#e8f5e9;border-color:#43a047;}.qo.ng{background:#ffebee;border-color:#ef5350;}
-    #QFB{display:none;margin-top:10px;background:#e3f2fd;border:1.5px solid #90caf9;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.6;white-space:pre-wrap;}
-    #MGR{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px;}
-    .mc{background:#1565c0;border-radius:7px;height:60px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:transparent;text-align:center;padding:4px;transition:all .22s;border:2px solid #1976d2;user-select:none;line-height:1.3;}
-    .mc.fl{background:#e3f2fd;border-color:#42a5f5;color:#1a2a38!important;}
-    .mc.mt{background:#e8f5e9;border-color:#43a047;color:#1a2a38!important;cursor:default;}
-    .scl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-    .sc{border:2px solid #90caf9;border-radius:9px;padding:8px;min-height:100px;}
-    .sc.gd{border-color:#a5d6a7;background:#f1f8e9;}.sc.bd{border-color:#ef9a9a;background:#fff5f5;}
-    .sct{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;text-align:center;color:#1a2a38;}
-    .si{background:#fff;border:1.5px solid #b3d9f7;border-radius:6px;padding:6px 9px;font-size:10px;cursor:pointer;margin-bottom:5px;user-select:none;font-family:'Courier New',monospace;color:#1a2a38;}
-    .si:hover{background:#dbeeff;}
-    .nb{display:none;background:#1565c0;color:#fff;border:none;padding:10px 26px;font-family:'Courier New',monospace;font-size:11px;font-weight:700;cursor:pointer;border-radius:7px;margin-top:10px;}
-    .nb.on{display:block;}
-    #FD{background:#d7ecfb;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
-    #FD *{color:#1a2a38;}
-    #ED{background:#dff0fb;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center;}
-    #ED *{color:#1a2a38;}
-    .ei{font-size:52px;}.et{font-size:20px;font-weight:900;}.es{font-size:11px;line-height:1.7;}
-    .ests{display:flex;gap:12px;margin-top:8px;}
-    .est{background:#fff;border:2px solid #90caf9;border-radius:10px;padding:12px 18px;}
-    .en{font-size:24px;font-weight:900;color:#1565c0;}.el{font-size:8px;color:#546e7a;letter-spacing:1px;text-transform:uppercase;}
-    .ebtn{background:#1565c0;color:#fff;border:none;padding:12px 32px;font-family:'Courier New',monospace;font-size:11px;font-weight:700;cursor:pointer;border-radius:8px;margin-top:10px;}
-    #CT{background:linear-gradient(90deg,#1565c0,#2196f3);border-top:2px solid #0d47a1;padding:5px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-    .ck{font-size:9px;color:#bbdefb;}.cy{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.3);border-radius:3px;padding:1px 6px;font-size:9px;color:#fff;}
-    #DP{display:flex;flex-direction:column;align-items:center;gap:2px;margin-left:auto;}
-    .dr{display:flex;gap:2px;}
-    .db{width:30px;height:30px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.3);border-radius:4px;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:none;}
-    .db:active{background:rgba(0,0,0,.45);}
+    /* ── 게임 CSS ── */
+    #W { width:100%; background:#e8f4fd; overflow:hidden; display:flex; flex-direction:column; color:#1a2a38; }
+    #W * { box-sizing:border-box; font-family:'Courier New',monospace; }
+    #HUD { background:linear-gradient(90deg,#1565c0,#42a5f5); padding:7px 14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; color:#fff; font-size:11px; }
+    #HUD b { color:#ffe082; }
+    #W .hp { background:rgba(0,0,0,.22); padding:2px 9px; border-radius:20px; }
+    #hloc { margin-left:auto; }
+    #STAGE { position:relative; width:100%; height:420px; overflow:hidden; background:#c8e6f7; }
+    #W .scr { display:none; position:absolute; inset:0; flex-direction:column; align-items:center; justify-content:center; padding:20px; gap:12px; }
+    #W .scr.on { display:flex; }
+    #W .scr * { color:#1a2a38; }
+    #TITLE { background:#c8e6f7; }
+    #W .t-badge { font-size:10px; letter-spacing:4px; font-weight:700; text-transform:uppercase; color:#0d47a1; }
+    #W .t-logo { font-size:30px; font-weight:900; line-height:1.1; text-align:center; }
+    #W .t-logo b { color:#1565c0; }
+    #W .t-sub { font-size:12px; font-weight:700; text-align:center; }
+    #W .t-tip { background:#fff; border:1px solid #90caf9; border-radius:8px; padding:6px 18px; font-size:11px; font-weight:700; }
+    #W .btn { width:220px; padding:13px 0; border:none; border-radius:10px; font-family:'Courier New',monospace; font-size:13px; font-weight:700; letter-spacing:2px; cursor:pointer; text-transform:uppercase; display:block; text-align:center; }
+    #W .btn.go { background:#1565c0; color:#fff !important; border:2px solid #0d47a1; }
+    #W .btn.go:hover { background:#0d47a1; }
+    #W .btn.hw { background:#fff; color:#1a2a38 !important; border:2.5px solid #1565c0; }
+    #W .btn.hw:hover { background:#e3f2fd; }
+    #HOWTO { background:#dceefb; }
+    #W .hw-t { font-size:18px; font-weight:900; letter-spacing:2px; }
+    #W .hw-g { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; max-width:480px; }
+    #W .hw-i { background:#fff; border:1.5px solid #90caf9; border-radius:8px; padding:10px; font-size:10px; line-height:1.5; }
+    #W .hw-i b { font-size:11px; display:block; margin-bottom:3px; }
+    #GAME { padding:0; justify-content:flex-start; align-items:stretch; }
+    #GAME canvas { display:block; width:100%; height:100%; }
+    #GAME .loc-banner { position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(21,101,192,.9); color:#fff; padding:5px 14px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; z-index:2; }
+    #W .panel { display:none; position:absolute; inset:8px; z-index:30; background:#fff; border:2px solid #90caf9; border-radius:12px; overflow-y:auto; padding:14px; color:#1a2a38; flex-direction:column; }
+    #W .panel.on { display:flex; }
+    #W .panel * { color:#1a2a38; }
+    #W .p-title { font-size:14px; font-weight:900; margin-bottom:3px; }
+    #W .p-sub { font-size:10px; margin-bottom:10px; font-weight:600; color:#546e7a; }
+    #W .p-scene { background:#e8f5e9; border-left:3px solid #43a047; border-radius:0 6px 6px 0; padding:9px 11px; font-size:11px; margin-bottom:10px; line-height:1.5; white-space:pre-wrap; }
+    #W .p-q { font-size:12px; font-weight:700; margin-bottom:10px; line-height:1.5; }
+    #W .p-opt { display:flex; flex-direction:column; gap:6px; }
+    #W .opt-btn { padding:9px 12px; background:#f0f8ff; border:1.5px solid #b3d9f7; border-radius:8px; font-size:11px; color:#1a2a38; cursor:pointer; text-align:left; font-family:'Courier New',monospace; }
+    #W .opt-btn:hover { background:#dbeeff; }
+    #W .opt-btn.ok { background:#e8f5e9; border-color:#43a047; }
+    #W .opt-btn.ng { background:#ffebee; border-color:#ef5350; }
+    #W .p-fb { margin-top:10px; background:#e3f2fd; border:1.5px solid #90caf9; border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.6; white-space:pre-wrap; }
+    #W .next-btn { background:#1565c0; color:#fff !important; border:none; padding:10px 26px; font-family:'Courier New',monospace; font-size:11px; font-weight:700; cursor:pointer; border-radius:7px; margin-top:10px; align-self:flex-end; }
+    #W .mem-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-top:8px; }
+    #W .mem-card { background:#1565c0; border-radius:7px; height:62px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:700; color:transparent; text-align:center; padding:4px; border:2px solid #1976d2; user-select:none; line-height:1.3; font-family:'Courier New',monospace; }
+    #W .mem-card.flip { background:#e3f2fd; border-color:#42a5f5; color:#1a2a38 !important; }
+    #W .mem-card.match { background:#e8f5e9; border-color:#43a047; color:#1a2a38 !important; cursor:default; }
+    #W .sort-cols { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+    #W .sort-col { border:2px solid #90caf9; border-radius:9px; padding:8px; min-height:110px; }
+    #W .sort-col.gd { border-color:#a5d6a7; background:#f1f8e9; }
+    #W .sort-col.bd { border-color:#ef9a9a; background:#fff5f5; }
+    #W .sort-ct { font-size:10px; font-weight:700; text-transform:uppercase; margin-bottom:5px; text-align:center; }
+    #W .sort-item { background:#fff; border:1.5px solid #b3d9f7; border-radius:6px; padding:6px 9px; font-size:10px; cursor:pointer; margin-bottom:5px; user-select:none; font-family:'Courier New',monospace; }
+    #DIALOG { display:none; position:absolute; bottom:60px; left:50%; transform:translateX(-50%); width:92%; max-width:560px; background:#fff; border:2px solid #1565c0; border-radius:12px; padding:12px 16px; z-index:25; cursor:pointer; }
+    #DIALOG.on { display:block; }
+    #DIALOG .spk { font-size:11px; font-weight:700; color:#1565c0; margin-bottom:4px; }
+    #DIALOG .txt { font-size:11px; line-height:1.6; white-space:pre-wrap; }
+    #DIALOG .hint { font-size:9px; color:#78909c; text-align:right; margin-top:4px; }
+    #ENDING { background:#dff0fb; }
+    #W .end-ico { font-size:54px; }
+    #W .end-t { font-size:22px; font-weight:900; }
+    #W .end-s { font-size:11px; line-height:1.6; text-align:center; }
+    #W .end-stats { display:flex; gap:12px; margin-top:6px; }
+    #W .end-st { background:#fff; border:2px solid #90caf9; border-radius:10px; padding:10px 18px; text-align:center; }
+    #W .end-n { font-size:22px; font-weight:900; color:#1565c0; }
+    #W .end-l { font-size:8px; color:#546e7a; letter-spacing:1px; text-transform:uppercase; }
+    #CTRL { background:linear-gradient(90deg,#1565c0,#2196f3); padding:5px 12px; display:flex; align-items:center; gap:6px; color:#fff; font-size:9px; flex-wrap:wrap; }
+    #W .key { background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.3); border-radius:3px; padding:1px 6px; font-size:9px; }
+    #DPAD { display:flex; flex-direction:column; align-items:center; gap:2px; margin-left:auto; }
+    #W .dr { display:flex; gap:2px; }
+    #W .dkey { width:30px; height:30px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.3); border-radius:4px; color:#fff; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; touch-action:none; }
+    #W .dkey:active { background:rgba(0,0,0,.45); }
   </style>
 </head>
 <body>
@@ -124,175 +116,958 @@
 <div class="game-outer">
   <div class="game-wrap">
 
-    <!-- ★ 게임 원본 HTML ★ -->
     <div id="W">
       <div id="HUD">
-        <span style="font-size:12px;font-weight:700;color:#fff;letter-spacing:2px;">CYBERGUARD CORP</span>
-        <span class="hp">점수 <b id="hsc">0</b></span><span class="hp">레벨 <b id="hlv">1</b></span><span class="hp">미션 <b id="hms">0</b>/6</span>
-        <span class="hp" id="hbg" style="font-size:14px;letter-spacing:2px;"></span>
-        <span id="hloc">집 아침</span>
+        <span style="font-weight:700;letter-spacing:2px;">☀ CYBERGUARD CORP</span>
+        <span class="hp">점수 <b id="hsc">0</b></span>
+        <span class="hp">레벨 <b id="hlv">1</b></span>
+        <span class="hp">미션 <b id="hms">0</b>/6</span>
+        <span class="hp" id="hbg" style="font-size:14px;"></span>
+        <span class="hp" id="hloc">🏠 우리집</span>
       </div>
-      <div id="GW">
-        <canvas id="BG" width="680" height="400"></canvas>
-        <canvas id="FG" width="680" height="400"></canvas>
-        <div id="GL"></div>
-        <div id="TS" class="ov on">
-          <div class="ts-badge">Security Education Game</div>
-          <div class="ts-logo">CYBER<b>GUARD</b><br>CORP</div>
-          <div class="ts-sub">집에서 서버실까지 — 6가지 보안 미션</div>
-          <canvas id="TCV" width="260" height="80" style="border-radius:8px;pointer-events:none;"></canvas>
-          <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-            <button class="tb go" onclick="startGame()" autofocus>▶ 게임 시작</button>
-            <button class="tb hw" onclick="showHowto()">? 게임 방법</button>
-          </div>
-          <div class="ts-tip">← → 이동 &nbsp;|&nbsp; ↑ 점프 &nbsp;|&nbsp; Space 상호작용</div>
+
+      <div id="STAGE">
+
+        <!-- 시작화면 -->
+        <div id="TITLE" class="scr on">
+          <div class="t-badge">🛡 Security Education Game</div>
+          <div class="t-logo">CYBER<b>GUARD</b><br>CORP</div>
+          <div class="t-sub">집에서 서버실까지 — 6가지 보안 미션</div>
+          <button class="btn go" onclick="goStart()">▶ 게임 시작</button>
+          <button class="btn hw" onclick="goHowto()">? 게임 방법</button>
+          <div class="t-tip">← → 이동 | ↑ 점프 | Space 상호작용</div>
         </div>
-        <div id="HO" class="ov">
-          <div style="font-size:16px;font-weight:900;letter-spacing:2px;color:#1a2a38;">HOW TO PLAY</div>
-          <div class="hwg">
-            <div class="hwi"><b>이동 & 점프</b>← → 이동, ↑ 점프</div>
-            <div class="hwi"><b>NPC 대화</b>가까이 가서 Space</div>
-            <div class="hwi"><b>구역 이동</b>포털에 닿으면 이동</div>
-            <div class="hwi"><b>이동 경로</b>집→거리→로비→사무실→서버실</div>
-            <div class="hwi"><b>미션 완료</b>6개 완료 후 등급 확인!</div>
-            <div class="hwi"><b>점수 획득</b>정답마다 점수+뱃지</div>
+
+        <!-- 게임방법 -->
+        <div id="HOWTO" class="scr">
+          <div class="hw-t">HOW TO PLAY</div>
+          <div class="hw-g">
+            <div class="hw-i"><b>🎮 이동/점프</b>← → 이동, ↑ 점프</div>
+            <div class="hw-i"><b>💬 NPC 대화</b>가까이서 Space</div>
+            <div class="hw-i"><b>🚪 구역 이동</b>포털에 닿으면 이동</div>
+            <div class="hw-i"><b>📍 경로</b>집→거리→로비→사무실→서버실</div>
+            <div class="hw-i"><b>🏆 미션</b>6개 완료시 등급</div>
+            <div class="hw-i"><b>⭐ 점수</b>정답마다 점수+뱃지</div>
           </div>
-          <button class="tb go" onclick="closeHowto()" style="width:160px;padding:10px 0;letter-spacing:1px;">확인</button>
+          <button class="btn go" onclick="goTitle()" style="width:160px;padding:10px 0;">확인 ✓</button>
         </div>
-        <div id="DLG"><div id="DB" onclick="closeDlg()"><div id="DSP"></div><div id="DTX"></div><div style="font-size:9px;color:#78909c;text-align:right;margin-top:5px;">▶ Space / 클릭</div></div></div>
-        <div id="QZ"><div id="QSC"><div id="QTG" style="font-size:9px;letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:6px;color:#1565c0;"></div><div id="QSC2"></div><div id="QQ"></div><div id="QOP"></div><div id="QFB"></div></div><div id="QFT"><button class="nb" id="QNX" onclick="nextQ()">다음 ▶</button></div></div>
-        <div id="MG" class="pn"><div class="pt" id="MGT"></div><div class="ps" id="MGS"></div><div id="MGB"></div><button class="nb" id="MGN" onclick="mgDone()">완료 ▶</button></div>
-        <div id="MM" class="pn"><div class="pt">보안 용어 카드 매칭</div><div class="ps">같은 용어 쌍을 찾아 매칭하세요!</div><div id="MMI" style="font-size:11px;margin-bottom:8px;"></div><div id="MGR"></div><button class="nb" id="MMN" onclick="memDone()">완료 ▶</button></div>
-        <div id="SO" class="pn"><div class="pt">보안 행동 분류</div><div class="ps">각 행동이 안전한지 위험한지 분류하세요</div><div style="margin-bottom:10px;"><div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#546e7a;margin-bottom:5px;font-weight:700;">분류할 행동 목록</div><div id="SPI"></div></div><div class="scl"><div class="sc gd"><div class="sct">안전한 행동</div><div id="SGD"></div></div><div class="sc bd"><div class="sct">위험한 행동</div><div id="SBD"></div></div></div><div id="SFB" style="display:none;font-size:11px;color:#1a2a38;background:#e3f2fd;border:1.5px solid #90caf9;border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.6;"></div><button class="nb" id="SON" onclick="sortDone()">완료 ▶</button></div>
-        <div id="FD" class="ov"><div id="FDT" style="font-size:14px;letter-spacing:4px;text-transform:uppercase;font-weight:700;color:#1a2a38;"></div><div style="font-size:9px;color:#546e7a;letter-spacing:2px;">이동 중...</div></div>
-        <div id="ED" class="ov"><div class="ei" id="EIC"></div><div class="et" id="ETI"></div><div class="es" id="ESI"></div><div class="ests"><div class="est"><div class="en" id="EN1">0</div><div class="el">최종점수</div></div><div class="est"><div class="en" id="EN2">1</div><div class="el">보안레벨</div></div><div class="est"><div class="en" id="EN3">0</div><div class="el">획득뱃지</div></div></div><button class="ebtn" onclick="restart()">다시 도전</button></div>
+
+        <!-- 게임화면 -->
+        <div id="GAME" class="scr">
+          <canvas id="CANVAS" width="680" height="420"></canvas>
+          <div class="loc-banner" id="locBanner">🏠 우리집</div>
+
+          <!-- 대화창 -->
+          <div id="DIALOG" onclick="closeDialog()">
+            <div class="spk" id="dlgSpk"></div>
+            <div class="txt" id="dlgTxt"></div>
+            <div class="hint">▶ 클릭 또는 Space</div>
+          </div>
+
+          <!-- 미션 패널 (모든 미션 공통) -->
+          <div id="MISSION" class="panel">
+            <div class="p-title" id="missionTitle"></div>
+            <div class="p-sub" id="missionSub"></div>
+            <div id="missionBody" style="flex:1;"></div>
+            <button class="next-btn" id="missionNext" onclick="missionNext()" style="display:none;">완료 ▶</button>
+          </div>
+        </div>
+
+        <!-- 엔딩 -->
+        <div id="ENDING" class="scr">
+          <div class="end-ico" id="endIco"></div>
+          <div class="end-t" id="endTitle"></div>
+          <div class="end-s" id="endSub"></div>
+          <div class="end-stats">
+            <div class="end-st"><div class="end-n" id="endSc">0</div><div class="end-l">점수</div></div>
+            <div class="end-st"><div class="end-n" id="endLv">1</div><div class="end-l">레벨</div></div>
+            <div class="end-st"><div class="end-n" id="endBg">0</div><div class="end-l">뱃지</div></div>
+          </div>
+          <button class="btn go" onclick="restart()" style="margin-top:6px;">🔄 다시 도전</button>
+        </div>
       </div>
-      <div id="CT">
-        <span class="ck">이동</span><span class="cy">← →</span><span class="ck">점프</span><span class="cy">↑</span><span class="ck">상호작용</span><span class="cy">Space</span>
-        <div id="DP"><div class="dr"><div class="db" id="DU">↑</div></div><div class="dr"><div class="db" id="DL">◀</div><div class="db" id="DA">●</div><div class="db" id="DR">▶</div></div></div>
+
+      <div id="CTRL">
+        <span>이동</span><span class="key">← →</span>
+        <span>점프</span><span class="key">↑</span>
+        <span>상호작용</span><span class="key">Space</span>
+        <div id="DPAD">
+          <div class="dr"><div class="dkey" id="dpU">↑</div></div>
+          <div class="dr"><div class="dkey" id="dpL">◀</div><div class="dkey" id="dpA">●</div><div class="dkey" id="dpR">▶</div></div>
+        </div>
       </div>
     </div><!-- /#W -->
 
-  </div><!-- /.game-wrap -->
-</div><!-- /.game-outer -->
+  </div>
+</div>
 
 <script>
 if (!sessionStorage.getItem('user')) location.href = 'login.html';
 
-var running=false,phT=null,pt=0;
-var CW=680,CH=400,GY=320,GRAV=0.55,JV=-12.5,SP=3.6;
-var G={wid:'home',cam:0,px:120,py:320,vy:0,gr:true,fr:true,sc:0,lv:1,ms:0,bg:[],dn:{},at:0,dlg:false,qz:false,mg:false,tr:false,npc:null,qd:null,qi:0,da:null};
-var K={},DP={l:0,r:0,j:0};
-var NM={m0:'다음: 거리 — 오른쪽 포털!',m1:'다음: 로비 — 계속 오른쪽!',m2:'다음: 사무실 — 로비 오른쪽 포털!',m3:'다음: 사무실 팀장님을 찾아!',m4:'다음: 서버실 — 오른쪽 포털!',m5:'모든 미션 완료!'};
-
-function startGame(){
-  document.getElementById('TS').classList.remove('on');
-  document.getElementById('GL').style.display='block';
-  updateHUD();running=true;requestAnimationFrame(loop);
+// ──────────────────────────────────────────────────────────────────────────
+// 화면 전환
+// ──────────────────────────────────────────────────────────────────────────
+function showScr(id){
+  ['TITLE','HOWTO','GAME','ENDING'].forEach(function(s){
+    document.getElementById(s).classList.remove('on');
+  });
+  document.getElementById(id).classList.add('on');
 }
-function showHowto(){document.getElementById('HO').classList.add('on');}
-function closeHowto(){document.getElementById('HO').classList.remove('on');}
-function closeDlg(){document.getElementById('DLG').classList.remove('on');G.dlg=false;if(G.da){var f=G.da;G.da=null;f();}}
-function nextQ(){G.qi++;if(G.qi<G.qd.quiz.length)renderQ();else{document.getElementById('QZ').classList.remove('on');G.qz=false;finishMission(G.qd);}}
-function memDone(){document.getElementById('MM').classList.remove('on');document.getElementById('MMN').classList.remove('on');G.mg=false;finishMission(G.npc);}
-function sortDone(){document.getElementById('SO').classList.remove('on');document.getElementById('SON').classList.remove('on');G.mg=false;finishMission(G.npc);}
-function mgDone(){clearInterval(phT);document.getElementById('MG').classList.remove('on');document.getElementById('MGN').classList.remove('on');document.getElementById('MGN').textContent='완료 ▶';G.mg=false;finishMission(G.npc);}
-function restart(){
-  clearInterval(phT);running=false;document.getElementById('GL').style.display='none';
-  Object.assign(G,{wid:'home',cam:0,px:120,py:GY,vy:0,gr:true,fr:true,sc:0,lv:1,ms:0,bg:[],dn:{},at:0,dlg:false,qz:false,mg:false,tr:false,npc:null,qd:null,qi:0,da:null});
-  Object.keys(W).forEach(function(k){CO[k]=(W[k].clouds||[]).map(function(){return 0;});});
-  ['DLG','QZ','MG','MM','SO','FD','ED'].forEach(function(id){document.getElementById(id).classList.remove('on');});
-  document.getElementById('hloc').textContent='집 아침';updateHUD();
-  document.getElementById('TS').classList.add('on');
+function goTitle(){showScr('TITLE');}
+function goHowto(){showScr('HOWTO');}
+function goStart(){
+  showScr('GAME');
+  resetGame();
+  running=true;
+  requestAnimationFrame(loop);
 }
 
-var B=document.getElementById('BG'),BX=B.getContext('2d');
-var F=document.getElementById('FG'),FX=F.getContext('2d');
-
-var W={
- home:{name:'집 아침',width:1700,th:'out',
-  blds:[{x:55,y:GY-110,w:185,h:110,cl:'#fde8d8',rl:'#d84315',dl:'#795548',wc:2,wr:2,ch:1},{x:290,y:GY-100,w:155,h:100,cl:'#e3f2fd',rl:'#1565c0',dl:'#5d4037',wc:1,wr:1,ch:0},{x:685,y:GY-115,w:180,h:115,cl:'#f1f8e9',rl:'#2e7d32',dl:'#4e342e',wc:2,wr:2,ch:1},{x:912,y:GY-105,w:150,h:105,cl:'#fff9e6',rl:'#e65100',dl:'#6d4c41',wc:1,wr:1,ch:0},{x:1200,y:GY-112,w:170,h:112,cl:'#f3e5f5',rl:'#6a1b9a',dl:'#4a148c',wc:2,wr:2,ch:1},{x:1435,y:GY-102,w:140,h:102,cl:'#e0f7fa',rl:'#00695c',dl:'#00695c',wc:1,wr:1,ch:0}],
-  npcs:[{id:'mom',x:360,y:GY,tp:'mom',lb:'엄마',mid:'m0',gt:'quiz',sp:'엄마',tk:'출근하기 전에 잠깐!\n\n← → 이동  ↑ 점프  Space 상호작용\n집→거리→로비→사무실→서버실 순서로 미션 완료!',
-   quiz:[{sc:'발신: hr-noreply@company-support.ru\n제목: [긴급] 연봉명세서.exe 첨부',q:'.exe 파일, 어떻게 해야 할까요?',op:['바로 실행','도메인 확인 후 보안팀 신고','동료에게 열어달라','백신 검사 후 실행'],ans:1,fb:'".ru"는 러시아 도메인 — 회사 공식 메일 아님!\n.exe 절대 실행 금지, 즉시 보안팀 신고!'},
-         {sc:'지인 계정에서 단축URL 링크가 왔습니다.',q:'이 링크, 어떻게 대응할까요?',op:['지인이 보낸 거니 바로 클릭','전화 확인 후에도 보안팀 신고','단축URL 확장 후 클릭','무시'],ans:1,fb:'지인 계정도 해킹될 수 있습니다!\n출처 불명 링크는 반드시 보안팀 신고!'}],bg:'P',rw:'피싱 탐지 전문가'}],
-  portals:[{x:1640,y:GY-56,w:56,h:56,to:'street',sx:90,lb:'거리 →',cl:'#e65100'}],
-  deco:[{t:'tree',x:500},{t:'tree',x:1080},{t:'tree',x:1340},{t:'lamp',x:460},{t:'lamp',x:870},{t:'car_y',x:600},{t:'car_b',x:1000}],
-  clouds:[{x:60,y:55,s:.22},{x:220,y:40,s:.15},{x:400,y:65,s:.18},{x:580,y:44,s:.25},{x:780,y:58,s:.12}]},
- street:{name:'거리',width:1800,th:'out',
-  blds:[{x:40,y:GY-230,w:220,h:230,cl:'#e8eaf6',rl:null,dl:'#37474f',wc:4,wr:5,lb2:'SECURITY BANK'},{x:310,y:GY-210,w:180,h:210,cl:'#fff3e0',rl:null,dl:'#5d4037',wc:3,wr:4,lb2:'CAFE 24'},{x:680,y:GY-240,w:260,h:240,cl:'#e8f5e9',rl:null,dl:'#1b5e20',wc:5,wr:5,lb2:'CYBERGUARD'},{x:1100,y:GY-220,w:200,h:220,cl:'#fce4ec',rl:null,dl:'#880e4f',wc:3,wr:4,lb2:'HOSPITAL'},{x:1450,y:GY-225,w:240,h:225,cl:'#e0f2f1',rl:null,dl:'#00695c',wc:4,wr:4,lb2:'POLICE'}],
-  npcs:[{id:'str',x:900,y:GY,tp:'str',lb:'낯선 사람',mid:'m1',gt:'phish',sp:'???',tk:'이 이메일들이 진짜인지 피싱인지 30초 안에 판별해주세요!',bg:'F',rw:'피싱 마스터'}],
-  portals:[{x:0,y:GY-56,w:56,h:56,to:'home',sx:1590,lb:'← 집',cl:'#546e7a'},{x:1740,y:GY-56,w:56,h:56,to:'lobby',sx:90,lb:'로비 →',cl:'#1565c0'}],
-  deco:[{t:'lamp',x:130},{t:'lamp',x:380},{t:'lamp',x:610},{t:'lamp',x:1020},{t:'lamp',x:1320},{t:'car_y',x:200},{t:'car_b',x:800},{t:'car_r',x:1300},{t:'tree',x:490},{t:'tree',x:1240}],
-  clouds:[{x:100,y:48,s:.2},{x:330,y:62,s:.14},{x:620,y:44,s:.22}]},
- lobby:{name:'1F 로비',width:1600,th:'in',blds:[],npcs:[{id:'rec',x:780,y:GY,tp:'rec',lb:'안내데스크',mid:'m2',gt:'mem',sp:'안내 직원',tk:'어서오세요 CYBERGUARD CORP!\n보안 용어 카드 매칭 게임을 시작합니다!',bg:'M',rw:'보안 용어 전문가'}],portals:[{x:0,y:GY-56,w:56,h:56,to:'street',sx:1690,lb:'← 거리',cl:'#546e7a'},{x:1540,y:GY-56,w:56,h:56,to:'office',sx:90,lb:'사무실 →',cl:'#1565c0'}],deco:[{t:'recep',x:620},{t:'sofa',x:180},{t:'sofa',x:1180},{t:'plant',x:100},{t:'plant',x:1420},{t:'cctv',x:40}],clouds:[]},
- office:{name:'2F 사무실',width:1800,th:'in',blds:[],npcs:[{id:'sec',x:480,y:GY,tp:'sec',lb:'보안담당',mid:'m3',gt:'sort',sp:'보안담당 이 주임',tk:'보안 행동 분류 테스트!\n안전한 행동과 위험한 행동을 분류하세요!',bg:'S',rw:'보안 행동 분류 전문가'},{id:'boss',x:1200,y:GY,tp:'boss',lb:'팀장',mid:'m4',gt:'pw',sp:'팀장 박 과장',tk:'패스워드 강도를 올바르게 평가해보세요!',bg:'PW',rw:'패스워드 마스터'}],portals:[{x:0,y:GY-56,w:56,h:56,to:'lobby',sx:1490,lb:'← 로비',cl:'#546e7a'},{x:1740,y:GY-56,w:56,h:56,to:'server',sx:90,lb:'서버실 →',cl:'#c62828'}],deco:[{t:'desk',x:160},{t:'desk',x:420},{t:'desk',x:680},{t:'desk',x:940},{t:'desk',x:1340},{t:'cctv',x:30},{t:'cctv',x:1740}],clouds:[]},
- server:{name:'B1 서버실',width:1600,th:'sv',blds:[],npcs:[{id:'sys',x:760,y:GY,tp:'sys',lb:'시스템관리자',mid:'m5',gt:'scen',sp:'시스템관리자 박 주임',tk:'실제 보안 사고 시나리오로\n올바른 대응 방법을 선택해봅시다!',bg:'SC',rw:'보안 사고 대응 전문가'}],portals:[{x:0,y:GY-56,w:56,h:56,to:'office',sx:1690,lb:'← 사무실',cl:'#546e7a'}],deco:[{t:'rack',x:90},{t:'rack',x:260},{t:'rack',x:430},{t:'rack',x:600},{t:'rack',x:870},{t:'rack',x:1040},{t:'rack',x:1210},{t:'rack',x:1390},{t:'monw',x:700},{t:'ups',x:780}],clouds:[]}
+// ──────────────────────────────────────────────────────────────────────────
+// 게임 상태
+// ──────────────────────────────────────────────────────────────────────────
+var GY=340, GRAV=0.55, JV=-12.5, SP=3.6, CW=680, CH=420;
+var running=false, lastT=0;
+var G={
+  world:'home', camX:0,
+  px:120, py:GY, vy:0, onGround:true, facingR:true,
+  score:0, level:1, missionCount:0, badges:[], done:{},
+  animT:0, inDialog:false, inMission:false, inTrans:false,
+  currentNpc:null, dialogCallback:null
 };
-var CO={};Object.keys(W).forEach(function(k){CO[k]=(W[k].clouds||[]).map(function(){return 0;});});
-function $g(id){return document.getElementById(id);}
-function show(id){$g(id).classList.add('on');}
-function hide(id){$g(id).classList.remove('on');}
-function updateHUD(){$g('hsc').textContent=G.sc;$g('hlv').textContent=G.lv;$g('hms').textContent=G.ms;$g('hbg').textContent=G.bg.join(' ');}
-function loop(ts){
-  if(!running)return;var dt=Math.min((ts-pt)/16,3);pt=ts;
-  if(!G.dlg&&!G.qz&&!G.mg&&!G.tr){
-    if(K.ArrowLeft||K.a||DP.l){G.px-=SP*dt*60/16;G.fr=false;}
-    if(K.ArrowRight||K.d||DP.r){G.px+=SP*dt*60/16;G.fr=true;}
-    if((K.ArrowUp||K.w||DP.j)&&G.gr){G.vy=JV;G.gr=false;}
-    G.vy+=GRAV;G.py+=G.vy;G.gr=false;if(G.py>=GY){G.py=GY;G.vy=0;G.gr=true;}
-    G.px=Math.max(15,Math.min(W[G.wid].width-15,G.px));
-    var tc=G.px-CW/3,mc=Math.max(0,W[G.wid].width-CW);G.cam+=(Math.max(0,Math.min(mc,tc))-G.cam)*.1;
-    if(K.ArrowLeft||K.ArrowRight||K.a||K.d||DP.l||DP.r)G.at+=2;else G.at=0;
-  }
-  (W[G.wid].clouds||[]).forEach(function(c,i){CO[G.wid][i]=(CO[G.wid][i]+c.s)%(CW+320);});
-  drawBG(ts);FX.clearRect(0,0,CW,CH);
-  W[G.wid].portals.forEach(function(p){drawPortal(p,ts);});
-  W[G.wid].npcs.forEach(function(n){drawNPC(n,ts);});
-  drawPlayer();requestAnimationFrame(loop);
+var keys={}, dpad={l:0,r:0,j:0};
+
+function resetGame(){
+  G.world='home'; G.camX=0; G.px=120; G.py=GY; G.vy=0; G.onGround=true; G.facingR=true;
+  G.score=0; G.level=1; G.missionCount=0; G.badges=[]; G.done={};
+  G.animT=0; G.inDialog=false; G.inMission=false; G.inTrans=false;
+  G.currentNpc=null; G.dialogCallback=null;
+  updateHUD();
+  document.getElementById('locBanner').textContent=WORLDS[G.world].name;
 }
-function tryAct(){var n=W[G.wid].npcs,p=W[G.wid].portals;for(var i=0;i<n.length;i++)if(Math.abs(n[i].x-G.px)<55){openNPC(n[i]);return;}for(var j=0;j<p.length;j++)if(G.px>p[j].x-14&&G.px<p[j].x+p[j].w+14){doTrans(p[j]);return;}}
-function openNPC(n){G.npc=n;if(G.dn[n.mid]){openDlg(n.sp,'[미션 완료]\n'+n.tk,null);return;}openDlg(n.sp,n.tk,function(){launch(n);});}
-function launch(n){var m={quiz:startQuiz,phish:startPhish,mem:startMem,sort:startSort,pw:startPW,scen:startScen};if(m[n.gt])m[n.gt](n);}
-function openDlg(sp,tx,after){G.dlg=true;G.da=after;$g('DSP').textContent=sp;$g('DTX').textContent=tx;show('DLG');}
-function doTrans(p){G.tr=true;$g('FDT').textContent=p.lb;show('FD');setTimeout(function(){G.wid=p.to;G.px=p.sx;G.py=GY;G.vy=0;G.cam=0;G.gr=true;$g('hloc').textContent=W[G.wid].name;updateHUD();setTimeout(function(){hide('FD');G.tr=false;},400);},600);}
-function finishMission(n){G.dn[n.mid]=true;G.ms++;G.bg.push(n.bg);G.sc+=200;G.lv=Math.min(6,1+G.ms);updateHUD();openDlg(n.lb+' 미션 완료!','"'+n.rw+'" 뱃지 ['+n.bg+'] 획득! +200점\n\n'+(NM[n.mid]||''),function(){if(G.ms>=6)setTimeout(showEnding,700);});}
-function startQuiz(n){G.qz=true;G.qd=n;G.qi=0;$g('QTG').textContent='보안 퀴즈 — '+n.sp;show('QZ');renderQ();}
-function renderQ(){var q=G.qd.quiz[G.qi];$g('QSC2').textContent=q.sc;$g('QQ').textContent='Q'+(G.qi+1)+'. '+q.q;$g('QFB').style.display='none';$g('QNX').classList.remove('on');var oc=$g('QOP');oc.innerHTML='';q.op.forEach(function(o,i){var b=document.createElement('button');b.className='qo';b.textContent=(i+1)+'. '+o;b.onclick=function(){document.querySelectorAll('.qo').forEach(function(x){x.onclick=null;});b.className='qo '+(i===q.ans?'ok':'ng');if(i===q.ans){G.sc+=100;updateHUD();}else document.querySelectorAll('.qo')[q.ans].className='qo ok';var fb=$g('QFB');fb.textContent=(i===q.ans?'정답! +100점\n':'오답\n')+'힌트: '+q.fb;fb.style.display='block';$g('QNX').classList.add('on');};oc.appendChild(b);});}
-var PH=[{fr:'no-reply@paypal-secure.info',sb:'계정 정지 예고 — 24시간 이내 확인',bd:'계정 비밀번호 재설정 필요. 링크를 클릭해주세요.',ph:1,wy:'paypal-secure.info 가짜 도메인 — 피싱!'},{fr:'newsletter@nytimes.com',sb:'오늘의 주요 뉴스 — 5월 특집',bd:'오늘의 헤드라인: AI 규제 법안 통과...',ph:0,wy:'공식 nytimes.com 도메인 — 안전'},{fr:'hr@company-bonuss.net',sb:'[긴급] 성과급 지급 안내.zip',bd:'첨부 파일을 실행하시면 내역을 확인할 수 있습니다.',ph:1,wy:'위조 도메인 + .zip 첨부 — 피싱!'},{fr:'support@github.com',sb:'Your SSH key has been added',bd:'A new SSH key was recently added to your account.',ph:0,wy:'공식 github.com 도메인 — 안전'},{fr:'admin@microsoft-helpdesk.ru',sb:'Windows 라이선스 만료 경고',bd:'즉시 결제하지 않으면 컴퓨터가 잠깁니다.',ph:1,wy:'.ru 도메인 + 공포심 유발 — 피싱!'}];
-var phI=0,phSc=0,phTL=30;
-function startPhish(n){G.mg=true;phI=0;phSc=0;phTL=30;$g('MGT').textContent='피싱 메일 판별';$g('MGS').textContent='진짜 메일 vs 피싱 메일을 판별하세요!';show('MG');renderPhish();phT=setInterval(function(){phTL--;if(phTL<=0){clearInterval(phT);mgDone();}var s=$g('MGS');if(s)s.textContent='남은 시간: '+phTL+'초 | 점수: '+phSc;},1000);}
-function renderPhish(){var b=$g('MGB');if(phI>=PH.length){clearInterval(phT);$g('MGN').classList.add('on');b.innerHTML='<div style="font-size:13px;font-weight:700;color:#1565c0;text-align:center;padding:20px;">판별 완료! 점수: '+phSc+'</div>';return;}var m=PH[phI];b.innerHTML='<div style="background:#f8fbff;border:1.5px solid #90caf9;border-radius:9px;padding:11px;margin-bottom:9px;font-size:11px;color:#1a2a38;"><div style="color:#546e7a;margin-bottom:2px;">발신: <b style="color:#1a2a38;">'+m.fr+'</b></div><div style="color:#546e7a;margin-bottom:6px;">제목: <b style="color:#1a2a38;">'+m.sb+'</b></div><div style="background:#fff;padding:8px;border-radius:6px;border:1px solid #e0e0e0;color:#1a2a38;">'+m.bd+'</div><div style="display:flex;gap:8px;margin-top:10px;"><button id="PPH" style="flex:1;padding:9px;background:#fff9c4;border:2px solid #f9a825;border-radius:8px;font-weight:700;cursor:pointer;font-size:11px;font-family:Courier New,monospace;color:#1a2a38;">피싱 의심</button><button id="PSA" style="flex:1;padding:9px;background:#e8f5e9;border:2px solid #66bb6a;border-radius:8px;font-weight:700;cursor:pointer;font-size:11px;font-family:Courier New,monospace;color:#1a2a38;">안전한 메일</button></div></div>';$g('PPH').onclick=function(){judgePhish(1);};$g('PSA').onclick=function(){judgePhish(0);};}
-function judgePhish(p){var m=PH[phI];var ok=m.ph===p;if(ok)phSc+=100;$g('MGB').innerHTML+='<div style="padding:8px 12px;border-radius:8px;margin-bottom:8px;font-size:11px;color:#1a2a38;background:'+(ok?'#e8f5e9':'#ffebee')+';border:1.5px solid '+(ok?'#66bb6a':'#ef9a9a')+';">'+(ok?'정답!':'오답!')+' — '+m.wy+'</div>';phI++;setTimeout(renderPhish,1200);}
-var MD=[['피싱','이메일로 개인정보 탈취'],['악성코드','시스템 손상 소프트웨어'],['VPN','암호화 가상 사설망'],['방화벽','네트워크 침입 차단'],['랜섬웨어','파일 암호화 후 금전 요구'],['2FA','이중 인증 보안']];
-var mFl=[],mMt=[],mLk=false;
-function startMem(n){G.mg=true;mFl=[];mMt=[];mLk=false;show('MM');var cards=MD.map(function(m,i){return{id:i,sd:'t',tx:m[0]};}).concat(MD.map(function(m,i){return{id:i,sd:'d',tx:m[1]};}));for(var i=cards.length-1;i>0;i--){var j=Math.floor(Math.random()*i);var tmp=cards[i];cards[i]=cards[j];cards[j]=tmp;}var g=$g('MGR');g.innerHTML='';cards.forEach(function(c){var d=document.createElement('div');d.className='mc';d.dataset.id=c.id;d.dataset.sd=c.sd;d.textContent=c.tx;d.onclick=function(){if(mLk||d.classList.contains('fl')||d.classList.contains('mt'))return;d.classList.add('fl');mFl.push(d);if(mFl.length===2){mLk=true;var a=mFl[0],b=mFl[1];if(a.dataset.id===b.dataset.id&&a.dataset.sd!==b.dataset.sd){a.classList.replace('fl','mt');b.classList.replace('fl','mt');mMt.push(a.dataset.id);G.sc+=80;updateHUD();mFl=[];mLk=false;$g('MMI').textContent='매칭 '+mMt.length+'/'+MD.length+' — 점수: '+G.sc;if(mMt.length===MD.length)$g('MMN').classList.add('on');}else setTimeout(function(){a.classList.remove('fl');b.classList.remove('fl');mFl=[];mLk=false;},800);}};g.appendChild(d);});$g('MMI').textContent='카드를 클릭해 용어와 설명을 매칭하세요!';}
-var SD=[{t:'주기적으로 비밀번호 변경',g:1},{t:'출처 불명 USB 바로 사용',g:0},{t:'화면 보호기 자동 잠금 설정',g:1},{t:'업무 파일을 개인 메일로 전송',g:0},{t:'소프트웨어 최신 업데이트 적용',g:1},{t:'공용 PC에서 자동 로그인 사용',g:0},{t:'의심 링크는 보안팀에 신고',g:1},{t:'비밀번호를 포스트잇에 기록',g:0}];
+
+function updateHUD(){
+  document.getElementById('hsc').textContent=G.score;
+  document.getElementById('hlv').textContent=G.level;
+  document.getElementById('hms').textContent=G.missionCount;
+  document.getElementById('hbg').textContent=G.badges.join(' ');
+  document.getElementById('hloc').textContent=WORLDS[G.world].name;
+}
+
+function restart(){running=false; goTitle();}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 월드 데이터
+// ──────────────────────────────────────────────────────────────────────────
+var WORLDS={
+  home:{name:'🏠 우리집', width:1600, theme:'out',
+    buildings:[
+      {x:60,y:GY-130,w:200,h:130,c:'#fde8d8',r:'#d84315',d:'#795548'},
+      {x:310,y:GY-115,w:170,h:115,c:'#e3f2fd',r:'#1565c0',d:'#5d4037'},
+      {x:520,y:GY-135,w:200,h:135,c:'#f1f8e9',r:'#2e7d32',d:'#4e342e'},
+      {x:780,y:GY-120,w:160,h:120,c:'#fff9e6',r:'#e65100',d:'#6d4c41'},
+      {x:1000,y:GY-130,w:190,h:130,c:'#f3e5f5',r:'#6a1b9a',d:'#4a148c'},
+      {x:1240,y:GY-120,w:160,h:120,c:'#e0f7fa',r:'#00695c',d:'#00695c'}
+    ],
+    npc:{id:'mom', x:380, type:'mom', label:'엄마', mid:'m0', game:'quiz'},
+    portal:{x:1530, label:'거리 →', to:'street', sx:80, c:'#e65100'}
+  },
+  street:{name:'🌇 거리', width:1700, theme:'out',
+    buildings:[
+      {x:40,y:GY-230,w:220,h:230,c:'#e8eaf6',r:null,d:'#37474f',lbl:'BANK'},
+      {x:300,y:GY-210,w:180,h:210,c:'#fff3e0',r:null,d:'#5d4037',lbl:'CAFÉ'},
+      {x:530,y:GY-240,w:260,h:240,c:'#e8f5e9',r:null,d:'#1b5e20',lbl:'CYBERGUARD'},
+      {x:850,y:GY-220,w:200,h:220,c:'#fce4ec',r:null,d:'#880e4f',lbl:'HOSPITAL'},
+      {x:1100,y:GY-225,w:240,h:225,c:'#e0f2f1',r:null,d:'#00695c',lbl:'POLICE'},
+      {x:1390,y:GY-200,w:200,h:200,c:'#f3e5f5',r:null,d:'#6a1b9a',lbl:'MARKET'}
+    ],
+    npc:{id:'str', x:780, type:'stranger', label:'낯선 사람', mid:'m1', game:'phish'},
+    portal:{x:1640, label:'로비 →', to:'lobby', sx:80, c:'#1565c0'},
+    backPortal:{x:0, label:'← 집', to:'home', sx:1500, c:'#546e7a'}
+  },
+  lobby:{name:'🏢 1F 로비', width:1400, theme:'in',
+    buildings:[],
+    npc:{id:'rec', x:700, type:'rec', label:'안내직원', mid:'m2', game:'mem'},
+    portal:{x:1340, label:'사무실 →', to:'office', sx:80, c:'#1565c0'},
+    backPortal:{x:0, label:'← 거리', to:'street', sx:1610, c:'#546e7a'}
+  },
+  office:{name:'💼 2F 사무실', width:1700, theme:'in',
+    buildings:[],
+    npc:{id:'sec', x:420, type:'sec', label:'보안담당', mid:'m3', game:'sort'},
+    npc2:{id:'boss', x:1100, type:'boss', label:'팀장', mid:'m4', game:'pw'},
+    portal:{x:1640, label:'서버실 →', to:'server', sx:80, c:'#c62828'},
+    backPortal:{x:0, label:'← 로비', to:'lobby', sx:1310, c:'#546e7a'}
+  },
+  server:{name:'⚙️ B1 서버실', width:1400, theme:'sv',
+    buildings:[],
+    npc:{id:'sys', x:700, type:'sys', label:'시스템관리자', mid:'m5', game:'scen'},
+    backPortal:{x:0, label:'← 사무실', to:'office', sx:1610, c:'#546e7a'}
+  }
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// 게임 루프
+// ──────────────────────────────────────────────────────────────────────────
+var canvas=document.getElementById('CANVAS');
+var ctx=canvas.getContext('2d');
+
+function loop(ts){
+  if(!running)return;
+  var dt=Math.min((ts-lastT)/16, 3); lastT=ts;
+
+  if(!G.inDialog && !G.inMission && !G.inTrans){
+    var moving=false;
+    if(keys.ArrowLeft||dpad.l){G.px-=SP*dt; G.facingR=false; moving=true;}
+    if(keys.ArrowRight||dpad.r){G.px+=SP*dt; G.facingR=true; moving=true;}
+    if((keys.ArrowUp||dpad.j) && G.onGround){G.vy=JV; G.onGround=false;}
+    G.vy+=GRAV; G.py+=G.vy;
+    if(G.py>=GY){G.py=GY; G.vy=0; G.onGround=true;}
+    G.px=Math.max(15, Math.min(WORLDS[G.world].width-15, G.px));
+    var targetCam=G.px-CW/3;
+    var maxCam=Math.max(0, WORLDS[G.world].width-CW);
+    G.camX += (Math.max(0,Math.min(maxCam,targetCam)) - G.camX)*0.1;
+    if(moving) G.animT+=0.3;
+
+    // 포털 감지
+    var w=WORLDS[G.world];
+    if(w.portal && G.px > w.portal.x-10 && G.px < w.portal.x+50){
+      doTransition(w.portal);
+    }
+    if(w.backPortal && G.px < 30){
+      doTransition(w.backPortal);
+    }
+  }
+
+  drawScene();
+  requestAnimationFrame(loop);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 그리기
+// ──────────────────────────────────────────────────────────────────────────
+function drawScene(){
+  var w=WORLDS[G.world];
+  if(w.theme==='out'){
+    var sg=ctx.createLinearGradient(0,0,0,GY);
+    sg.addColorStop(0,'#42a5f5'); sg.addColorStop(0.5,'#90caf9'); sg.addColorStop(1,'#c5e1f9');
+    ctx.fillStyle=sg; ctx.fillRect(0,0,CW,GY);
+    ctx.fillStyle='rgba(255,235,59,0.3)';
+    ctx.beginPath(); ctx.arc(580,55,55,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffee58';
+    ctx.beginPath(); ctx.arc(580,55,26,0,Math.PI*2); ctx.fill();
+    drawCloud(100 - G.camX*0.1, 60);
+    drawCloud(350 - G.camX*0.1, 40);
+    drawCloud(600 - G.camX*0.1, 70);
+    ctx.fillStyle='rgba(140,180,230,0.4)';
+    for(var i=0;i<6;i++){
+      var mx=i*250 - G.camX*0.2 + 100;
+      ctx.beginPath();
+      ctx.moveTo(mx-90,GY); ctx.lineTo(mx,GY-100); ctx.lineTo(mx+90,GY);
+      ctx.closePath(); ctx.fill();
+    }
+  } else if(w.theme==='in'){
+    ctx.fillStyle='#fafafa'; ctx.fillRect(0,0,CW,CH);
+    ctx.fillStyle='#e0e0e0'; ctx.fillRect(0,0,CW,55);
+    ctx.fillStyle='#d0d0d0'; ctx.fillRect(0,50,CW,6);
+    for(var i=0;i<8;i++){
+      var lx=i*130 - G.camX*0.05 + 60;
+      ctx.fillStyle='rgba(255,245,200,0.9)';
+      ctx.fillRect(lx-18,25,36,10);
+    }
+    ctx.fillStyle='#f5f5f5'; ctx.fillRect(0,56,CW,GY-56);
+  } else {
+    var sg2=ctx.createLinearGradient(0,0,0,CH);
+    sg2.addColorStop(0,'#0a1628'); sg2.addColorStop(1,'#081020');
+    ctx.fillStyle=sg2; ctx.fillRect(0,0,CW,CH);
+    ctx.fillStyle='rgba(30,60,90,0.6)'; ctx.fillRect(0,35,CW,20);
+  }
+
+  if(w.buildings){
+    w.buildings.forEach(function(b){
+      var bx=b.x - G.camX*0.6;
+      if(bx>CW+50||bx+b.w<-50)return;
+      drawBuilding(bx, b);
+    });
+  }
+
+  if(w.theme==='out'){
+    ctx.fillStyle='#7cb342'; ctx.fillRect(0,GY-3,CW,8);
+    ctx.fillStyle='#8bc34a'; ctx.fillRect(0,GY+5,CW,CH-GY-5);
+    ctx.fillStyle='#b0bec5'; ctx.fillRect(0,GY+18,CW,CH-GY-18);
+  } else if(w.theme==='in'){
+    ctx.fillStyle='#bcaaa4'; ctx.fillRect(0,GY,CW,CH-GY);
+    ctx.fillStyle='#a1887f'; ctx.fillRect(0,GY,CW,4);
+  } else {
+    ctx.fillStyle='#0d1a2a'; ctx.fillRect(0,GY,CW,CH-GY);
+    for(var r=0;r<5;r++){
+      var rx=r*250 - G.camX*0.6 + 100;
+      if(rx>CW+50||rx+50<-50)continue;
+      drawRack(rx);
+    }
+  }
+
+  if(w.portal) drawPortal(w.portal.x - G.camX, w.portal.label, w.portal.c);
+  if(w.backPortal) drawPortal(w.backPortal.x - G.camX, w.backPortal.label, w.backPortal.c);
+  if(w.npc) drawNpc(w.npc);
+  if(w.npc2) drawNpc(w.npc2);
+  drawPlayer();
+}
+
+function drawCloud(x,y){
+  ctx.save(); ctx.globalAlpha=0.9; ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(x,y,16,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+20,y-5,20,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+40,y,15,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawBuilding(bx, b){
+  ctx.fillStyle='rgba(0,0,0,0.1)'; ctx.fillRect(bx+5, b.y+5, b.w, b.h);
+  ctx.fillStyle=b.c; ctx.fillRect(bx, b.y, b.w, b.h);
+  ctx.strokeStyle='rgba(0,0,0,0.1)'; ctx.lineWidth=1; ctx.strokeRect(bx,b.y,b.w,b.h);
+  if(b.r){
+    ctx.fillStyle=b.r;
+    ctx.beginPath();
+    ctx.moveTo(bx-8, b.y); ctx.lineTo(bx+b.w/2, b.y-40); ctx.lineTo(bx+b.w+8, b.y);
+    ctx.closePath(); ctx.fill();
+  } else if(b.lbl){
+    ctx.fillStyle='rgba(21,101,192,0.9)'; ctx.fillRect(bx+10, b.y-26, b.w-20, 20);
+    ctx.fillStyle='#fff'; ctx.font='bold 9px Courier New';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(b.lbl, bx+b.w/2, b.y-16);
+  }
+  for(var r=0;r<2;r++){
+    for(var c=0;c<2;c++){
+      var wx=bx + b.w*(c+1)/3 - 14, wy=b.y + b.h*(r+1)/3;
+      ctx.fillStyle='#546e7a'; ctx.fillRect(wx-2,wy-2,28,22);
+      ctx.fillStyle='#81d4fa'; ctx.fillRect(wx,wy,24,18);
+    }
+  }
+  ctx.fillStyle=b.d; ctx.fillRect(bx+b.w/2-12, b.y+b.h-35, 24, 35);
+  ctx.fillStyle='#ffd54f';
+  ctx.beginPath(); ctx.arc(bx+b.w/2+8, b.y+b.h-18, 3, 0, Math.PI*2); ctx.fill();
+}
+
+function drawRack(rx){
+  ctx.fillStyle='#1a2a3a'; ctx.fillRect(rx, GY-140, 50, 142);
+  ctx.strokeStyle='rgba(0,150,255,0.3)'; ctx.lineWidth=1.5;
+  ctx.strokeRect(rx, GY-140, 50, 142);
+  var t=Date.now();
+  for(var u=0;u<8;u++){
+    ctx.fillStyle='#162436';
+    ctx.fillRect(rx+3, GY-128+u*16, 44, 12);
+    for(var l=0;l<3;l++){
+      var on=Math.sin(t/400+u*2+l*3)>0;
+      ctx.fillStyle=on?['#00e5ff','#69f0ae','#ffd740'][l]:'rgba(100,120,140,0.3)';
+      ctx.beginPath(); ctx.arc(rx+25+l*7, GY-122+u*16, 2.5, 0, Math.PI*2); ctx.fill();
+    }
+  }
+}
+
+function drawPortal(px, label, color){
+  if(px>CW+60||px<-60)return;
+  var pulse=Math.sin(Date.now()/500)*0.15+0.85;
+  ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.fillRect(px+4, GY-60+4, 56, 60);
+  ctx.fillStyle=color; ctx.fillRect(px, GY-60, 56, 60);
+  ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=2;
+  ctx.strokeRect(px, GY-60, 56, 60);
+  ctx.globalAlpha=pulse;
+  ctx.fillStyle='#fff'; ctx.font='bold 18px Courier New';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(label.startsWith('←')?'◀':'▶', px+28, GY-30);
+  ctx.globalAlpha=1;
+  ctx.font='bold 9px Courier New';
+  var tw=ctx.measureText(label).width;
+  ctx.fillStyle='rgba(0,0,0,0.7)';
+  ctx.fillRect(px+28-tw/2-4, GY-78, tw+8, 14);
+  ctx.fillStyle='#fff';
+  ctx.fillText(label, px+28, GY-71);
+}
+
+function drawNpc(npc){
+  var nx=npc.x - G.camX;
+  if(nx<-80||nx>CW+80)return;
+  var done=G.done[npc.mid];
+  var bob=Math.sin(Date.now()/400)*2;
+
+  ctx.save();
+  ctx.translate(nx, GY+bob);
+  ctx.fillStyle='rgba(0,0,0,0.15)';
+  ctx.beginPath(); ctx.ellipse(0,2,16,5,0,0,Math.PI*2); ctx.fill();
+
+  var bodyColor={mom:'#ef9a9a',stranger:'#4a148c',rec:'#1565c0',sec:'#2e7d32',boss:'#1a237e',sys:'#1b5e20'}[npc.type]||'#1565c0';
+  var legColor={mom:'#5d4037',stranger:'#37474f',rec:'#1565c0',sec:'#2e7d32',boss:'#263238',sys:'#1b5e20'}[npc.type]||'#37474f';
+
+  ctx.fillStyle=legColor; ctx.fillRect(-8,-30,7,30); ctx.fillRect(2,-30,7,30);
+  ctx.fillStyle='#212121'; ctx.fillRect(-10,-2,10,5); ctx.fillRect(1,-2,10,5);
+  ctx.fillStyle=bodyColor;
+  ctx.beginPath();
+  ctx.moveTo(-14,-30); ctx.lineTo(-16,-65); ctx.lineTo(16,-65); ctx.lineTo(14,-30);
+  ctx.closePath(); ctx.fill();
+  ctx.fillRect(-20,-62,7,24); ctx.fillRect(13,-62,7,24);
+  ctx.fillStyle='#ffccbc';
+  ctx.beginPath(); ctx.arc(-17,-40,5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(17,-40,5,0,Math.PI*2); ctx.fill();
+
+  if(npc.type==='mom'){
+    ctx.fillStyle='#fff9c4';
+    ctx.beginPath();
+    ctx.moveTo(-8,-58); ctx.lineTo(-10,-30); ctx.lineTo(10,-30); ctx.lineTo(8,-58);
+    ctx.closePath(); ctx.fill();
+  }
+  if(npc.type==='sec'){
+    ctx.fillStyle='rgba(255,235,59,0.8)'; ctx.fillRect(-13,-62,26,20);
+    ctx.fillStyle='#ffe082'; ctx.font='bold 5px Courier New';
+    ctx.textAlign='center'; ctx.fillText('SECURITY',0,-50);
+  }
+  if(npc.type==='rec'||npc.type==='boss'){
+    ctx.fillStyle='#fff';
+    ctx.beginPath();
+    ctx.moveTo(-4,-65); ctx.lineTo(-3,-50); ctx.lineTo(3,-50); ctx.lineTo(4,-65);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#c62828';
+    ctx.beginPath();
+    ctx.moveTo(-2,-62); ctx.lineTo(-3,-50); ctx.lineTo(0,-47); ctx.lineTo(3,-50); ctx.lineTo(2,-62);
+    ctx.closePath(); ctx.fill();
+  }
+  if(npc.type==='sys'){
+    ctx.fillStyle='#37474f'; ctx.fillRect(11,-46,20,14);
+    ctx.fillStyle='#00e5ff'; ctx.fillRect(13,-44,3,2);
+  }
+
+  ctx.fillStyle='#ffccbc'; ctx.fillRect(-5,-70,10,8);
+  ctx.fillStyle='#ffccbc';
+  ctx.beginPath(); ctx.ellipse(0,-82,15,17,0,0,Math.PI*2); ctx.fill();
+  var hairColor={mom:'#5d4037',stranger:'#4a148c',rec:'#4e342e',sec:'#1b5e20',boss:'#1a237e',sys:'#1b5e20'}[npc.type]||'#37474f';
+  ctx.fillStyle=hairColor;
+  ctx.beginPath(); ctx.arc(0,-95,13,Math.PI,0); ctx.fill();
+  ctx.fillRect(-13,-95,26,7);
+
+  if(npc.type==='stranger'){
+    ctx.beginPath();
+    ctx.moveTo(-16,-90); ctx.lineTo(-18,-65); ctx.lineTo(-13,-65); ctx.lineTo(-12,-90);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(16,-90); ctx.lineTo(18,-65); ctx.lineTo(13,-65); ctx.lineTo(12,-90);
+    ctx.closePath(); ctx.fill();
+  }
+
+  ctx.fillStyle='#1a2a38';
+  ctx.beginPath(); ctx.arc(-5,-82,2.2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(5,-82,2.2,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=npc.type==='stranger'?'#5d4037':'#c62828';
+  ctx.lineWidth=1.4;
+  ctx.beginPath();
+  if(npc.type==='stranger') ctx.arc(0,-76,4,0.4,Math.PI-0.4,true);
+  else ctx.arc(0,-77,5,0.15,Math.PI-0.15);
+  ctx.stroke();
+
+  if(npc.type==='boss'||npc.type==='sys'){
+    ctx.strokeStyle='#546e7a'; ctx.lineWidth=1.5;
+    ctx.strokeRect(-9,-85,8,5); ctx.strokeRect(1,-85,8,5);
+  }
+  ctx.restore();
+
+  var lblText=npc.label+(done?' ✅':'');
+  ctx.font='bold 10px Courier New';
+  var tw=ctx.measureText(lblText).width;
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.fillRect(nx-tw/2-6, GY-115, tw+12, 16);
+  ctx.strokeStyle='#90caf9'; ctx.lineWidth=1;
+  ctx.strokeRect(nx-tw/2-6, GY-115, tw+12, 16);
+  ctx.fillStyle='#1a2a38';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(lblText, nx, GY-107);
+
+  if(!done && Math.abs(npc.x-G.px)<55){
+    ctx.font='bold 10px Courier New';
+    var hw=ctx.measureText('Space').width;
+    ctx.fillStyle='#1565c0';
+    ctx.fillRect(nx-hw/2-6, GY-138, hw+12, 16);
+    ctx.fillStyle='#fff';
+    ctx.fillText('Space', nx, GY-130);
+  }
+}
+
+function drawPlayer(){
+  var px=G.px-G.camX, py=G.py;
+  var moving=keys.ArrowLeft||keys.ArrowRight||dpad.l||dpad.r;
+  var legSwing=G.onGround&&moving?Math.sin(G.animT*2)*8:0;
+  var bob=G.onGround?Math.sin(G.animT*2)*1:0;
+
+  ctx.save();
+  ctx.translate(px, py+bob);
+  if(!G.facingR) ctx.scale(-1,1);
+
+  ctx.fillStyle='rgba(0,0,0,0.15)';
+  ctx.beginPath(); ctx.ellipse(0,2,16,5,0,0,Math.PI*2); ctx.fill();
+
+  ctx.save(); ctx.translate(-6,-20); ctx.rotate(legSwing*Math.PI/180);
+  ctx.fillStyle='#37474f'; ctx.fillRect(-4,0,8,22); ctx.restore();
+  ctx.save(); ctx.translate(6,-20); ctx.rotate(-legSwing*Math.PI/180);
+  ctx.fillStyle='#37474f'; ctx.fillRect(-4,0,8,22); ctx.restore();
+  ctx.fillStyle='#212121';
+  ctx.fillRect(-12,0,13,5); ctx.fillRect(1,0,12,5);
+
+  ctx.fillStyle='#1565c0';
+  ctx.beginPath();
+  ctx.moveTo(-14,-20); ctx.lineTo(-16,-62); ctx.lineTo(16,-62); ctx.lineTo(14,-20);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#ffe082'; ctx.fillRect(-9,-54,18,8);
+  ctx.fillStyle='#1a2a38'; ctx.font='bold 6px Courier New';
+  ctx.textAlign='center'; ctx.fillText('GUARD',0,-48);
+
+  var armSwing=moving?Math.sin(G.animT*2)*15:0;
+  ctx.save(); ctx.translate(-14,-52); ctx.rotate(-armSwing*Math.PI/180);
+  ctx.fillStyle='#1565c0'; ctx.fillRect(-4,0,8,22);
+  ctx.fillStyle='#ffccbc'; ctx.beginPath(); ctx.arc(0,24,5,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  ctx.save(); ctx.translate(14,-52); ctx.rotate(armSwing*Math.PI/180);
+  ctx.fillStyle='#1565c0'; ctx.fillRect(-4,0,8,22);
+  ctx.fillStyle='#ffccbc'; ctx.beginPath(); ctx.arc(0,24,5,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle='#ffccbc'; ctx.fillRect(-5,-68,10,8);
+  ctx.fillStyle='#ffe0b2';
+  ctx.beginPath(); ctx.ellipse(0,-80,15,17,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#4e342e';
+  ctx.beginPath(); ctx.arc(0,-93,13,Math.PI,0); ctx.fill();
+  ctx.fillRect(-13,-93,26,7);
+  ctx.fillStyle='#1a2a38';
+  ctx.beginPath(); ctx.arc(-5,-80,2.2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(5,-80,2.2,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#c62828'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.arc(0,-75,5,0.15,Math.PI-0.15); ctx.stroke();
+  ctx.restore();
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 상호작용
+// ──────────────────────────────────────────────────────────────────────────
+function tryInteract(){
+  if(G.inDialog||G.inMission||G.inTrans)return;
+  var w=WORLDS[G.world];
+  if(w.npc && Math.abs(w.npc.x-G.px)<55){startNpc(w.npc);return;}
+  if(w.npc2 && Math.abs(w.npc2.x-G.px)<55){startNpc(w.npc2);return;}
+}
+
+function startNpc(npc){
+  G.currentNpc=npc;
+  if(G.done[npc.mid]){
+    showDialog(npc.label, '[미션 완료 ✅]\n수고했습니다!', null);
+    return;
+  }
+  var t=NPC_TALKS[npc.mid];
+  showDialog(t.spk, t.tk, function(){launchMission(npc);});
+}
+
+function showDialog(spk, txt, cb){
+  G.inDialog=true; G.dialogCallback=cb;
+  document.getElementById('dlgSpk').textContent=spk;
+  document.getElementById('dlgTxt').textContent=txt;
+  document.getElementById('DIALOG').classList.add('on');
+}
+
+function closeDialog(){
+  document.getElementById('DIALOG').classList.remove('on');
+  G.inDialog=false;
+  if(G.dialogCallback){var cb=G.dialogCallback; G.dialogCallback=null; cb();}
+}
+
+function doTransition(p){
+  G.inTrans=true;
+  setTimeout(function(){
+    G.world=p.to; G.px=p.sx; G.camX=0;
+    document.getElementById('locBanner').textContent=WORLDS[G.world].name;
+    updateHUD();
+    setTimeout(function(){G.inTrans=false;}, 200);
+  }, 300);
+}
+
+function finishMission(npc){
+  G.done[npc.mid]=true; G.missionCount++; G.score+=200;
+  G.level=Math.min(6, 1+G.missionCount);
+  var badge={m0:'📧',m1:'🎯',m2:'🃏',m3:'🗂️',m4:'🔐',m5:'🛡️'}[npc.mid];
+  G.badges.push(badge);
+  updateHUD();
+  var nextMsg={m0:'다음: 🌇 거리로!',m1:'다음: 🏢 로비로!',m2:'다음: 💼 사무실로!',m3:'다음: 같은 사무실 팀장님!',m4:'다음: ⚙️ 서버실로!',m5:'🎉 모든 미션 완료!'}[npc.mid];
+  showDialog(npc.label+' 🎉', '미션 완료! +200점\n뱃지 '+badge+' 획득!\n\n'+nextMsg, function(){
+    if(G.missionCount>=6) setTimeout(showEnding, 600);
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// NPC 대화 텍스트
+// ──────────────────────────────────────────────────────────────────────────
+var NPC_TALKS={
+  m0:{spk:'엄마', tk:'출근하기 전에 잠깐!\n보안 퀴즈 하나 풀어보자.'},
+  m1:{spk:'???', tk:'잠깐만요! 이 이메일들이\n진짜인지 피싱인지 판별해주세요!'},
+  m2:{spk:'안내직원', tk:'어서오세요!\n보안 용어 카드 매칭으로\n기본 개념을 확인해볼게요!'},
+  m3:{spk:'보안담당 이주임', tk:'안전한 행동과 위험한 행동을\n올바르게 분류해보세요!'},
+  m4:{spk:'팀장 박과장', tk:'패스워드 강도를\n올바르게 평가해보세요!'},
+  m5:{spk:'시스템관리자 박주임', tk:'실제 보안 사고 시나리오로\n올바른 대응을 선택해봅시다!'}
+};
+
+function launchMission(npc){
+  G.inMission=true;
+  document.getElementById('MISSION').classList.add('on');
+  document.getElementById('missionNext').style.display='none';
+  if(npc.game==='quiz') startQuiz();
+  else if(npc.game==='phish') startPhish();
+  else if(npc.game==='mem') startMem();
+  else if(npc.game==='sort') startSort();
+  else if(npc.game==='pw') startPW();
+  else if(npc.game==='scen') startScen();
+}
+
+function missionNext(){
+  document.getElementById('MISSION').classList.remove('on');
+  G.inMission=false;
+  finishMission(G.currentNpc);
+}
+
+// ── QUIZ ──
+var QUIZ=[
+  {sc:'발신: hr-noreply@company-support.ru\n제목: [긴급] 연봉명세서.exe 첨부',
+   q:'.exe 파일, 어떻게 해야 할까요?',
+   op:['바로 실행한다','도메인 확인 후 보안팀 신고','동료에게 대신 열어달라','백신 검사 후 실행'],
+   ans:1, fb:'".ru"는 러시아 도메인 — 회사 공식 메일 아님!\n.exe 절대 실행 금지, 즉시 보안팀 신고!'},
+  {sc:'지인 계정에서 단축URL이 왔습니다.\n"이거 무조건 클릭해봐 ㅋㅋ"',
+   q:'어떻게 대응할까요?',
+   op:['지인이 보냈으니 클릭','전화 확인 후에도 보안팀 신고','단축URL 확장 후 클릭','무시'],
+   ans:1, fb:'지인 계정도 해킹될 수 있습니다!\n전화 확인 후에도 반드시 보안팀 신고!'}
+];
+var qIdx=0;
+function startQuiz(){
+  document.getElementById('missionTitle').textContent='📝 보안 퀴즈 — 엄마';
+  document.getElementById('missionSub').textContent='피싱 메일 대응을 학습합니다';
+  qIdx=0; renderQuiz();
+}
+function renderQuiz(){
+  var q=QUIZ[qIdx];
+  var html='<div class="p-scene">'+q.sc+'</div>';
+  html+='<div class="p-q">Q'+(qIdx+1)+'/'+QUIZ.length+'. '+q.q+'</div>';
+  html+='<div class="p-opt">';
+  q.op.forEach(function(o,i){
+    html+='<button class="opt-btn" onclick="answerQuiz('+i+')">'+(i+1)+'. '+o+'</button>';
+  });
+  html+='</div><div id="qFb" style="display:none;"></div>';
+  document.getElementById('missionBody').innerHTML=html;
+}
+function answerQuiz(i){
+  var q=QUIZ[qIdx];
+  var btns=document.querySelectorAll('#missionBody .opt-btn');
+  btns.forEach(function(b){b.onclick=null;});
+  btns[i].classList.add(i===q.ans?'ok':'ng');
+  if(i!==q.ans) btns[q.ans].classList.add('ok');
+  else {G.score+=100; updateHUD();}
+  var fb=document.getElementById('qFb');
+  fb.className='p-fb';
+  fb.style.display='block';
+  fb.textContent=(i===q.ans?'✅ 정답! +100점\n':'❌ 오답\n')+'💡 '+q.fb;
+  setTimeout(function(){
+    qIdx++;
+    if(qIdx<QUIZ.length) renderQuiz();
+    else document.getElementById('missionNext').style.display='block';
+  }, 2000);
+}
+
+// ── PHISHING ──
+var PHISH=[
+  {fr:'no-reply@paypal-secure.info',sb:'계정 정지 — 24시간내 확인',ph:1,wy:'paypal-secure.info는 가짜 도메인 — 피싱!'},
+  {fr:'newsletter@nytimes.com',sb:'오늘의 주요 뉴스',ph:0,wy:'공식 nytimes.com 도메인 — 안전'},
+  {fr:'hr@company-bonuss.net',sb:'[긴급] 성과급 안내.zip',ph:1,wy:'위조 도메인 + .zip 첨부 — 피싱!'},
+  {fr:'support@github.com',sb:'SSH key added',ph:0,wy:'공식 github.com 도메인 — 안전'}
+];
+var phIdx=0, phScore=0;
+function startPhish(){
+  document.getElementById('missionTitle').textContent='🎯 피싱 메일 판별';
+  document.getElementById('missionSub').textContent='피싱과 정상 메일을 구별하세요';
+  phIdx=0; phScore=0; renderPhish();
+}
+function renderPhish(){
+  if(phIdx>=PHISH.length){
+    document.getElementById('missionBody').innerHTML='<div style="text-align:center;padding:20px;font-size:14px;font-weight:700;color:#1565c0;">판별 완료!<br>점수: '+phScore+'</div>';
+    document.getElementById('missionNext').style.display='block';
+    return;
+  }
+  var m=PHISH[phIdx];
+  var html='<div style="background:#f8fbff;border:1.5px solid #90caf9;border-radius:9px;padding:11px;margin-bottom:9px;font-size:11px;">';
+  html+='<div style="color:#546e7a;margin-bottom:2px;">발신: <b>'+m.fr+'</b></div>';
+  html+='<div style="color:#546e7a;margin-bottom:6px;">제목: <b>'+m.sb+'</b></div>';
+  html+='<div style="display:flex;gap:8px;margin-top:10px;">';
+  html+='<button class="opt-btn" style="flex:1;background:#fff9c4;border-color:#f9a825;text-align:center;" onclick="judgePhish(1)">⚠️ 피싱 의심</button>';
+  html+='<button class="opt-btn" style="flex:1;background:#e8f5e9;border-color:#66bb6a;text-align:center;" onclick="judgePhish(0)">✅ 안전</button>';
+  html+='</div></div><div id="phFb" style="display:none;"></div>';
+  html+='<div style="font-size:10px;color:#546e7a;margin-top:8px;">진행: '+(phIdx+1)+'/'+PHISH.length+' · 점수: '+phScore+'</div>';
+  document.getElementById('missionBody').innerHTML=html;
+}
+function judgePhish(g){
+  var m=PHISH[phIdx];
+  var ok=m.ph===g;
+  if(ok) phScore+=100;
+  var fb=document.getElementById('phFb');
+  fb.className='p-fb';
+  fb.style.display='block';
+  fb.textContent=(ok?'✅ 정답!':'❌ 오답!')+' — '+m.wy;
+  setTimeout(function(){phIdx++; renderPhish();}, 1400);
+}
+
+// ── MEMORY ──
+var MEM_DATA=[
+  ['피싱','이메일로 정보 탈취'],
+  ['악성코드','시스템 손상 SW'],
+  ['VPN','암호화 가상망'],
+  ['방화벽','네트워크 차단'],
+  ['랜섬웨어','파일 암호화 후 금전요구'],
+  ['2FA','이중 인증']
+];
+var memFlipped=[], memMatched=[], memLock=false;
+function startMem(){
+  document.getElementById('missionTitle').textContent='🃏 보안 용어 카드 매칭';
+  document.getElementById('missionSub').textContent='같은 용어 쌍을 찾아 매칭하세요';
+  memFlipped=[]; memMatched=[]; memLock=false;
+  var cards=[];
+  MEM_DATA.forEach(function(p,i){
+    cards.push({id:i,side:'t',tx:p[0]});
+    cards.push({id:i,side:'d',tx:p[1]});
+  });
+  for(var i=cards.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*i);
+    var tmp=cards[i]; cards[i]=cards[j]; cards[j]=tmp;
+  }
+  var html='<div id="memInfo" style="font-size:11px;margin-bottom:8px;">매칭 0/'+MEM_DATA.length+'</div>';
+  html+='<div class="mem-grid">';
+  cards.forEach(function(c,i){
+    html+='<div class="mem-card" data-id="'+c.id+'" data-side="'+c.side+'" onclick="flipMem('+i+')" id="mc'+i+'">'+c.tx+'</div>';
+  });
+  html+='</div>';
+  document.getElementById('missionBody').innerHTML=html;
+}
+function flipMem(i){
+  var d=document.getElementById('mc'+i);
+  if(memLock||d.classList.contains('flip')||d.classList.contains('match'))return;
+  d.classList.add('flip');
+  memFlipped.push(d);
+  if(memFlipped.length===2){
+    memLock=true;
+    var a=memFlipped[0], b=memFlipped[1];
+    if(a.dataset.id===b.dataset.id && a.dataset.side!==b.dataset.side){
+      setTimeout(function(){
+        a.classList.replace('flip','match'); b.classList.replace('flip','match');
+        memMatched.push(a.dataset.id);
+        G.score+=80; updateHUD();
+        memFlipped=[]; memLock=false;
+        document.getElementById('memInfo').textContent='매칭 '+memMatched.length+'/'+MEM_DATA.length+' · 점수: '+G.score;
+        if(memMatched.length===MEM_DATA.length){
+          document.getElementById('missionNext').style.display='block';
+        }
+      }, 400);
+    } else {
+      setTimeout(function(){
+        a.classList.remove('flip'); b.classList.remove('flip');
+        memFlipped=[]; memLock=false;
+      }, 800);
+    }
+  }
+}
+
+// ── SORT ──
+var SORT_DATA=[
+  {t:'주기적 비밀번호 변경',g:1},
+  {t:'출처불명 USB 바로 사용',g:0},
+  {t:'화면 자동 잠금 설정',g:1},
+  {t:'업무파일 개인메일 전송',g:0},
+  {t:'SW 최신 업데이트',g:1},
+  {t:'공용PC 자동로그인',g:0},
+  {t:'의심링크 보안팀 신고',g:1},
+  {t:'비밀번호 포스트잇 기록',g:0}
+];
 var sortPlaced=0;
-function startSort(n){G.mg=true;sortPlaced=0;show('SO');$g('SFB').style.display='none';$g('SON').classList.remove('on');var pi=$g('SPI');pi.innerHTML='';$g('SGD').innerHTML='';$g('SBD').innerHTML='';SD.forEach(function(item){var d=document.createElement('div');d.className='si';d.textContent=item.t;d.onclick=function(){if(d.style.pointerEvents==='none')return;var ex=$g('SCH');if(ex)ex.remove();var ch=document.createElement('div');ch.id='SCH';ch.style.cssText='display:flex;gap:8px;margin:5px 0;';function mk(lbl,bg,bd,g){var b=document.createElement('button');b.textContent=lbl;b.style.cssText='flex:1;padding:7px;background:'+bg+';border:2px solid '+bd+';border-radius:7px;cursor:pointer;font-weight:700;color:#1a2a38;font-size:11px;font-family:Courier New,monospace;';b.onclick=function(){ch.remove();d.style.pointerEvents='none';var ok=!!g===!!item.g;if(ok)G.sc+=60;updateHUD();var nd=document.createElement('div');nd.className='si';nd.style.cssText='background:'+(ok?'#e8f5e9':'#ffebee')+';border-color:'+(ok?'#66bb6a':'#ef9a9a')+';cursor:default;color:#1a2a38;';nd.textContent=(ok?'O ':'X ')+item.t+(ok?'':' (→'+(item.g?'안전':'위험')+')');$g(g?'SGD':'SBD').appendChild(nd);sortPlaced++;if(sortPlaced>=SD.length){$g('SFB').textContent='분류 완료!';$g('SFB').style.display='block';$g('SON').classList.add('on');}};return b;}ch.appendChild(mk('안전','#e8f5e9','#66bb6a',1));ch.appendChild(mk('위험','#ffebee','#ef9a9a',0));d.after(ch);};pi.appendChild(d);});}
-var PW=[{hint:'길이 8자, 숫자만\n예: "12345678"',ans:1,opts:['강함','약함','보통'],exp:'숫자만 사용한 단순 패턴은 매우 약합니다!'},{hint:'15자, 대소문자+숫자+특수문자\n예: "Tr0ub4dor&3!"',ans:0,opts:['강함','약함','보통'],exp:'길이가 길고 다양한 문자 사용 — 매우 강한 패스워드!'},{hint:'실명+생일 조합\n예: "kim1990"',ans:1,opts:['강함','약함','보통'],exp:'개인정보 기반 패스워드는 추측하기 쉬워 위험합니다!'}];
-var pwI=0;
-function startPW(n){G.mg=true;pwI=0;$g('MGT').textContent='패스워드 강도 평가';$g('MGS').textContent='패스워드의 강도를 올바르게 평가하세요!';show('MG');renderPW();}
-function renderPW(){if(pwI>=PW.length){$g('MGN').classList.add('on');return;}var p=PW[pwI];$g('MGB').innerHTML='<div style="background:#f8fbff;border:1.5px solid #90caf9;border-radius:9px;padding:12px;margin-bottom:9px;color:#1a2a38;"><div style="font-size:10px;color:#546e7a;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">패스워드 분석 '+(pwI+1)+'/'+PW.length+'</div><div style="background:#fff;border:1.5px solid #e0e0e0;border-radius:8px;padding:9px;margin-bottom:10px;font-size:11px;white-space:pre-wrap;line-height:1.6;color:#1a2a38;">'+p.hint+'</div><div style="display:flex;gap:8px;">'+p.opts.map(function(o,i){return'<button id="PW'+i+'" style="flex:1;padding:9px 4px;background:#f0f8ff;border:2px solid #90caf9;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;color:#1a2a38;font-family:Courier New,monospace;">'+o+'</button>';}).join('')+'</div></div>';p.opts.forEach(function(_,i){$g('PW'+i).onclick=function(){var ok=i===p.ans;if(ok)G.sc+=120;updateHUD();$g('MGB').innerHTML+='<div style="padding:9px 12px;border-radius:8px;margin-bottom:8px;font-size:11px;color:#1a2a38;background:'+(ok?'#e8f5e9':'#ffebee')+';border:1.5px solid '+(ok?'#66bb6a':'#ef9a9a')+';">'+(ok?'정답! +120점':'오답')+' — '+p.exp+'</div>';pwI++;setTimeout(renderPW,1400);};});}
-var SC=[{sit:'직원 PC에서 CPU 90%+,\n알 수 없는 외부 서버로 데이터 전송이 감지됩니다.',q:'악성코드 감염 의심 시 가장 먼저 할 행동은?',op:['PC 즉시 재부팅','인터넷 연결 즉시 차단 후 보안팀 신고','새 백신 설치','USB 백업 후 포맷'],ans:1,fb:'네트워크를 즉시 차단해 피해 확산을 막는 것이 최우선!\n재부팅하면 메모리의 악성코드 증거가 소실됩니다.'},{sit:'랜섬웨어로 핵심 업무 파일이\n모두 암호화되었습니다.',q:'랜섬웨어 피해 예방을 위한 가장 효과적인 방법은?',op:['해커에게 몸값 즉시 지불','정기 오프라인 백업 + 네트워크 분리 유지','고가 백신 소프트웨어 구매','클라우드에만 모든 파일 저장'],ans:1,fb:'오프라인 백업이 핵심입니다!\n몸값을 지불해도 복호화를 보장받지 못합니다.'}];
-var scI=0;
-function startScen(n){G.mg=true;scI=0;$g('MGT').textContent='보안 사고 시나리오';$g('MGS').textContent='실제 상황에서 올바른 대응을 선택하세요!';show('MG');renderScen();}
-function renderScen(){var s=SC[scI];$g('MGB').innerHTML='<div style="background:#f8fbff;border:1.5px solid #90caf9;border-radius:9px;padding:12px;margin-bottom:9px;color:#1a2a38;"><div style="background:#fff3e0;border-left:3px solid #ff9800;border-radius:0 8px 8px 0;padding:9px;margin-bottom:10px;font-size:11px;line-height:1.6;white-space:pre-wrap;color:#1a2a38;">'+s.sit+'</div><div style="font-size:12px;font-weight:700;margin-bottom:9px;color:#1a2a38;">'+s.q+'</div><div style="display:flex;flex-direction:column;gap:6px;">'+s.op.map(function(o,i){return'<button id="SC'+i+'" class="qo">'+(i+1)+'. '+o+'</button>';}).join('')+'</div></div>';s.op.forEach(function(_,i){$g('SC'+i).onclick=function(){var ok=i===s.ans;if(ok)G.sc+=150;updateHUD();$g('MGB').innerHTML+='<div style="padding:9px 12px;border-radius:8px;margin-bottom:8px;font-size:11px;color:#1a2a38;background:'+(ok?'#e8f5e9':'#ffebee')+';border:1.5px solid '+(ok?'#66bb6a':'#ef9a9a')+';white-space:pre-wrap;">'+(ok?'정답! +150점':'오답')+'\n\n힌트: '+s.fb+'</div>';var nx=$g('MGN');if(scI<SC.length-1){nx.textContent='다음 시나리오 ▶';nx.classList.add('on');nx.onclick=function(){scI++;renderScen();nx.classList.remove('on');nx.textContent='완료 ▶';nx.setAttribute('onclick','mgDone()');};}else{nx.textContent='완료 ▶';nx.classList.add('on');nx.setAttribute('onclick','mgDone()');}};}); }
-function showEnding(){try{const u=JSON.parse(sessionStorage.getItem('user')||'{}');if(u.email)sb.from('game_scores').insert({user_email:u.email,game_type:'cyberguard',score:G.sc});}catch(e){}$g('EN1').textContent=G.sc;$g('EN2').textContent=G.lv;$g('EN3').textContent=G.bg.length;var ico,t,s;if(G.sc>=3000){ico='A+';t='사이버 보안 전문가!';s='완벽합니다! 모든 위협을 막아냈어요.';}else if(G.sc>=1800){ico='B+';t='훌륭한 보안 수호자!';s='대부분의 위협을 잘 막아냈습니다!';}else{ico='C';t='보안 교육이 더 필요해요';s='다시 도전해서 높은 점수를 달성해보세요!';}$g('EIC').textContent=ico;$g('ETI').textContent=t;$g('ESI').textContent=s+'\n\n획득 뱃지: '+G.bg.join(' ');show('ED');}
-document.addEventListener('keydown',function(e){K[e.key]=true;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.key===' '){if(G.dlg)closeDlg();else if(running&&!G.qz&&!G.mg&&!G.tr)tryAct();}});
-document.addEventListener('keyup',function(e){K[e.key]=false;});
-$g('GL').onclick=function(){if(!G.dlg&&!G.qz&&!G.mg&&!G.tr)tryAct();};
-function dpad(id,key){var el=$g(id);el.addEventListener('pointerdown',function(){DP[key]=1;});el.addEventListener('pointerup',function(){DP[key]=0;});el.addEventListener('pointerleave',function(){DP[key]=0;});}
-dpad('DL','l');dpad('DR','r');dpad('DU','j');
-$g('DA').addEventListener('pointerdown',function(){if(!G.dlg&&!G.qz&&!G.mg&&!G.tr)tryAct();else if(G.dlg)closeDlg();});
-function drawBG(ts){BX.clearRect(0,0,CW,CH);var wd=W[G.wid];if(wd.th==='out'){var sg=BX.createLinearGradient(0,0,0,GY);sg.addColorStop(0,'#42a5f5');sg.addColorStop(0.4,'#90caf9');sg.addColorStop(1,'#c5e1f9');BX.fillStyle=sg;BX.fillRect(0,0,CW,GY);var mO=-G.cam*0.15;BX.fillStyle='rgba(140,180,230,0.35)';for(var i=0;i<5;i++){var mx=i*220+mO+50;BX.beginPath();BX.moveTo(mx-80,GY-20);BX.lineTo(mx,GY-110);BX.lineTo(mx+80,GY-20);BX.closePath();BX.fill();}BX.fillStyle='rgba(255,235,59,0.15)';BX.beginPath();BX.arc(580,52,70,0,Math.PI*2);BX.fill();BX.fillStyle='#ffee58';BX.beginPath();BX.arc(580,52,24,0,Math.PI*2);BX.fill();(wd.clouds||[]).forEach(function(c,i){drawCloud(BX,(c.x+CO[G.wid][i]+CW*4)%(CW+320)-80,c.y);});(wd.blds||[]).forEach(function(b){drawBuilding(BX,b,b.x-G.cam*0.5);});wd.deco&&wd.deco.forEach(function(d){var dx=d.x-G.cam*0.88;if(dx>-180&&dx<CW+180)drawDeco(BX,d.t,dx);});BX.fillStyle='#6ab040';BX.fillRect(0,GY-4,CW,8);BX.fillStyle='#8bc34a';BX.fillRect(0,GY+4,CW,CH-GY-4);var gO=((-G.cam*0.88)%40+40)%40;BX.strokeStyle='#558b2f';BX.lineWidth=1.5;for(var i=-1;i<CW/40+2;i++){var gx=i*40+gO;BX.beginPath();BX.moveTo(gx,GY-4);BX.lineTo(gx+3,GY-10);BX.lineTo(gx+6,GY-4);BX.stroke();}BX.fillStyle='#b0bec5';BX.fillRect(0,GY+12,CW,CH-GY-12);var rO=((-G.cam*0.9)%80+80)%80;BX.fillStyle='rgba(255,255,255,0.45)';for(var i=-1;i<CW/80+2;i++)BX.fillRect(i*80+rO,GY+12,46,4);}else if(wd.th==='in'){BX.fillStyle='#fafafa';BX.fillRect(0,0,CW,CH);BX.fillStyle='#e0e0e0';BX.fillRect(0,0,CW,50);BX.fillStyle='#d0d0d0';BX.fillRect(0,46,CW,6);var lO=((-G.cam*0.04)%120+120)%120;for(var i=-1;i<CW/120+2;i++){var lx=i*120+lO+60;BX.fillStyle='rgba(255,245,200,0.9)';BX.fillRect(lx-18,28,36,10);}wd.deco&&wd.deco.forEach(function(d){var dx=d.x-G.cam*0.88;if(dx>-180&&dx<CW+180)drawDeco(BX,d.t,dx);});BX.fillStyle='#bcaaa4';BX.fillRect(0,GY,CW,CH-GY);BX.fillStyle='#a1887f';BX.fillRect(0,GY,CW,4);var tO=((-G.cam*0.9)%80+80)%80;BX.strokeStyle='rgba(150,130,110,0.25)';BX.lineWidth=0.5;for(var i=-1;i<CW/80+2;i++){BX.beginPath();BX.moveTo(i*80+tO,GY);BX.lineTo(i*80+tO,CH);BX.stroke();}}else{var sg2=BX.createLinearGradient(0,0,0,CH);sg2.addColorStop(0,'#0a1628');sg2.addColorStop(1,'#081020');BX.fillStyle=sg2;BX.fillRect(0,0,CW,CH);BX.fillStyle='rgba(30,60,90,0.6)';BX.fillRect(0,32,CW,18);BX.fillStyle='rgba(15,35,60,0.6)';BX.fillRect(0,50,CW,GY-50);wd.deco&&wd.deco.forEach(function(d){var dx=d.x-G.cam*0.88;if(dx>-180&&dx<CW+180)drawDeco(BX,d.t,dx);});BX.fillStyle='#0d1a2a';BX.fillRect(0,GY,CW,CH-GY);var fO=((-G.cam*0.9)%60+60)%60;BX.strokeStyle='rgba(0,100,180,0.18)';BX.lineWidth=1;for(var i=-1;i<CW/60+2;i++){BX.beginPath();BX.moveTo(i*60+fO,GY);BX.lineTo(i*60+fO,CH);BX.stroke();}}}
-function drawCloud(cx,dx,dy){cx.save();cx.globalAlpha=0.85;cx.fillStyle='rgba(255,255,255,0.95)';cx.beginPath();cx.arc(dx+20,dy+4,19,0,Math.PI*2);cx.fill();cx.beginPath();cx.arc(dx+40,dy-4,23,0,Math.PI*2);cx.fill();cx.beginPath();cx.arc(dx+62,dy+3,16,0,Math.PI*2);cx.fill();cx.beginPath();cx.arc(dx+2,dy+5,13,0,Math.PI*2);cx.fill();cx.restore();}
-function drawBuilding(cx,b,bx){if(bx>CW+40||bx+b.w<-40)return;var y=b.y,w=b.w,h=b.h,cl=b.cl,rl=b.rl,dl=b.dl,wc=b.wc||2,wr=b.wr||2,lb2=b.lb2;cx.fillStyle='rgba(0,0,0,0.07)';cx.fillRect(bx+5,y+5,w,h);cx.fillStyle=cl;cx.fillRect(bx,y,w,h);cx.strokeStyle='rgba(0,0,0,0.08)';cx.lineWidth=1;cx.strokeRect(bx,y,w,h);if(rl){var rh=36+w*0.07;cx.fillStyle=rl;cx.beginPath();cx.moveTo(bx-8,y);cx.lineTo(bx+w/2,y-rh);cx.lineTo(bx+w+8,y);cx.closePath();cx.fill();if(b.ch){var c2=bx+w*0.72;cx.fillStyle='#8d6e63';cx.fillRect(c2,y-rh*0.52,11,rh*0.52+5);}}else if(lb2){cx.fillStyle='rgba(21,101,192,0.88)';cx.fillRect(bx+8,y-28,w-16,20);cx.fillStyle='#fff';cx.font='bold 8px Courier New';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(lb2,bx+w/2,y-18);}var cs=w/(wc+1),rs=(h-(rl?38:34))/(wr+1);for(var r=0;r<wr;r++)for(var c=0;c<wc;c++){var wx=bx+cs*(c+1)-12,wy=y+rs*(r+1)+(rl?10:8);cx.fillStyle='#546e7a';cx.fillRect(wx-2,wy-2,28,24);cx.fillStyle='#81d4fa';cx.fillRect(wx,wy,24,20);}cx.fillStyle=dl;cx.fillRect(bx+w/2-9,y+h-35,20,35);cx.fillStyle='#ffd54f';cx.beginPath();cx.arc(bx+w/2+7,y+h-17,3,0,Math.PI*2);cx.fill();}
-function drawPortal(p,ts){var px=p.x-G.cam;if(px>CW+60||px+p.w<-60)return;var pulse=Math.sin(ts/500)*0.15+0.85;FX.fillStyle='rgba(0,0,0,0.14)';FX.fillRect(px+4,p.y+4,p.w,p.h);FX.fillStyle=p.cl;FX.fillRect(px,p.y,p.w,p.h);FX.strokeStyle='rgba(0,0,0,0.2)';FX.lineWidth=2;FX.strokeRect(px,p.y,p.w,p.h);FX.globalAlpha=pulse;FX.fillStyle='#fff';FX.font='bold 16px Courier New';FX.textAlign='center';FX.textBaseline='middle';FX.fillText(p.lb.startsWith('←')?'<':'>',px+p.w/2,p.y+p.h/2);FX.globalAlpha=1;FX.font='bold 8px Courier New';FX.fillStyle='rgba(255,255,255,0.9)';FX.textAlign='center';FX.fillText(p.lb,px+p.w/2,p.y-8);}
-function drawNPC(n,ts){var nx=n.x-G.cam,ny=n.y;if(nx<-80||nx>CW+80)return;var done=G.dn[n.mid],bob=Math.sin(ts/400)*1.5;FX.save();FX.translate(nx,ny+bob);drawBody(FX,n.tp,done);FX.restore();var lb=n.lb+(done?' [완료]':'');FX.font='bold 9px Courier New';var tw=FX.measureText(lb).width;FX.fillStyle='rgba(255,255,255,0.95)';FX.fillRect(nx-tw/2-7,ny-69,tw+14,16);FX.strokeStyle='#90caf9';FX.lineWidth=1;FX.strokeRect(nx-tw/2-7,ny-69,tw+14,16);FX.fillStyle='#1a2a38';FX.textAlign='center';FX.textBaseline='middle';FX.fillText(lb,nx,ny-61);if(!done&&Math.abs(n.x-G.px)<55){var hw=FX.measureText('Space').width;FX.fillStyle='rgba(255,255,255,0.95)';FX.fillRect(nx-hw/2-10,ny-90,hw+20,16);FX.fillStyle='#1a2a38';FX.textAlign='center';FX.textBaseline='middle';FX.fillText('Space',nx,ny-82);}}
-function drawBody(cx,tp,done){cx.fillStyle='rgba(0,0,0,0.09)';cx.beginPath();cx.ellipse(0,2,14,4,0,0,Math.PI*2);cx.fill();var lc={mom:'#5d4037',str:'#37474f',rec:'#1565c0',sec:'#2e7d32',boss:'#263238',sys:'#1b5e20'}[tp]||'#37474f';cx.fillStyle=lc;cx.fillRect(-8,-28,7,28);cx.fillRect(2,-28,7,28);cx.fillStyle='#212121';cx.fillRect(-10,-2,10,5);cx.fillRect(1,-2,10,5);var bc={mom:'#ef9a9a',str:'#4a148c',rec:'#1565c0',sec:'#2e7d32',boss:'#1a237e',sys:'#1b5e20'}[tp]||'#1565c0';cx.fillStyle=bc;cx.beginPath();cx.moveTo(-13,-28);cx.lineTo(-15,-62);cx.lineTo(15,-62);cx.lineTo(13,-28);cx.closePath();cx.fill();cx.fillStyle=bc;cx.fillRect(-19,-60,7,22);cx.fillRect(12,-60,7,22);cx.fillStyle='#ffccbc';cx.beginPath();cx.arc(-16,-40,5,0,Math.PI*2);cx.fill();cx.beginPath();cx.arc(16,-40,5,0,Math.PI*2);cx.fill();if(tp==='mom'){cx.fillStyle='#fff9c4';cx.beginPath();cx.moveTo(-7,-55);cx.lineTo(-9,-28);cx.lineTo(9,-28);cx.lineTo(7,-55);cx.closePath();cx.fill();}if(tp==='sec'){cx.fillStyle='rgba(255,235,59,0.75)';cx.fillRect(-12,-60,24,18);cx.fillStyle='rgba(0,0,0,0.7)';cx.fillRect(-9,-54,18,8);cx.fillStyle='#ffe082';cx.font='5px Courier New';cx.textAlign='center';cx.fillText('SECURITY',0,-48);}if(tp==='rec'||tp==='boss'){cx.fillStyle='#fff';cx.beginPath();cx.moveTo(-4,-62);cx.lineTo(-3,-50);cx.lineTo(0,-47);cx.lineTo(3,-50);cx.lineTo(4,-62);cx.closePath();cx.fill();}if(tp==='sys'){cx.fillStyle='#37474f';cx.fillRect(10,-44,20,14);cx.fillStyle='#212121';cx.fillRect(11,-43,18,10);cx.fillStyle='#00e5ff';cx.fillRect(12,-42,3,2);}cx.fillStyle='#ffccbc';cx.fillRect(-5,-68,10,8);cx.fillStyle='#ffccbc';cx.beginPath();cx.ellipse(0,-79,15,17,0,0,Math.PI*2);cx.fill();var hc={mom:'#5d4037',str:'#4a148c',rec:'#4e342e',sec:'#1b5e20',boss:'#1a237e',sys:'#1b5e20'}[tp]||'#37474f';cx.fillStyle=hc;cx.beginPath();cx.arc(0,-92,13,Math.PI,0);cx.fill();cx.fillRect(-13,-92,26,7);if(tp==='str'){cx.beginPath();cx.moveTo(-16,-87);cx.lineTo(-18,-62);cx.lineTo(-13,-62);cx.lineTo(-12,-87);cx.closePath();cx.fill();cx.beginPath();cx.moveTo(16,-87);cx.lineTo(18,-62);cx.lineTo(13,-62);cx.lineTo(12,-87);cx.closePath();cx.fill();}cx.fillStyle='#1a2a38';cx.beginPath();cx.arc(-5,-79,2.2,0,Math.PI*2);cx.fill();cx.beginPath();cx.arc(5,-79,2.2,0,Math.PI*2);cx.fill();cx.strokeStyle=tp==='str'?'#5d4037':'#c62828';cx.lineWidth=1.4;cx.beginPath();tp==='str'?cx.arc(0,-73,4,0.4,Math.PI-0.4,true):cx.arc(0,-74,5,0.15,Math.PI-0.15);cx.stroke();if(tp==='boss'||tp==='sys'){cx.strokeStyle='#546e7a';cx.lineWidth=1.5;cx.strokeRect(-9,-82,8,5);cx.strokeRect(1,-82,8,5);}if(done){cx.fillStyle='#1a2a38';cx.font='bold 10px Courier New';cx.textAlign='center';cx.fillText('[OK]',0,-108);}}
-function drawPlayer(){var px=G.px-G.cam,py=G.py,bob=G.gr?Math.sin(G.at*0.3)*1.5:0,mv=K.ArrowLeft||K.ArrowRight||K.a||K.d||DP.l||DP.r,ls=G.gr&&mv?Math.sin(G.at*0.5)*10:0;FX.save();FX.translate(px,py+bob);if(!G.fr)FX.scale(-1,1);FX.fillStyle='rgba(0,0,0,0.1)';FX.beginPath();FX.ellipse(0,2,16,5,0,0,Math.PI*2);FX.fill();FX.save();FX.translate(-6,-18);FX.rotate(ls*Math.PI/180);FX.fillStyle='#37474f';FX.fillRect(-4,0,8,20);FX.restore();FX.save();FX.translate(6,-18);FX.rotate(-ls*Math.PI/180);FX.fillStyle='#37474f';FX.fillRect(-4,0,8,20);FX.restore();FX.fillStyle='#212121';FX.fillRect(-12,0,13,5);FX.fillRect(1,0,12,5);FX.fillStyle='#1565c0';FX.beginPath();FX.moveTo(-13,-18);FX.lineTo(-15,-60);FX.lineTo(15,-60);FX.lineTo(13,-18);FX.closePath();FX.fill();FX.fillStyle='#ffe082';FX.fillRect(-9,-52,18,8);FX.fillStyle='#1a2a38';FX.font='bold 5px Courier New';FX.textAlign='center';FX.fillText('GUARD',0,-46);var as=mv?Math.sin(G.at*0.5)*15:0;[[-13,1],[13,-1]].forEach(function(a){FX.save();FX.translate(a[0],-50);FX.rotate(as*a[1]*Math.PI/180);FX.fillStyle='#1565c0';FX.fillRect(-4,0,8,20);FX.fillStyle='#ffccbc';FX.beginPath();FX.arc(0,22,5,0,Math.PI*2);FX.fill();FX.restore();});FX.fillStyle='#ffccbc';FX.fillRect(-5,-67,10,9);FX.fillStyle='#ffe0b2';FX.beginPath();FX.ellipse(0,-77,15,17,0,0,Math.PI*2);FX.fill();FX.fillStyle='#4e342e';FX.beginPath();FX.arc(0,-91,12,Math.PI*1.1,-0.1);FX.fill();FX.fillRect(-4,-91,12,5);FX.fillStyle='#1a2a38';FX.beginPath();FX.arc(-4,-78,2.2,0,Math.PI*2);FX.fill();FX.beginPath();FX.arc(5,-78,2.2,0,Math.PI*2);FX.fill();FX.strokeStyle='#37474f';FX.lineWidth=1.2;FX.beginPath();FX.arc(1,-72,4,0.15,Math.PI-0.15);FX.stroke();FX.restore();}
-function drawDeco(cx,type,dx){var dy=GY;cx.save();switch(type){case 'tree':cx.fillStyle='#8d6e63';cx.fillRect(dx+16,dy-22,8,22);cx.fillStyle='#388e3c';cx.beginPath();cx.arc(dx+20,dy-56,25,0,Math.PI*2);cx.fill();cx.fillStyle='#43a047';cx.beginPath();cx.arc(dx+20,dy-65,18,0,Math.PI*2);cx.fill();cx.fillStyle='#66bb6a';cx.beginPath();cx.arc(dx+20,dy-72,12,0,Math.PI*2);cx.fill();break;case 'lamp':cx.fillStyle='#9e9e9e';cx.fillRect(dx+10,dy-88,5,88);cx.fillRect(dx+10,dy-87,18,4);cx.fillStyle='#616161';cx.fillRect(dx+22,dy-93,10,8);cx.fillStyle='#ffe082';cx.fillRect(dx+24,dy-91,6,5);break;case 'car_y':case 'car_b':case 'car_r':{var cc=type==='car_y'?'#fdd835':type==='car_b'?'#1565c0':'#c62828';cx.fillStyle=cc;cx.fillRect(dx,dy-22,64,22);cx.beginPath();cx.moveTo(dx+12,dy-22);cx.lineTo(dx+16,dy-38);cx.lineTo(dx+48,dy-38);cx.lineTo(dx+52,dy-22);cx.closePath();cx.fill();cx.fillStyle='#80deea';cx.fillRect(dx+17,dy-36,13,13);cx.fillRect(dx+33,dy-36,13,13);cx.fillStyle='#212121';cx.beginPath();cx.arc(dx+14,dy+2,8,0,Math.PI*2);cx.fill();cx.beginPath();cx.arc(dx+50,dy+2,8,0,Math.PI*2);cx.fill();cx.fillStyle='#757575';cx.beginPath();cx.arc(dx+14,dy+2,5,0,Math.PI*2);cx.fill();cx.beginPath();cx.arc(dx+50,dy+2,5,0,Math.PI*2);cx.fill();break;}case 'desk':cx.fillStyle='#795548';cx.fillRect(dx,dy-44,88,44);cx.fillStyle='#6d4c41';cx.fillRect(dx+8,dy-30,35,18);cx.fillRect(dx+46,dy-30,35,18);cx.fillStyle='#37474f';cx.fillRect(dx+28,dy-78,32,30);cx.fillStyle='#212121';cx.fillRect(dx+30,dy-76,28,26);cx.fillStyle='#1976d2';cx.fillRect(dx+31,dy-75,26,6);break;case 'rack':{cx.fillStyle='#1a2a3a';cx.fillRect(dx,dy-138,48,140);cx.strokeStyle='rgba(0,150,255,0.28)';cx.lineWidth=1.5;cx.strokeRect(dx,dy-138,48,140);var t=Date.now();for(var u=0;u<8;u++){cx.fillStyle='#162436';cx.fillRect(dx+2,dy-126+u*16,44,12);[0,1,2].forEach(function(l){var on=Math.sin(t/400+u*2+l*3)>0;cx.fillStyle=on?['#00e5ff','#69f0ae','#ffd740'][l]:'rgba(100,120,140,0.25)';cx.beginPath();cx.arc(dx+26+l*6,dy-120+u*16,2.5,0,Math.PI*2);cx.fill();});}break;}case 'monw':{cx.fillStyle='#1a2a3a';cx.fillRect(dx,dy-126,92,88);cx.strokeStyle='rgba(0,150,255,0.35)';cx.lineWidth=1.5;cx.strokeRect(dx,dy-126,92,88);var t2=Date.now();[[dx+3,dy-123,42,40],[dx+49,dy-123,40,40],[dx+3,dy-79,42,40],[dx+49,dy-79,40,40]].forEach(function(a,i){cx.fillStyle='#0d1520';cx.fillRect(a[0],a[1],a[2],a[3]);cx.fillStyle=['#1565c0','#0d47a1','#1b5e20','#4a148c'][i];cx.fillRect(a[0]+1,a[1]+1,a[2]-2,7);cx.strokeStyle='rgba(0,200,255,0.25)';cx.lineWidth=0.5;for(var r=0;r<4;r++){cx.beginPath();cx.moveTo(a[0]+2,a[1]+12+r*7);cx.lineTo(a[0]+2+(a[2]-4)*(Math.sin(t2/1000+i+r)*0.5+0.5),a[1]+12+r*7);cx.stroke();}});break;}case 'recep':cx.fillStyle='#1565c0';cx.fillRect(dx,dy-62,180,62);cx.fillStyle='rgba(255,255,255,0.88)';cx.font='bold 12px Courier New';cx.textAlign='center';cx.fillText('CYBERGUARD CORP',dx+90,dy-40);cx.fillStyle='rgba(255,255,255,0.55)';cx.font='8px Courier New';cx.fillText('SECURITY SOLUTIONS',dx+90,dy-26);break;case 'sofa':cx.fillStyle='#5d4037';cx.fillRect(dx,dy-14,90,14);cx.fillStyle='#8d6e63';cx.fillRect(dx+2,dy-34,86,22);cx.fillStyle='#6d4c41';cx.fillRect(dx,dy-62,90,30);cx.fillStyle='#6d4c41';cx.fillRect(dx-6,dy-46,10,50);cx.fillRect(dx+86,dy-46,10,50);break;case 'plant':{cx.fillStyle='#4e342e';cx.beginPath();cx.moveTo(dx+8,dy-40);cx.lineTo(dx+4,dy);cx.lineTo(dx+44,dy);cx.lineTo(dx+40,dy-40);cx.closePath();cx.fill();cx.strokeStyle='#6d4c41';cx.lineWidth=5;cx.beginPath();cx.moveTo(dx+24,dy-40);cx.lineTo(dx+22,dy-100);cx.stroke();[[-28,-108,0],[28,-113,-28],[0,-118,14]].forEach(function(a){cx.save();cx.translate(dx+22+a[0],dy+a[1]);cx.rotate(a[2]*Math.PI/180);cx.fillStyle='#388e3c';cx.beginPath();cx.moveTo(0,0);cx.bezierCurveTo(10,-20,30,-24,38,-19);cx.bezierCurveTo(28,-14,9,-9,0,0);cx.fill();cx.restore();});break;}case 'cctv':cx.fillStyle='#37474f';cx.fillRect(dx,dy-190,26,16);cx.fillStyle='rgba(0,150,255,0.5)';cx.beginPath();cx.arc(dx+8,dy-182,3,0,Math.PI*2);cx.fill();var tc=Date.now();cx.fillStyle=tc%1500<750?'#ff5252':'rgba(255,82,82,0.25)';cx.beginPath();cx.arc(dx+22,dy-186,2.5,0,Math.PI*2);cx.fill();break;case 'ups':cx.fillStyle='#1a2a3a';cx.fillRect(dx,dy-88,58,88);cx.fillStyle='#001a0d';cx.fillRect(dx+6,dy-80,46,22);cx.fillStyle='#00ff00';cx.font='bold 7px Courier New';cx.textAlign='center';cx.fillText('UPS ONLINE',dx+29,dy-72);cx.fillStyle='#69f0ae';cx.beginPath();cx.arc(dx+29,dy-24,8,0,Math.PI*2);cx.fill();break;}cx.restore();}
-(function(){var TC=$g('TCV');if(!TC)return;var TX=TC.getContext('2d');var sg=TX.createLinearGradient(0,0,0,60);sg.addColorStop(0,'#42a5f5');sg.addColorStop(1,'#90caf9');TX.fillStyle=sg;TX.fillRect(0,0,260,60);TX.fillStyle='#7cb342';TX.fillRect(0,60,260,20);[[18,24,50,36,'#fde8d8','#d84315'],[78,27,44,33,'#e3f2fd','#1565c0'],[136,21,56,39,'#f1f8e9','#2e7d32'],[204,25,46,35,'#f3e5f5','#6a1b9a']].forEach(function(a){TX.fillStyle=a[4];TX.fillRect(a[0],a[1],a[2],a[3]);var rh=14+a[2]*0.07;TX.fillStyle=a[5];TX.beginPath();TX.moveTo(a[0]-4,a[1]);TX.lineTo(a[0]+a[2]/2,a[1]-rh);TX.lineTo(a[0]+a[2]+4,a[1]);TX.closePath();TX.fill();TX.fillStyle='#81d4fa';TX.fillRect(a[0]+6,a[1]+8,12,9);TX.fillRect(a[0]+a[2]-18,a[1]+8,12,9);});TX.fillStyle='#ffee58';TX.beginPath();TX.arc(245,16,11,0,Math.PI*2);TX.fill();})();
+function startSort(){
+  document.getElementById('missionTitle').textContent='🗂️ 보안 행동 분류';
+  document.getElementById('missionSub').textContent='안전한 행동과 위험한 행동을 분류하세요';
+  sortPlaced=0;
+  var html='<div id="sortPool" style="margin-bottom:10px;"><div style="font-size:9px;color:#546e7a;margin-bottom:5px;font-weight:700;">분류할 행동 목록</div>';
+  SORT_DATA.forEach(function(item,i){
+    html+='<div class="sort-item" id="si'+i+'" onclick="pickSort('+i+')">'+item.t+'</div>';
+  });
+  html+='</div><div class="sort-cols"><div class="sort-col gd"><div class="sort-ct">✅ 안전</div><div id="sortGood"></div></div><div class="sort-col bd"><div class="sort-ct">❌ 위험</div><div id="sortBad"></div></div></div>';
+  document.getElementById('missionBody').innerHTML=html;
+}
+var sortSelected=-1;
+function pickSort(i){
+  var d=document.getElementById('si'+i);
+  if(d.dataset.placed)return;
+  var existChoice=document.getElementById('sortChoice');
+  if(existChoice)existChoice.remove();
+  var ch=document.createElement('div');
+  ch.id='sortChoice';
+  ch.style.cssText='display:flex;gap:8px;margin:5px 0;';
+  ch.innerHTML='<button class="opt-btn" style="flex:1;background:#e8f5e9;border-color:#66bb6a;text-align:center;" onclick="placeSort('+i+',1)">✅ 안전</button><button class="opt-btn" style="flex:1;background:#ffebee;border-color:#ef9a9a;text-align:center;" onclick="placeSort('+i+',0)">❌ 위험</button>';
+  d.after(ch);
+}
+function placeSort(i, guess){
+  var item=SORT_DATA[i];
+  var d=document.getElementById('si'+i);
+  d.dataset.placed='1';
+  document.getElementById('sortChoice').remove();
+  var ok=guess===item.g;
+  if(ok) G.score+=60;
+  updateHUD();
+  d.style.background=ok?'#e8f5e9':'#ffebee';
+  d.style.borderColor=ok?'#66bb6a':'#ef9a9a';
+  d.style.cursor='default';
+  d.textContent=(ok?'✅ ':'❌ ')+item.t+(ok?'':' (→'+(item.g?'안전':'위험')+')');
+  document.getElementById(guess?'sortGood':'sortBad').appendChild(d);
+  sortPlaced++;
+  if(sortPlaced>=SORT_DATA.length){
+    document.getElementById('missionNext').style.display='block';
+  }
+}
+
+// ── PASSWORD ──
+var PW_DATA=[
+  {hint:'길이 8자, 숫자만\n예: "12345678"', ans:1, exp:'숫자만 사용한 단순 패턴 — 매우 약함!'},
+  {hint:'15자, 대소문자+숫자+특수문자\n예: "Tr0ub4dor&3!"', ans:0, exp:'길이가 길고 다양한 문자 — 매우 강함!'},
+  {hint:'실명+생일 조합\n예: "kim1990"', ans:1, exp:'개인정보 기반 — 추측 쉬워 위험!'}
+];
+var pwIdx=0;
+function startPW(){
+  document.getElementById('missionTitle').textContent='🔐 패스워드 강도 평가';
+  document.getElementById('missionSub').textContent='패스워드 강도를 올바르게 판단하세요';
+  pwIdx=0; renderPW();
+}
+function renderPW(){
+  if(pwIdx>=PW_DATA.length){
+    document.getElementById('missionBody').innerHTML='<div style="text-align:center;padding:20px;font-size:14px;font-weight:700;color:#1565c0;">평가 완료!</div>';
+    document.getElementById('missionNext').style.display='block';
+    return;
+  }
+  var p=PW_DATA[pwIdx];
+  var html='<div style="font-size:10px;color:#546e7a;margin-bottom:6px;">평가 '+(pwIdx+1)+'/'+PW_DATA.length+'</div>';
+  html+='<div class="p-scene" style="white-space:pre-wrap;">'+p.hint+'</div>';
+  html+='<div class="p-q">이 패스워드의 강도는?</div>';
+  html+='<div style="display:flex;gap:8px;">';
+  ['강함','약함','보통'].forEach(function(o,i){
+    html+='<button class="opt-btn" style="flex:1;text-align:center;" onclick="answerPW('+i+')">'+o+'</button>';
+  });
+  html+='</div><div id="pwFb" style="display:none;"></div>';
+  document.getElementById('missionBody').innerHTML=html;
+}
+function answerPW(i){
+  var p=PW_DATA[pwIdx];
+  var ok=i===p.ans;
+  if(ok) G.score+=120;
+  updateHUD();
+  var fb=document.getElementById('pwFb');
+  fb.className='p-fb';
+  fb.style.display='block';
+  fb.textContent=(ok?'✅ 정답! +120점':'❌ 오답')+' — '+p.exp;
+  setTimeout(function(){pwIdx++; renderPW();}, 1800);
+}
+
+// ── SCENARIO ──
+var SCEN_DATA=[
+  {sit:'직원 PC CPU 90%+,\n알 수 없는 외부 서버로 데이터 전송 감지!',
+   q:'악성코드 감염 의심 시 가장 먼저?',
+   op:['PC 즉시 재부팅','인터넷 차단 후 보안팀 신고','새 백신 설치','USB 백업 후 포맷'],
+   ans:1, fb:'네트워크 차단이 최우선!\n재부팅하면 증거 소실됩니다.'},
+  {sit:'랜섬웨어로 핵심 파일이\n모두 암호화되었습니다.',
+   q:'랜섬웨어 예방의 최고 방법은?',
+   op:['몸값 즉시 지불','정기 오프라인 백업 + 망분리','고가 백신 구매','클라우드에만 저장'],
+   ans:1, fb:'오프라인 백업이 핵심!\n몸값 지불해도 복호화 보장 안 됨.'}
+];
+var scenIdx=0;
+function startScen(){
+  document.getElementById('missionTitle').textContent='🎭 보안 사고 시나리오';
+  document.getElementById('missionSub').textContent='실제 상황에서 올바른 대응을 선택하세요';
+  scenIdx=0; renderScen();
+}
+function renderScen(){
+  var s=SCEN_DATA[scenIdx];
+  var html='<div style="font-size:10px;color:#546e7a;margin-bottom:6px;">시나리오 '+(scenIdx+1)+'/'+SCEN_DATA.length+'</div>';
+  html+='<div style="background:#fff3e0;border-left:3px solid #ff9800;border-radius:0 8px 8px 0;padding:9px;margin-bottom:10px;font-size:11px;line-height:1.6;white-space:pre-wrap;">'+s.sit+'</div>';
+  html+='<div class="p-q">'+s.q+'</div>';
+  html+='<div class="p-opt">';
+  s.op.forEach(function(o,i){
+    html+='<button class="opt-btn" onclick="answerScen('+i+')">'+(i+1)+'. '+o+'</button>';
+  });
+  html+='</div><div id="scFb" style="display:none;"></div>';
+  document.getElementById('missionBody').innerHTML=html;
+}
+function answerScen(i){
+  var s=SCEN_DATA[scenIdx];
+  var ok=i===s.ans;
+  if(ok) G.score+=150;
+  updateHUD();
+  var btns=document.querySelectorAll('#missionBody .opt-btn');
+  btns.forEach(function(b){b.onclick=null;});
+  btns[i].classList.add(ok?'ok':'ng');
+  if(!ok) btns[s.ans].classList.add('ok');
+  var fb=document.getElementById('scFb');
+  fb.className='p-fb';
+  fb.style.display='block';
+  fb.style.whiteSpace='pre-wrap';
+  fb.textContent=(ok?'✅ 정답! +150점\n':'❌ 오답\n')+'💡 '+s.fb;
+  setTimeout(function(){
+    scenIdx++;
+    if(scenIdx<SCEN_DATA.length) renderScen();
+    else document.getElementById('missionNext').style.display='block';
+  }, 2200);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 엔딩 (Supabase 점수 저장 포함)
+// ──────────────────────────────────────────────────────────────────────────
+function showEnding(){
+  // Supabase에 게임 점수 저장
+  try {
+    var u=JSON.parse(sessionStorage.getItem('user')||'{}');
+    if(u.email) sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:G.score});
+  } catch(e){}
+
+  showScr('ENDING');
+  running=false;
+  document.getElementById('endSc').textContent=G.score;
+  document.getElementById('endLv').textContent=G.level;
+  document.getElementById('endBg').textContent=G.badges.length;
+  var ico, t, s;
+  if(G.score>=2500){ico='🏆'; t='사이버 보안 전문가!'; s='완벽합니다! 모든 위협을 막아냈어요.';}
+  else if(G.score>=1500){ico='🥈'; t='훌륭한 보안 수호자!'; s='대부분의 위협을 잘 막아냈습니다!';}
+  else {ico='📚'; t='보안 교육이 더 필요해요'; s='다시 도전해서 더 높은 점수에 도전!';}
+  document.getElementById('endIco').textContent=ico;
+  document.getElementById('endTitle').textContent=t;
+  document.getElementById('endSub').textContent=s+'\n뱃지: '+G.badges.join(' ');
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// 입력 처리
+// ──────────────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e){
+  keys[e.key]=true;
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].indexOf(e.key)>=0) e.preventDefault();
+  if(e.key===' '){
+    if(G.inDialog) closeDialog();
+    else if(running && !G.inMission && !G.inTrans) tryInteract();
+  }
+});
+document.addEventListener('keyup', function(e){keys[e.key]=false;});
+
+canvas.addEventListener('click', function(){
+  if(!G.inDialog && !G.inMission && !G.inTrans) tryInteract();
+});
+
+function bindDpad(id, key){
+  var el=document.getElementById(id);
+  el.addEventListener('pointerdown', function(){dpad[key]=1;});
+  el.addEventListener('pointerup', function(){dpad[key]=0;});
+  el.addEventListener('pointerleave', function(){dpad[key]=0;});
+}
+bindDpad('dpL','l'); bindDpad('dpR','r'); bindDpad('dpU','j');
+document.getElementById('dpA').addEventListener('pointerdown', function(){
+  if(G.inDialog) closeDialog();
+  else if(running && !G.inMission && !G.inTrans) tryInteract();
+});
 </script>
 </body>
 </html>
