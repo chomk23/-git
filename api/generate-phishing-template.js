@@ -137,20 +137,24 @@ ${description
     const raw = aiData?.content?.[0]?.text?.trim();
     if (!raw) throw new Error('AI 응답 없음');
 
-    const extract = (label, nextLabel) => {
-      const re = new RegExp(`===${label}===\\s*([\\s\\S]*?)\\s*===${nextLabel}===`);
+    // 섹션을 추출: ===LABEL=== 부터 다음 ===로 시작하는 줄 또는 문자열 끝까지
+    const extract = (label) => {
+      const re = new RegExp(`===\\s*${label}\\s*===\\s*([\\s\\S]*?)(?=\\n\\s*===|$)`, 'i');
       const m = raw.match(re);
       return m ? m[1].trim() : '';
     };
 
     const template = {
-      from:    extract('FROM', 'SUBJECT'),
-      subject: extract('SUBJECT', 'HTML'),
-      html:    extract('HTML', 'TEXT'),
-      text:    extract('TEXT', 'END'),
+      from:    extract('FROM'),
+      subject: extract('SUBJECT'),
+      html:    extract('HTML'),
+      text:    extract('TEXT'),
     };
 
-    if (!template.html) throw new Error('AI 응답 형식 오류');
+    if (!template.html) {
+      console.error('AI raw response:', raw);
+      throw new Error('AI 응답 형식 오류');
+    }
     return res.status(200).json({ success: true, template });
   } catch (err) {
     console.error('generate-phishing-template error:', err);
