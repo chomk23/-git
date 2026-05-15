@@ -111,17 +111,32 @@
     location.href = 'login.html';
   }
 
-  const courses = [
-    { id:1, title:'CyberGuard Corp',  sub:'서버실까지 — 6가지 보안 미션 어드벤처', color:'#1565C0', link:'cyberguard.html',           status:'inprogress' },
-    { id:2, title:'피싱 탐정',         sub:'진짜 vs 가짜 이메일 판별 · 6라운드',     color:'#1E3A5F', link:'gamification.html#phishing', status:'inprogress' },
-    { id:3, title:'OX 번개퀴즈',       sub:'빠를수록 높은 점수 · 연속 보너스',       color:'#5B21B6', link:'gamification.html#ox',       status:'inprogress' },
-    { id:4, title:'비밀번호 요새',      sub:'강한 비밀번호 만들기 · 3단계 미션',      color:'#064E3B', link:'gamification.html#password',  status:'inprogress' },
-    { id:5, title:'보안 예산 작전',     sub:'100P 예산으로 회사를 지켜라 · 전략형',   color:'#7C2D12', link:'gamification.html#budget',    status:'inprogress' },
-  ];
+  // 강의 목록은 Supabase에서 로드 (admin-courses.html에서 관리)
+  let courses = [];
+  let gameTypeNames = {};
+  let maxScores = {};
 
-  const gameTypeToId = { cyberguard:1, phishing:2, ox:3, password:4, budget:5 };
-  const gameTypeNames = { cyberguard:'CyberGuard Corp', phishing:'피싱 탐정', ox:'OX 번개퀴즈', password:'비밀번호 요새', budget:'보안 예산 작전' };
-  const maxScores = { cyberguard:1200, phishing:300, ox:500, password:200, budget:400 };
+  async function loadCourses() {
+    const { data, error } = await sb.from('courses').select('*').eq('active', true).order('sort_order', { ascending: true });
+    if (error || !data) return;
+    courses = data.map(c => ({
+      id: c.id,
+      title: c.title,
+      sub: c.subtitle || '',
+      color: c.color || '#1A1A1A',
+      link: c.link,
+      gameType: c.game_type,
+      maxScore: c.max_score || 0,
+      status: 'inprogress',
+    }));
+    // 헬퍼 맵 빌드
+    courses.forEach(c => {
+      if (c.gameType) {
+        gameTypeNames[c.gameType] = c.title;
+        maxScores[c.gameType] = c.maxScore;
+      }
+    });
+  }
 
   let currentFilter = 'all';
   let examScores = [];
@@ -288,16 +303,13 @@
       if (scores && scores.length > 0) {
         examScores = scores;
         const completedTypes = new Set(scores.map(s => s.game_type));
-        Object.entries(gameTypeToId).forEach(([type, id]) => {
-          if (completedTypes.has(type)) {
-            const c = courses.find(c => c.id === id);
-            if (c) c.status = 'completed';
-          }
+        courses.forEach(c => {
+          if (c.gameType && completedTypes.has(c.gameType)) c.status = 'completed';
         });
         const best = {};
         scores.forEach(s => { if (!best[s.game_type] || s.score > best[s.game_type]) best[s.game_type] = s.score; });
         const total = Object.values(best).reduce((a, b) => a + b, 0);
-        const maxTotal = 2600;
+        const maxTotal = courses.reduce((sum, c) => sum + (c.maxScore || 0), 0) || 2600;
         document.getElementById('security-score').textContent = total.toLocaleString();
         document.getElementById('score-bar').style.width = Math.min(100, Math.round(total / maxTotal * 100)) + '%';
       } else {
@@ -315,9 +327,13 @@
     } catch(e) {}
   }
 
-  updateBadges();
-  renderCourses();
-  loadUserData();
+  // 부트스트랩: 강의 → 사용자 데이터 → 렌더 순서로
+  (async () => {
+    await loadCourses();
+    updateBadges();
+    renderCourses();
+    await loadUserData();
+  })();
 </script>
 </body>
 </html>

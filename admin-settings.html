@@ -99,6 +99,12 @@
           </svg>
           <span class="text-sm text-gray-500">수강생 관리</span>
         </a>
+        <a href="admin-courses.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+          <span class="text-sm text-gray-500">강의 관리</span>
+        </a>
         <a href="admin-phishing.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
           <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -131,56 +137,19 @@
         <div class="flex flex-col gap-3">
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">플랫폼 이름</label>
-            <input id="platform-name" type="text" class="input-field" value="보안 교육 플랫폼">
+            <input id="platform-name" type="text" class="input-field" placeholder="예: 보안 교육 플랫폼">
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">조직명</label>
-            <input id="org-name" type="text" class="input-field" value="(주)보안기업">
+            <input id="org-name" type="text" class="input-field" placeholder="예: (주)보안기업">
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">관리자 이메일</label>
             <input id="admin-email" type="email" class="input-field" placeholder="이메일" readonly style="background:#F5F3F0; color:#6B7280;">
           </div>
+          <div id="settings-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2;color:#DC2626;"></div>
           <div class="flex justify-end pt-1">
-            <button class="btn-sm btn-dark" onclick="saveSettings('기본 정보')">저장</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 알림 설정 -->
-      <div class="card">
-        <p class="text-sm font-semibold text-gray-900 mb-4">알림 설정</p>
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-700">피싱 클릭 시 즉시 알림</p>
-              <p class="text-xs mt-0.5" style="color:#B0ADA9;">수강생이 피싱 훈련 메일을 클릭하면 관리자에게 알림을 보냅니다</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="toggle-phishing-alert" checked>
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-          <div class="section-divider"></div>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-700">교육 미시작 수강생 리마인더</p>
-              <p class="text-xs mt-0.5" style="color:#B0ADA9;">기한 7일 전까지 미시작 수강생에게 자동 안내 메일을 발송합니다</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="toggle-reminder" checked>
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
-          <div class="section-divider"></div>
-          <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5">알림 수신 이메일</label>
-            <input type="email" id="notif-email" class="input-field" placeholder="알림 받을 이메일 주소">
-          </div>
-          <div class="flex justify-end pt-1">
-            <button class="btn-sm btn-dark" onclick="saveNotifSettings()">저장</button>
+            <button id="settings-save-btn" class="btn-sm btn-dark" onclick="savePlatformSettings()">저장</button>
           </div>
         </div>
       </div>
@@ -235,11 +204,6 @@
     if (u.role !== 'admin') location.href = 'index.html';
     document.getElementById('admin-name').textContent = u.name || '관리자';
     document.getElementById('admin-email').value = u.email || '';
-    // 저장된 기본 정보 불러오기
-    const pName = localStorage.getItem('platform-name');
-    const oName = localStorage.getItem('org-name');
-    if (pName) document.getElementById('platform-name').value = pName;
-    if (oName) document.getElementById('org-name').value = oName;
   }
   function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
 
@@ -250,35 +214,45 @@
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  function saveSettings(label) {
-    if (label === '기본 정보') {
-      localStorage.setItem('platform-name', document.getElementById('platform-name').value);
-      localStorage.setItem('org-name', document.getElementById('org-name').value);
+  // ── Supabase에서 플랫폼/조직명 로드 ──
+  async function loadPlatformSettings() {
+    const { data } = await sb.from('app_settings').select('key, value').in('key', ['platform_name', 'org_name']);
+    const map = {};
+    (data || []).forEach(r => { map[r.key] = r.value; });
+    if (map.platform_name) document.getElementById('platform-name').value = map.platform_name;
+    if (map.org_name)      document.getElementById('org-name').value      = map.org_name;
+  }
+
+  // ── Supabase에 저장 ──
+  async function savePlatformSettings() {
+    const errEl = document.getElementById('settings-error');
+    const btn = document.getElementById('settings-save-btn');
+    errEl.classList.add('hidden');
+    btn.disabled = true; btn.textContent = '저장 중...';
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch('/api/admin-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({
+          settings: {
+            platform_name: document.getElementById('platform-name').value.trim(),
+            org_name:      document.getElementById('org-name').value.trim(),
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '저장 실패');
+      showToast('기본 정보가 저장되었습니다');
+    } catch (err) {
+      errEl.textContent = '오류: ' + err.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = '저장';
     }
-    showToast(label + ' 설정이 저장되었습니다');
   }
 
-  // ── 알림 설정 로드 ──
-  async function loadNotifSettings() {
-    const u = JSON.parse(sessionStorage.getItem('user') || '{}');
-    const { data } = await sb.from('profiles').select('notif_phishing_alert, notif_email').eq('email', u.email).limit(1);
-    if (data?.[0]) {
-      document.getElementById('toggle-phishing-alert').checked = data[0].notif_phishing_alert !== false;
-      if (data[0].notif_email) document.getElementById('notif-email').value = data[0].notif_email;
-    }
-  }
-
-  // ── 알림 설정 저장 ──
-  async function saveNotifSettings() {
-    const u = JSON.parse(sessionStorage.getItem('user') || '{}');
-    const notif_phishing_alert = document.getElementById('toggle-phishing-alert').checked;
-    const notif_email = document.getElementById('notif-email').value.trim();
-    const { error } = await sb.from('profiles').update({ notif_phishing_alert, notif_email }).eq('email', u.email);
-    if (error) { showToast('저장 실패: ' + error.message); return; }
-    showToast('알림 설정이 저장되었습니다');
-  }
-
-  loadNotifSettings();
+  loadPlatformSettings();
 
   function togglePw(id) {
     const input = document.getElementById(id);

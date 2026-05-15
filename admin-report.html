@@ -75,6 +75,12 @@
           </svg>
           <span class="text-sm text-gray-500">수강생 관리</span>
         </a>
+        <a href="admin-courses.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+          <span class="text-sm text-gray-500">강의 관리</span>
+        </a>
         <a href="admin-phishing.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
           <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -116,23 +122,22 @@
     <div class="grid grid-cols-4 gap-3 mb-4">
       <div class="stat-card">
         <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">전체 이수율</p>
-        <p class="text-3xl font-bold text-gray-900">72%</p>
-        <p class="text-xs mt-1.5" style="color:#16A34A;">전월 대비 +7%p</p>
+        <p class="text-3xl font-bold text-gray-900" id="kpi-completion">-</p>
       </div>
       <div class="stat-card">
-        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">평균 점수 향상</p>
-        <p class="text-3xl font-bold text-gray-900">+24점</p>
-        <p class="text-xs mt-1.5" style="color:#16A34A;">사전 → 사후</p>
+        <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">평균 게임 점수</p>
+        <p class="text-3xl font-bold text-gray-900" id="kpi-avg-score">-</p>
+        <p class="text-xs mt-1.5" id="kpi-game-sub" style="color:#B0ADA9;">총 0회 플레이</p>
       </div>
       <div class="stat-card">
         <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">피싱 클릭률</p>
-        <p class="text-3xl font-bold text-gray-900">12%</p>
-        <p class="text-xs mt-1.5" style="color:#16A34A;">전월 대비 -6%p</p>
+        <p class="text-3xl font-bold text-gray-900" id="kpi-phishing">-</p>
+        <p class="text-xs mt-1.5" id="kpi-phishing-sub" style="color:#B0ADA9;">0명 클릭</p>
       </div>
       <div class="stat-card">
         <p class="text-xs font-medium tracking-widest uppercase mb-2" style="color:#B0ADA9;">총 수강생</p>
-        <p class="text-3xl font-bold text-gray-900">8명</p>
-        <p class="text-xs mt-1.5" style="color:#B0ADA9;">완료 3 / 진행중 4 / 미시작 1</p>
+        <p class="text-3xl font-bold text-gray-900" id="kpi-total">-</p>
+        <p class="text-xs mt-1.5" id="kpi-total-sub" style="color:#B0ADA9;">완료 0 / 진행중 0 / 미시작 0</p>
       </div>
     </div>
 
@@ -157,9 +162,8 @@
             <th class="text-left text-xs font-medium px-5 py-3" style="color:#B0ADA9;">이름</th>
             <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">부서</th>
             <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">이수율</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">사전 점수</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">사후 점수</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">향상도</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">게임 점수</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">게임 횟수</th>
             <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">피싱 결과</th>
             <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">상태</th>
           </tr>
@@ -186,44 +190,59 @@
   let deptChart;
 
   async function loadReport() {
-    const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: true });
-    if (error || !data) return;
+    const [profileRes, scoreRes] = await Promise.all([
+      sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true }),
+      sb.from('game_scores').select('user_email, score'),
+    ]);
+    if (profileRes.error || !profileRes.data) return;
 
-    _reportUsers = data.map(r => ({
-      name:       r.name,
-      dept:       r.dept || '미지정',
-      completion: r.completion  || 0,
-      preScore:   r.pre_score   || 0,
-      postScore:  r.post_score  || 0,
-      phishing:   r.phishing_clicked || false,
-    }));
+    const scores = scoreRes.data || [];
+    const scoresByUser = {};
+    for (const s of scores) {
+      if (!scoresByUser[s.user_email]) scoresByUser[s.user_email] = { plays: 0, total: 0 };
+      scoresByUser[s.user_email].plays++;
+      scoresByUser[s.user_email].total += s.score || 0;
+    }
 
-    const total   = _reportUsers.length;
-    const avgComp = total ? Math.round(_reportUsers.reduce((s,u)=>s+u.completion,0)/total) : 0;
-    const avgPre  = total ? Math.round(_reportUsers.reduce((s,u)=>s+u.preScore,0)/total) : 0;
-    const avgPost = total ? Math.round(_reportUsers.reduce((s,u)=>s+u.postScore,0)/total) : 0;
-    const phishN  = _reportUsers.filter(u=>u.phishing).length;
-    const doneN   = _reportUsers.filter(u=>u.completion===100).length;
-    const progN   = _reportUsers.filter(u=>u.completion>0&&u.completion<100).length;
+    _reportUsers = profileRes.data.map(r => {
+      const userScore = scoresByUser[r.email] || { plays: 0, total: 0 };
+      return {
+        name:       r.name,
+        email:      r.email,
+        dept:       r.dept || '미지정',
+        completion: r.completion  || 0,
+        gamePlays:  userScore.plays,
+        gameTotal:  userScore.total,
+        phishing:   r.phishing_clicked || false,
+      };
+    });
+
+    const total      = _reportUsers.length;
+    const avgComp    = total ? Math.round(_reportUsers.reduce((s,u)=>s+u.completion,0)/total) : 0;
+    const phishN     = _reportUsers.filter(u=>u.phishing).length;
+    const doneN      = _reportUsers.filter(u=>u.completion===100).length;
+    const progN      = _reportUsers.filter(u=>u.completion>0&&u.completion<100).length;
+    const totalPlays = scores.length;
+    const avgScore   = totalPlays ? Math.round(scores.reduce((s,x)=>s+(x.score||0),0)/totalPlays) : 0;
 
     // KPI 업데이트
-    document.querySelectorAll('.stat-card p.text-3xl')[0].textContent = avgComp + '%';
-    document.querySelectorAll('.stat-card p.text-3xl')[1].textContent = (avgPost-avgPre>=0?'+':'')+(avgPost-avgPre)+'점';
-    document.querySelectorAll('.stat-card p.text-3xl')[2].textContent = Math.round(phishN/total*100)+'%';
-    document.querySelectorAll('.stat-card p.text-3xl')[3].textContent = total + '명';
-    document.querySelectorAll('.stat-card p.text-xs.mt-1\\.5')[3].textContent = `완료 ${doneN} / 진행중 ${progN} / 미시작 ${total-doneN-progN}`;
+    document.getElementById('kpi-completion').textContent = avgComp + '%';
+    document.getElementById('kpi-avg-score').textContent  = avgScore + '점';
+    document.getElementById('kpi-game-sub').textContent   = `총 ${totalPlays}회 플레이`;
+    document.getElementById('kpi-phishing').textContent   = (total ? Math.round(phishN/total*100) : 0) + '%';
+    document.getElementById('kpi-phishing-sub').textContent = `${phishN}명 클릭`;
+    document.getElementById('kpi-total').textContent      = total + '명';
+    document.getElementById('kpi-total-sub').textContent  = `완료 ${doneN} / 진행중 ${progN} / 미시작 ${total-doneN-progN}`;
 
     // 테이블 렌더
     document.getElementById('report-tbody').innerHTML = _reportUsers.map(u => {
-      const diff   = u.postScore - u.preScore;
       const status = u.completion===100?['완료','badge-green']:u.completion>0?['진행중','badge-amber']:['미시작','badge-red'];
       return `<tr style="border-bottom:1px solid #F5F3F0;">
         <td class="px-5 py-3 font-medium text-gray-900">${u.name}</td>
         <td class="px-4 py-3 text-xs text-gray-500">${u.dept}</td>
         <td class="px-4 py-3 text-sm text-gray-700">${u.completion}%</td>
-        <td class="px-4 py-3 text-sm text-gray-600">${u.preScore}점</td>
-        <td class="px-4 py-3 text-sm text-gray-600">${u.postScore}점</td>
-        <td class="px-4 py-3 text-sm font-medium" style="color:${diff>0?'#16A34A':'#DC2626'};">${diff>0?'+':''}${diff}점</td>
+        <td class="px-4 py-3 text-sm text-gray-700 font-medium">${u.gameTotal}점</td>
+        <td class="px-4 py-3 text-sm text-gray-600">${u.gamePlays}회</td>
         <td class="px-4 py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium ${u.phishing?'badge-red':'badge-green'}">${u.phishing?'클릭함':'안전'}</span></td>
         <td class="px-4 py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium ${status[1]}">${status[0]}</span></td>
       </tr>`;

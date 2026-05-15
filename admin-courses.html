@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 교육 플랫폼 — 강의 관리</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #ECEAE6; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .nav-item { transition: background 0.12s; border-radius: 12px; }
+    .nav-item:hover { background: #F5F3F0; }
+    .nav-item.active { background: #F0EDEA; }
+    .card { background: white; border-radius: 24px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .btn-sm { padding: 7px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.12s; border: none; }
+    .btn-dark    { background: #1A1A1A; color: white; }
+    .btn-dark:hover { background: #333; }
+    .btn-outline { background: white; color: #374151; border: 1.5px solid #E4E1DD; }
+    .btn-outline:hover { background: #F5F3F0; }
+    .btn-danger  { background: #FEF2F2; color: #DC2626; border: 1.5px solid #FECACA; }
+    .btn-danger:hover { background: #FEE2E2; }
+    .input-field {
+      padding: 10px 14px; border-radius: 12px; border: 1.5px solid #E4E1DD;
+      background: #FAF9F7; font-size: 13px; color: #1a1a1a; outline: none;
+      transition: border-color 0.15s; width: 100%;
+    }
+    .input-field:focus { border-color: #1A1A1A; }
+    .input-field::placeholder { color: #B0ADA9; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter:blur(4px); z-index:40; display:flex; align-items:center; justify-content:center; }
+    .modal-box { background:white; border-radius:24px; padding:28px; width:520px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.15); }
+    .row-hover:hover { background: #FAFAF9; }
+    .swatch { width:18px; height:18px; border-radius:6px; flex-shrink:0; }
+  </style>
+</head>
+<body class="h-screen overflow-hidden">
+
+<div class="flex h-full">
+
+  <!-- ── Sidebar ── -->
+  <aside class="w-64 flex-shrink-0 p-4 flex flex-col gap-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl p-5 flex flex-col gap-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#1A1A1A;">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-gray-900">보안 교육</h1>
+          <p class="text-xs" style="color:#8C8984;">관리자</p>
+        </div>
+      </div>
+      <div style="height:1px; background:#F0EDEA;"></div>
+      <nav class="flex flex-col gap-0.5">
+        <a href="admin.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span class="text-sm text-gray-500">대시보드</span>
+        </a>
+        <a href="admin-users.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <span class="text-sm text-gray-500">수강생 관리</span>
+        </a>
+        <a href="admin-courses.html" class="nav-item active flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+          <span class="text-sm text-gray-700">강의 관리</span>
+        </a>
+        <a href="admin-phishing.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="text-sm text-gray-500">피싱 훈련</span>
+        </a>
+        <a href="admin-settings.html" class="nav-item flex items-center gap-2.5 px-3 py-2.5">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          </svg>
+          <span class="text-sm text-gray-500">설정</span>
+        </a>
+      </nav>
+    </div>
+    <div class="bg-white rounded-3xl p-4 mt-auto shadow-sm">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#1A1A1A;">A</div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900" id="admin-name">관리자</p>
+          <p class="text-xs" style="color:#8C8984;">Admin</p>
+        </div>
+      </div>
+      <button onclick="logout()" class="w-full text-xs py-2 rounded-xl text-gray-600 hover:bg-gray-50">로그아웃</button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="flex-1 overflow-y-auto p-4 pl-0 pr-5">
+
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900">강의 관리</h1>
+        <p class="text-xs mt-0.5" style="color:#B0ADA9;">총 <span id="total-count">0</span>개의 강의 · 게이미케이션 콘텐츠 관리</p>
+      </div>
+      <button class="btn-sm btn-dark" onclick="openModal()">
+        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        강의 추가
+      </button>
+    </div>
+
+    <!-- 강의 테이블 -->
+    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr style="border-bottom:1.5px solid #F0EDEA;">
+            <th class="text-left text-xs font-medium px-5 py-3" style="color:#B0ADA9;width:48px;">순서</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">제목</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">설명</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:90px;">게임 ID</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:70px;">만점</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:100px;">상태</th>
+            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:140px;">작업</th>
+          </tr>
+        </thead>
+        <tbody id="courses-tbody">
+          <tr><td colspan="7" class="text-center py-10 text-sm" style="color:#B0ADA9;">불러오는 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- 강의 추가/수정 모달 -->
+<div id="course-modal" class="modal-backdrop hidden" onclick="closeOnBackdrop(event)">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-base font-bold text-gray-900" id="modal-title">강의 추가</h2>
+      <button onclick="closeModal()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">제목 *</label>
+        <input id="f-title" type="text" class="input-field" placeholder="예: CyberGuard Corp">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">설명</label>
+        <input id="f-subtitle" type="text" class="input-field" placeholder="예: 서버실까지 — 6가지 보안 미션 어드벤처">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">링크 *</label>
+          <input id="f-link" type="text" class="input-field" placeholder="예: gamification.html#phishing">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">게임 ID</label>
+          <input id="f-game-type" type="text" class="input-field" placeholder="예: phishing_game">
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">색상</label>
+          <input id="f-color" type="color" class="input-field" style="height:42px;padding:4px;" value="#1A1A1A">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">만점</label>
+          <input id="f-max-score" type="number" min="0" class="input-field" value="100">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5">정렬 순서</label>
+          <input id="f-sort-order" type="number" min="0" class="input-field" value="0">
+        </div>
+      </div>
+      <label class="flex items-center gap-2 mt-1 cursor-pointer">
+        <input id="f-active" type="checkbox" checked class="rounded">
+        <span class="text-sm text-gray-700">활성화 (수강생에게 표시)</span>
+      </label>
+      <div id="form-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2;color:#DC2626;"></div>
+      <div class="flex gap-2 pt-2">
+        <button class="btn-sm btn-outline flex-1" onclick="closeModal()">취소</button>
+        <button id="save-btn" class="btn-sm btn-dark flex-1" onclick="saveCourse()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const stored = sessionStorage.getItem('user');
+  if (!stored) location.href = 'login.html';
+  else {
+    const u = JSON.parse(stored);
+    if (u.role !== 'admin') location.href = 'index.html';
+    document.getElementById('admin-name').textContent = u.name || '관리자';
+  }
+  function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
+
+  let courses = [];
+  let editingId = null;
+
+  async function loadCourses() {
+    const { data, error } = await sb.from('courses').select('*').order('sort_order', { ascending: true });
+    const tbody = document.getElementById('courses-tbody');
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-sm" style="color:#DC2626;">불러오기 실패: ${error.message}</td></tr>`;
+      return;
+    }
+    courses = data || [];
+    document.getElementById('total-count').textContent = courses.length;
+    if (!courses.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-sm" style="color:#B0ADA9;">아직 등록된 강의가 없습니다.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = courses.map(c => `
+      <tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
+        <td class="px-5 py-3 text-sm text-gray-600">${c.sort_order ?? 0}</td>
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-2.5">
+            <span class="swatch" style="background:${c.color || '#1A1A1A'};"></span>
+            <span class="font-medium text-gray-900">${escapeHtml(c.title)}</span>
+          </div>
+        </td>
+        <td class="px-4 py-3 text-xs" style="color:#8C8984;">${escapeHtml(c.subtitle || '')}</td>
+        <td class="px-4 py-3 text-xs text-gray-500"><code style="background:#F5F3F0;padding:2px 6px;border-radius:4px;">${c.game_type || '-'}</code></td>
+        <td class="px-4 py-3 text-sm text-gray-600">${c.max_score ?? '-'}</td>
+        <td class="px-4 py-3">
+          <span class="text-xs px-2.5 py-1 rounded-full font-medium" style="background:${c.active?'#F0FDF4':'#F5F3F0'};color:${c.active?'#16A34A':'#6B7280'};">
+            ${c.active ? '활성' : '비활성'}
+          </span>
+        </td>
+        <td class="px-4 py-3">
+          <div class="flex gap-1.5">
+            <button class="btn-sm btn-outline text-xs px-3 py-1.5" onclick="openEdit('${c.id}')">수정</button>
+            <button class="btn-sm btn-danger text-xs px-3 py-1.5" onclick="deleteCourse('${c.id}', '${escapeHtml(c.title).replace(/'/g, "&#39;")}')">삭제</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+  }
+
+  function openModal() {
+    editingId = null;
+    document.getElementById('modal-title').textContent = '강의 추가';
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-subtitle').value = '';
+    document.getElementById('f-link').value = '';
+    document.getElementById('f-game-type').value = '';
+    document.getElementById('f-color').value = '#1A1A1A';
+    document.getElementById('f-max-score').value = 100;
+    document.getElementById('f-sort-order').value = courses.length + 1;
+    document.getElementById('f-active').checked = true;
+    document.getElementById('form-error').classList.add('hidden');
+    document.getElementById('course-modal').classList.remove('hidden');
+  }
+
+  function openEdit(id) {
+    const c = courses.find(x => x.id === id);
+    if (!c) return;
+    editingId = id;
+    document.getElementById('modal-title').textContent = '강의 수정';
+    document.getElementById('f-title').value = c.title || '';
+    document.getElementById('f-subtitle').value = c.subtitle || '';
+    document.getElementById('f-link').value = c.link || '';
+    document.getElementById('f-game-type').value = c.game_type || '';
+    document.getElementById('f-color').value = c.color || '#1A1A1A';
+    document.getElementById('f-max-score').value = c.max_score ?? 100;
+    document.getElementById('f-sort-order').value = c.sort_order ?? 0;
+    document.getElementById('f-active').checked = c.active !== false;
+    document.getElementById('form-error').classList.add('hidden');
+    document.getElementById('course-modal').classList.remove('hidden');
+  }
+
+  function closeModal() { document.getElementById('course-modal').classList.add('hidden'); }
+  function closeOnBackdrop(e) { if (e.target === document.getElementById('course-modal')) closeModal(); }
+
+  async function saveCourse() {
+    const errEl = document.getElementById('form-error');
+    errEl.classList.add('hidden');
+
+    const payload = {
+      title: document.getElementById('f-title').value.trim(),
+      subtitle: document.getElementById('f-subtitle').value.trim() || null,
+      link: document.getElementById('f-link').value.trim(),
+      game_type: document.getElementById('f-game-type').value.trim() || null,
+      color: document.getElementById('f-color').value,
+      max_score: parseInt(document.getElementById('f-max-score').value) || 0,
+      sort_order: parseInt(document.getElementById('f-sort-order').value) || 0,
+      active: document.getElementById('f-active').checked,
+    };
+
+    if (!payload.title || !payload.link) {
+      errEl.textContent = '제목과 링크는 필수입니다.';
+      errEl.classList.remove('hidden'); return;
+    }
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = '저장 중...';
+
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const isEdit = !!editingId;
+      const res = await fetch('/api/admin-courses', {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify(isEdit ? { id: editingId, ...payload } : payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '저장 실패');
+
+      closeModal();
+      showToast(isEdit ? '강의가 수정되었습니다' : '강의가 추가되었습니다');
+      await loadCourses();
+    } catch (err) {
+      errEl.textContent = '오류: ' + err.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = '저장';
+    }
+  }
+
+  async function deleteCourse(id, title) {
+    if (!confirm(`"${title}" 강의를 삭제하시겠습니까?\n수강생 페이지에서도 즉시 제거됩니다.`)) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch(`/api/admin-courses?id=${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session?.access_token || ''}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '삭제 실패');
+      showToast('강의가 삭제되었습니다');
+      await loadCourses();
+    } catch (err) {
+      alert('삭제 중 오류: ' + err.message);
+    }
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById('toast-msg');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast-msg';
+      t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1A1A1A;color:white;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:500;z-index:50;transition:all 0.3s;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 2500);
+  }
+
+  loadCourses();
+</script>
+</body>
+</html>
