@@ -199,7 +199,15 @@
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1.5">임시 비밀번호 *</label>
-        <input id="new-pw" type="text" class="input-field w-full" placeholder="초기 비밀번호 설정">
+        <div class="relative">
+          <input id="new-pw" type="password" class="input-field w-full" placeholder="초기 비밀번호 설정" style="padding-right:42px;">
+          <button type="button" onclick="togglePw('new-pw')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabindex="-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div id="modal-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2; color:#DC2626;"></div>
       <div class="flex gap-2 pt-1">
@@ -266,7 +274,7 @@
         <label class="block text-xs font-medium text-gray-500 mb-1.5">새 비밀번호 <span class="font-normal" style="color:#B0ADA9;">(변경 시에만 입력)</span></label>
         <div class="relative">
           <input id="edit-pw" type="password" class="input-field w-full" placeholder="변경하지 않으려면 비워두세요" style="padding-right:42px;">
-          <button type="button" onclick="toggleEditPw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabindex="-1">
+          <button type="button" onclick="togglePw('edit-pw')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabindex="-1">
             <svg id="edit-pw-eye" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -564,10 +572,11 @@
     }
   }
 
-  function toggleEditPw() {
-    const input = document.getElementById('edit-pw');
+  function togglePw(id) {
+    const input = document.getElementById(id);
     input.type = input.type === 'password' ? 'text' : 'password';
   }
+
 
   function closeEdit() {
     document.getElementById('edit-modal').classList.add('hidden');

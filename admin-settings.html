@@ -191,11 +191,27 @@
         <div class="flex flex-col gap-3">
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">새 비밀번호</label>
-            <input type="password" id="pw-new" class="input-field" placeholder="새 비밀번호 입력 (8자 이상)">
+            <div class="relative">
+              <input type="password" id="pw-new" class="input-field" placeholder="새 비밀번호 입력 (8자 이상)" style="padding-right:42px;">
+              <button type="button" onclick="togglePw('pw-new')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabindex="-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5">새 비밀번호 확인</label>
-            <input type="password" id="pw-confirm" class="input-field" placeholder="새 비밀번호 재입력">
+            <div class="relative">
+              <input type="password" id="pw-confirm" class="input-field" placeholder="새 비밀번호 재입력" style="padding-right:42px;">
+              <button type="button" onclick="togglePw('pw-confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabindex="-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+            </div>
           </div>
           <div id="pw-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2; color:#DC2626;"></div>
           <div class="flex justify-end pt-1">
@@ -240,6 +256,11 @@
       localStorage.setItem('org-name', document.getElementById('org-name').value);
     }
     showToast(label + ' 설정이 저장되었습니다');
+  }
+
+  function togglePw(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
   }
 
   async function changePassword() {
