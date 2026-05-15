@@ -241,6 +241,7 @@
       email: r.email,
       dept: r.dept || '미지정',
       clicked: r.phishing_clicked || false,
+      clickedAt: r.phishing_clicked_at || null,
       completion: r.completion || 0,
     }));
 
@@ -281,7 +282,7 @@
             ${u.clicked ? '클릭함' : '안전'}
           </span>
         </td>
-        <td class="px-4 py-3 text-xs" style="color:#B0ADA9;">${u.clicked ? '기록됨' : '-'}</td>
+        <td class="px-4 py-3 text-xs" style="color:#B0ADA9;">${u.clickedAt ? new Date(u.clickedAt).toLocaleString('ko-KR', {timeZone:'Asia/Seoul'}) : '-'}</td>
         <td class="px-4 py-3">
           <div class="flex items-center gap-2">
             <div class="progress-bar w-16">

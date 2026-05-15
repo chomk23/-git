@@ -24,7 +24,7 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${serviceKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ phishing_clicked: true }),
+        body: JSON.stringify({ phishing_clicked: true, phishing_clicked_at: new Date().toISOString() }),
       }
     );
 
