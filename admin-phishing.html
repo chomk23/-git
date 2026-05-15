@@ -49,21 +49,9 @@
           </svg>
         </div>
         <div>
-          <p class="text-sm font-semibold text-gray-900">보안 교육 관리</p>
-          <p class="text-xs" style="color:#B0ADA9;">Administrator</p>
+          <h1 class="text-sm font-bold text-gray-900">보안 교육</h1>
+          <p class="text-xs" style="color:#8C8984;">관리자</p>
         </div>
-      </div>
-      <div class="flex items-center justify-between px-1">
-        <div>
-          <p id="admin-name" class="text-sm font-medium text-gray-800">이담당</p>
-          <p class="text-xs" style="color:#B0ADA9;">보안팀</p>
-        </div>
-        <button onclick="logout()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
-          <svg class="w-4 h-4" style="color:#B0ADA9;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-        </button>
       </div>
       <div style="height:1px; background:#F0EDEA;"></div>
       <nav class="flex flex-col gap-0.5">
@@ -98,6 +86,16 @@
           <span class="text-sm text-gray-500">설정</span>
         </a>
       </nav>
+    </div>
+    <div class="bg-white rounded-3xl p-4 mt-auto shadow-sm">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#1A1A1A;">A</div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900" id="admin-name">관리자</p>
+          <p class="text-xs" style="color:#8C8984;">Admin</p>
+        </div>
+      </div>
+      <button onclick="logout()" class="w-full text-xs py-2 rounded-xl text-gray-600 hover:bg-gray-50">로그아웃</button>
     </div>
   </aside>
 
