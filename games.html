@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 교육 플랫폼 — 보안 게임</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -545,8 +547,20 @@ const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
 document.getElementById('lobby-user-name').textContent = currentUser.name || '사용자';
 
 // ── 전역 상태 ──
-let totalScore  = parseInt(sessionStorage.getItem('gameScore') || '0');
+let totalScore   = parseInt(sessionStorage.getItem('gameScore') || '0');
 let earnedBadges = JSON.parse(sessionStorage.getItem('gameBadges') || '[]');
+
+// ── Supabase 점수 저장 ──
+async function saveScore(gameType, score) {
+  try {
+    if (!currentUser.email) return;
+    await sb.from('game_scores').insert({
+      user_email: currentUser.email,
+      game_type:  gameType,
+      score:      score,
+    });
+  } catch(e) {}
+}
 
 function saveState() {
   sessionStorage.setItem('gameScore',  totalScore);
@@ -732,6 +746,7 @@ function endQuiz() {
   document.getElementById('quiz-correct').textContent = qCorrect;
   document.getElementById('quiz-best-streak').textContent = qBestStreak;
   // (end emoji removed)
+  saveScore('quiz_challenge', qScore);
   if (qScore>=800) grantBadge('quiz_master');
   checkAllClear('quiz');
   checkHighScorer();
@@ -850,6 +865,7 @@ function endPhishing() {
   document.getElementById('phish-final-score').textContent = pScore.toLocaleString()+' pts';
   document.getElementById('phish-correct').textContent = pCorrect;
   document.getElementById('phish-wrong').textContent = pWrong;
+  saveScore('phishing_game', pScore);
   if (pCorrect>=6) grantBadge('phish_hunter');
   checkAllClear('phishing');
   checkHighScorer();
@@ -956,6 +972,7 @@ function endOX() {
   document.getElementById('ox-correct').textContent = oxCorrect;
   const avg = oxAnswered>0?(oxTotalTime/oxAnswered).toFixed(1):'-';
   document.getElementById('ox-avg-time').textContent = avg;
+  saveScore('ox_game', oxScore);
   if (oxAnswered>0 && (oxTotalTime/oxAnswered)<3) grantBadge('speed_king');
   checkAllClear('ox');
   checkHighScorer();
@@ -1115,6 +1132,7 @@ function endPassword() {
   document.getElementById('pw-play').classList.add('hidden');
   document.getElementById('pw-end').classList.remove('hidden');
   document.getElementById('pw-final-score').textContent = pwScore.toLocaleString()+' pts';
+  saveScore('password_game', pwScore);
   grantBadge('pw_expert');
   checkAllClear('password');
   checkHighScorer();
@@ -1131,45 +1149,63 @@ function checkAllClear(game) {
 }
 function checkHighScorer() { if(totalScore>=3000) grantBadge('high_scorer'); }
 
-// ── 리더보드 ──
-const lbData = [
-  { name:'이수현', dept:'보안팀',      score:4820, badges:5 },
-  { name:'오동현', dept:'IT 인프라팀', score:4150, badges:4 },
-  { name:'김보안', dept:'IT 인프라팀', score:3900, badges:4, isMe:true },
-  { name:'최지영', dept:'법무팀',      score:3200, badges:3 },
-  { name:'윤지수', dept:'인사팀',      score:2800, badges:3 },
-  { name:'박민준', dept:'인사팀',      score:2100, badges:2 },
-  { name:'정태호', dept:'개발팀',      score:1800, badges:2 },
-  { name:'한소영', dept:'마케팅팀',    score:950,  badges:1 },
-];
+// ── 리더보드 (Supabase 실시간) ──
+let _lbMode = 'all';
 
-function renderLeaderboard(mode) {
+async function renderLeaderboard(mode) {
+  _lbMode = mode;
   document.getElementById('lb-tab-all').className  = mode==='all'  ? 'text-xs font-medium px-3 py-1.5 rounded-lg bg-white shadow-sm' : 'text-xs font-medium px-3 py-1.5 rounded-lg text-gray-500';
   document.getElementById('lb-tab-dept').className = mode==='dept' ? 'text-xs font-medium px-3 py-1.5 rounded-lg bg-white shadow-sm' : 'text-xs font-medium px-3 py-1.5 rounded-lg text-gray-500';
+  document.getElementById('lb-list').innerHTML = '<p class="text-center text-sm py-8" style="color:#B0ADA9;">불러오는 중...</p>';
 
-  let data = [...lbData];
-  if (mode==='dept' && currentUser.dept) data = data.filter(u=>u.dept===currentUser.dept || u.isMe);
-  data.sort((a,b)=>b.score-a.score);
+  try {
+    const [{ data: scores }, { data: profiles }] = await Promise.all([
+      sb.from('game_scores').select('user_email, game_type, score'),
+      sb.from('profiles').select('email, name, dept').neq('role', 'admin'),
+    ]);
 
-  // 내 실제 점수 반영
-  const meIdx = data.findIndex(u=>u.isMe);
-  if (meIdx>=0) data[meIdx].score = Math.max(data[meIdx].score, totalScore);
-  data.sort((a,b)=>b.score-a.score);
+    // 유저별 게임 타입별 최고 점수 집계
+    const bestByUser = {};
+    (scores || []).forEach(s => {
+      if (!bestByUser[s.user_email]) bestByUser[s.user_email] = {};
+      if (!bestByUser[s.user_email][s.game_type] || s.score > bestByUser[s.user_email][s.game_type])
+        bestByUser[s.user_email][s.game_type] = s.score;
+    });
 
-  document.getElementById('lb-list').innerHTML = data.map((u,i)=>`
-    <div class="lb-row flex items-center gap-3 px-2 py-3 rounded-xl ${u.isMe?'me':''}">
-      <span class="w-7 text-center font-bold text-sm text-gray-700">${i+1}</span>
-      <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-        style="background:${u.isMe?'#1A1A1A':'#6B7280'}">${u.name[0]}</div>
-      <div class="flex-1">
-        <p class="text-sm font-medium text-gray-900">${u.name}${u.isMe?' (나)':''}</p>
-        <p class="text-xs" style="color:#B0ADA9;">${u.dept}</p>
-      </div>
-      <div class="text-right">
-        <p class="text-sm font-bold text-gray-900">${u.score.toLocaleString()}</p>
-        <p class="text-xs" style="color:#B0ADA9;">배지 ${u.badges}개</p>
-      </div>
-    </div>`).join('');
+    let data = (profiles || []).map(p => {
+      const games = bestByUser[p.email] || {};
+      const total = Object.values(games).reduce((a, b) => a + b, 0);
+      const isMe  = p.email === currentUser.email;
+      return { name: p.name, dept: p.dept || '미지정', score: isMe ? Math.max(total, totalScore) : total, badges: Object.keys(games).length, isMe };
+    }).filter(u => u.score > 0 || u.isMe);
+
+    if (mode === 'dept' && currentUser.dept)
+      data = data.filter(u => u.dept === currentUser.dept || u.isMe);
+
+    data.sort((a, b) => b.score - a.score);
+
+    if (!data.length) {
+      document.getElementById('lb-list').innerHTML = '<p class="text-center text-sm py-8" style="color:#B0ADA9;">아직 기록이 없습니다.</p>';
+      return;
+    }
+
+    document.getElementById('lb-list').innerHTML = data.map((u, i) => `
+      <div class="lb-row flex items-center gap-3 px-2 py-3 rounded-xl ${u.isMe ? 'me' : ''}">
+        <span class="w-7 text-center font-bold text-sm text-gray-700">${i + 1}</span>
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+          style="background:${u.isMe ? '#1A1A1A' : '#6B7280'}">${u.name[0]}</div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900">${u.name}${u.isMe ? ' (나)' : ''}</p>
+          <p class="text-xs" style="color:#B0ADA9;">${u.dept}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm font-bold text-gray-900">${u.score.toLocaleString()}</p>
+          <p class="text-xs" style="color:#B0ADA9;">배지 ${u.badges}개</p>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('lb-list').innerHTML = '<p class="text-center text-sm py-8" style="color:#B0ADA9;">데이터를 불러올 수 없습니다.</p>';
+  }
 }
 
 // ── URL 해시 네비게이션 ──
