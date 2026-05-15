@@ -226,6 +226,55 @@
   </div>
 </div>
 
+<!-- ── 수정 모달 ── -->
+<div id="edit-modal" class="modal-backdrop hidden" onclick="closeEditOnBackdrop(event)">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-base font-bold text-gray-900">수강생 정보 수정</h2>
+      <button onclick="closeEdit()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="flex flex-col gap-3">
+      <input id="edit-user-id" type="hidden">
+      <input id="edit-original-email" type="hidden">
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">이름</label>
+        <input id="edit-name" type="text" class="input-field w-full" placeholder="홍길동">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">이메일</label>
+        <input id="edit-email" type="email" class="input-field w-full" placeholder="user@company.com">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">부서</label>
+        <select id="edit-dept" class="input-field w-full" style="cursor:pointer;" onchange="toggleEditDeptInput(this)">
+          <option value="IT 인프라팀">IT 인프라팀</option>
+          <option value="보안팀">보안팀</option>
+          <option value="인사팀">인사팀</option>
+          <option value="법무팀">법무팀</option>
+          <option value="개발팀">개발팀</option>
+          <option value="마케팅팀">마케팅팀</option>
+          <option value="기타">기타</option>
+          <option value="__custom__">직접 입력...</option>
+        </select>
+        <input id="edit-dept-custom" type="text" class="input-field w-full mt-1.5 hidden" placeholder="부서명 직접 입력">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">새 비밀번호 <span class="font-normal" style="color:#B0ADA9;">(변경 시에만 입력)</span></label>
+        <input id="edit-pw" type="text" class="input-field w-full" placeholder="변경하지 않으려면 비워두세요">
+      </div>
+      <div id="edit-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2; color:#DC2626;"></div>
+      <div class="flex gap-2 pt-1">
+        <button class="btn-sm btn-outline flex-1" onclick="closeEdit()">취소</button>
+        <button class="btn-sm btn-dark flex-1" onclick="saveEdit()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   // ── 인증 체크 ──
   const stored = sessionStorage.getItem('user');
@@ -330,6 +379,7 @@
         <td class="px-4 py-3.5">
           <div class="flex gap-1.5">
             <button class="btn-sm btn-outline text-xs px-3 py-1.5" onclick="openDetail('${u.id}')">상세</button>
+            <button class="btn-sm btn-outline text-xs px-3 py-1.5" onclick="openEdit('${u.id}')">수정</button>
             <button class="btn-sm btn-danger text-xs px-3 py-1.5"  onclick="deleteUser('${u.id}')">삭제</button>
           </div>
         </td>
@@ -465,6 +515,102 @@
     if (!confirm('정말 이 계정을 삭제하시겠습니까?')) return;
     const { error } = await sb.from('profiles').delete().eq('id', id);
     if (error) { alert('삭제 실패: ' + error.message); return; }
+    await loadUsers();
+  }
+
+  // ── 수정 모달 ──
+  const PRESET_DEPTS = ['IT 인프라팀','보안팀','인사팀','법무팀','개발팀','마케팅팀','기타'];
+
+  function openEdit(id) {
+    const u = users.find(u => u.id === id);
+    if (!u) return;
+    document.getElementById('edit-user-id').value = u.id;
+    document.getElementById('edit-original-email').value = u.email;
+    document.getElementById('edit-name').value = u.name;
+    document.getElementById('edit-email').value = u.email;
+    document.getElementById('edit-pw').value = '';
+    document.getElementById('edit-error').classList.add('hidden');
+
+    const deptSel = document.getElementById('edit-dept');
+    const deptCustom = document.getElementById('edit-dept-custom');
+    if (PRESET_DEPTS.includes(u.dept)) {
+      deptSel.value = u.dept;
+      deptCustom.classList.add('hidden');
+      deptCustom.value = '';
+    } else {
+      deptSel.value = '__custom__';
+      deptCustom.classList.remove('hidden');
+      deptCustom.value = u.dept;
+    }
+    document.getElementById('edit-modal').classList.remove('hidden');
+  }
+
+  function toggleEditDeptInput(sel) {
+    const custom = document.getElementById('edit-dept-custom');
+    if (sel.value === '__custom__') {
+      custom.classList.remove('hidden');
+      custom.focus();
+    } else {
+      custom.classList.add('hidden');
+      custom.value = '';
+    }
+  }
+
+  function closeEdit() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    document.getElementById('edit-error').classList.add('hidden');
+  }
+  function closeEditOnBackdrop(e) { if (e.target === document.getElementById('edit-modal')) closeEdit(); }
+
+  async function saveEdit() {
+    const id            = document.getElementById('edit-user-id').value;
+    const originalEmail = document.getElementById('edit-original-email').value;
+    const name          = document.getElementById('edit-name').value.trim();
+    const newEmail      = document.getElementById('edit-email').value.trim().toLowerCase();
+    const deptSel       = document.getElementById('edit-dept').value;
+    const dept          = deptSel === '__custom__' ? document.getElementById('edit-dept-custom').value.trim() : deptSel;
+    const newPw         = document.getElementById('edit-pw').value.trim();
+    const err           = document.getElementById('edit-error');
+
+    if (!name || !newEmail) {
+      err.textContent = '이름과 이메일은 필수입니다.';
+      err.classList.remove('hidden'); return;
+    }
+    if (deptSel === '__custom__' && !dept) {
+      err.textContent = '부서명을 입력해주세요.';
+      err.classList.remove('hidden'); return;
+    }
+
+    // 1. profiles 테이블 업데이트 (이름, 이메일, 부서)
+    const profileUpdate = { name, dept };
+    if (newEmail !== originalEmail) profileUpdate.email = newEmail;
+    const { error: profErr } = await sb.from('profiles').update(profileUpdate).eq('id', id);
+    if (profErr) {
+      err.textContent = '저장 실패: ' + profErr.message;
+      err.classList.remove('hidden'); return;
+    }
+
+    // 2. 이메일 또는 비밀번호 변경 시 auth 업데이트 (서버리스 API 경유)
+    if (newEmail !== originalEmail || newPw) {
+      try {
+        const apiRes = await fetch('/api/admin-update-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentEmail: originalEmail, newEmail: newEmail !== originalEmail ? newEmail : undefined, newPassword: newPw || undefined }),
+        });
+        const apiData = await apiRes.json();
+        if (!apiRes.ok) {
+          err.textContent = '인증 정보 업데이트 실패: ' + (apiData.error || '알 수 없는 오류');
+          err.classList.remove('hidden'); return;
+        }
+      } catch(e) {
+        err.textContent = '서버 오류: ' + e.message;
+        err.classList.remove('hidden'); return;
+      }
+    }
+
+    closeEdit();
+    showToast('정보가 수정되었습니다');
     await loadUsers();
   }
 
