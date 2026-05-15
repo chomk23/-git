@@ -34,9 +34,9 @@ export default async function handler(req, res) {
   const profiles = await profileRes.json();
   if (profiles?.[0]?.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
 
-  const { emailType, targets } = req.body || {};
-  if (!emailType || !targets?.length) {
-    return res.status(400).json({ error: 'emailType과 targets가 필요합니다.' });
+  const { emailType, customTemplate, targets } = req.body || {};
+  if ((!emailType && !customTemplate) || !targets?.length) {
+    return res.status(400).json({ error: 'emailType 또는 customTemplate과 targets가 필요합니다.' });
   }
 
   // ── 훈련 회차 생성 ──
@@ -48,13 +48,13 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
     },
-    body: JSON.stringify({ email_type: emailType, sent_count: targets.length }),
+    body: JSON.stringify({ email_type: emailType || 'AI 생성', sent_count: targets.length }),
   });
   const sessionData = await sessionRes.json();
   const sessionId = sessionData?.[0]?.id || 'unknown';
 
   // ── 이메일 발송 ──
-  const tmpl = getTemplate(emailType);
+  const tmpl = customTemplate || getTemplate(emailType);
   let successCount = 0;
 
   for (const t of targets) {
