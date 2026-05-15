@@ -57,18 +57,27 @@ export default async function handler(req, res) {
   const tmpl = customTemplate || getTemplate(emailType);
   let successCount = 0;
 
+  const fromAddr = (tmpl.from || '').includes('@') ? tmpl.from : `보안 교육 플랫폼 <onboarding@resend.dev>`;
+
   for (const t of targets) {
     const trackingUrl = `${siteUrl}/api/phishing-click?e=${Buffer.from(t.email).toString('base64')}&s=${sessionId}`;
+    const name = t.name || '수강생';
+    const subject = (tmpl.subject || '').replace(/\{NAME\}/g, name);
     const html = tmpl.html
-      .replace(/\{NAME\}/g, t.name || '수강생')
+      .replace(/\{NAME\}/g, name)
       .replace(/\{TRACKING_URL\}/g, trackingUrl);
 
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: tmpl.from, to: t.email, subject: tmpl.subject, html }),
+      body: JSON.stringify({ from: fromAddr, to: t.email, subject, html }),
     });
-    if (r.ok) successCount++;
+    if (r.ok) {
+      successCount++;
+    } else {
+      const errBody = await r.json().catch(() => ({}));
+      console.error('Resend error:', r.status, JSON.stringify(errBody));
+    }
   }
 
   return res.status(200).json({ success: true, sent: successCount, sessionId });
