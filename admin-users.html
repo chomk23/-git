@@ -593,9 +593,13 @@
     // 2. 이메일 또는 비밀번호 변경 시 auth 업데이트 (서버리스 API 경유)
     if (newEmail !== originalEmail || newPw) {
       try {
+        const { data: { session } } = await sb.auth.getSession();
         const apiRes = await fetch('/api/admin-update-user', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token || ''}`,
+          },
           body: JSON.stringify({ currentEmail: originalEmail, newEmail: newEmail !== originalEmail ? newEmail : undefined, newPassword: newPw || undefined }),
         });
         const apiData = await apiRes.json();
