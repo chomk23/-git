@@ -104,7 +104,7 @@
     <div class="flex items-center justify-between mb-5">
       <div>
         <h1 class="text-lg font-bold text-gray-900">리포트</h1>
-        <p class="text-xs mt-0.5" style="color:#B0ADA9;">2026년 5월 기준</p>
+        <p class="text-xs mt-0.5" id="report-date" style="color:#B0ADA9;"></p>
       </div>
       <div class="flex gap-2">
         <button class="btn-sm btn-outline" onclick="exportFullCSV()">CSV 내보내기</button>
@@ -250,6 +250,10 @@
       }
     });
   }
+
+  const now = new Date();
+  document.getElementById('report-date').textContent =
+    `${now.getFullYear()}년 ${now.getMonth() + 1}월 기준`;
 
   loadReport();
 

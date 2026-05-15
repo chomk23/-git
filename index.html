@@ -162,6 +162,15 @@
         return { name: p.name || p.email, dept: p.dept || '—', total, best, email: p.email };
       }).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
 
+      // 동점 처리: 같은 점수면 같은 순위
+      let rankNum = 0, prevTotal = -1, sameCount = 0;
+      rows.forEach((r, i) => {
+        if (r.total !== prevTotal) { rankNum += sameCount + 1; sameCount = 0; }
+        else sameCount++;
+        r.rank = rankNum;
+        prevTotal = r.total;
+      });
+
       if (rows.length === 0) {
         grid.innerHTML = `<div class="col-span-3 flex items-center justify-center py-20">
           <p class="text-sm text-gray-400">아직 게임을 플레이한 사용자가 없습니다.</p>
@@ -183,7 +192,7 @@
           </tr></thead>
           <tbody>${rows.map((r, i) => {
             const isMe = r.email === myEmail;
-            const rank = i + 1;
+            const rank = r.rank;
             return `<tr class="border-t border-gray-50${isMe ? '" style="background:#F5F3FF;' : ''}">
               <td class="px-5 py-3 text-center font-medium text-gray-500">${rank}</td>
               <td class="px-5 py-3 font-medium ${isMe ? 'text-purple-700' : 'text-gray-900'}">${r.name}${isMe ? ' <span class="text-xs text-purple-400">(나)</span>' : ''}</td>
