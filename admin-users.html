@@ -185,7 +185,7 @@
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1.5">부서</label>
-        <select id="new-dept" class="input-field w-full" style="cursor:pointer;">
+        <select id="new-dept" class="input-field w-full" style="cursor:pointer;" onchange="toggleDeptInput(this)">
           <option value="IT 인프라팀">IT 인프라팀</option>
           <option value="보안팀">보안팀</option>
           <option value="인사팀">인사팀</option>
@@ -193,7 +193,9 @@
           <option value="개발팀">개발팀</option>
           <option value="마케팅팀">마케팅팀</option>
           <option value="기타">기타</option>
+          <option value="__custom__">직접 입력...</option>
         </select>
+        <input id="new-dept-custom" type="text" class="input-field w-full mt-1.5 hidden" placeholder="부서명 직접 입력">
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1.5">임시 비밀번호 *</label>
@@ -345,22 +347,41 @@
 
   // ── 계정 추가 모달 ──
   function openModal() { document.getElementById('modal').classList.remove('hidden'); }
+  function toggleDeptInput(sel) {
+    const custom = document.getElementById('new-dept-custom');
+    if (sel.value === '__custom__') {
+      custom.classList.remove('hidden');
+      custom.focus();
+    } else {
+      custom.classList.add('hidden');
+      custom.value = '';
+    }
+  }
+
   function closeModal() {
     document.getElementById('modal').classList.add('hidden');
     document.getElementById('modal-error').classList.add('hidden');
     ['new-name','new-email','new-pw'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('new-dept').value = 'IT 인프라팀';
+    document.getElementById('new-dept-custom').value = '';
+    document.getElementById('new-dept-custom').classList.add('hidden');
   }
   function closeModalOnBackdrop(e) { if (e.target === document.getElementById('modal')) closeModal(); }
 
   async function addUser() {
     const name  = document.getElementById('new-name').value.trim();
     const email = document.getElementById('new-email').value.trim().toLowerCase();
-    const dept  = document.getElementById('new-dept').value;
+    const deptSel = document.getElementById('new-dept').value;
+    const dept  = deptSel === '__custom__' ? document.getElementById('new-dept-custom').value.trim() : deptSel;
     const pw    = document.getElementById('new-pw').value.trim();
     const err   = document.getElementById('modal-error');
 
     if (!name || !email || !pw) {
       err.textContent = '이름, 이메일, 비밀번호는 필수입니다.';
+      err.classList.remove('hidden'); return;
+    }
+    if (deptSel === '__custom__' && !dept) {
+      err.textContent = '부서명을 입력해주세요.';
       err.classList.remove('hidden'); return;
     }
 
