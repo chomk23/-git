@@ -131,6 +131,19 @@
         <button class="btn-primary mt-6 w-full" onclick="startPhishing()">탐정 시작하기</button>
       </div>
     </div>
+    <!-- 피싱 AI 로딩 -->
+    <div id="phishing-loading" style="display:none;">
+      <div class="bg-white rounded-3xl p-10 shadow-sm text-center">
+        <div class="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center" style="background:linear-gradient(135deg,#1e3a5f,#2563EB);">
+          <svg class="animate-spin" width="28" height="28" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </div>
+        <p class="text-base font-bold text-gray-900">AI가 이메일을 생성하는 중</p>
+        <p class="text-sm mt-2" style="color:#8C8984;">실제 같은 피싱 시나리오를 만들고 있어요 <span id="phishing-dots-anim">.</span></p>
+        <div class="mt-5 rounded-2xl p-3" style="background:#EFF6FF;">
+          <p class="text-xs font-medium" style="color:#2563EB;">✦ AI가 오늘의 피싱 이메일 6개를 준비 중입니다</p>
+        </div>
+      </div>
+    </div>
     <div id="phishing-game" style="display:none;">
       <div class="flex items-center justify-between mb-3">
         <div class="flex gap-1" id="phishing-dots"></div>
@@ -172,6 +185,19 @@
           <div class="rounded-2xl p-3" style="background:#F5F3F0;"><p class="text-xs font-semibold text-gray-700">10문항</p><p class="text-xs mt-0.5" style="color:#8C8984;">총 문항 수</p></div>
         </div>
         <button class="btn-primary mt-6 w-full" onclick="startOX()">퀴즈 시작!</button>
+      </div>
+    </div>
+    <!-- OX AI 로딩 -->
+    <div id="ox-loading" style="display:none;">
+      <div class="bg-white rounded-3xl p-10 shadow-sm text-center">
+        <div class="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+          <svg class="animate-spin" width="28" height="28" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </div>
+        <p class="text-base font-bold text-gray-900">AI가 문제를 생성하는 중</p>
+        <p class="text-sm mt-2" style="color:#8C8984;">매번 새로운 보안 퀴즈를 만들고 있어요 <span id="ox-dots-anim">.</span></p>
+        <div class="mt-5 rounded-2xl p-3" style="background:#F5F3FF;">
+          <p class="text-xs font-medium" style="color:#7c3aed;">✦ AI가 오늘의 보안 상식 10문항을 준비 중입니다</p>
+        </div>
       </div>
     </div>
     <div id="ox-game" style="display:none;">
@@ -337,6 +363,20 @@ function goLobby() {
   location.href = 'index.html';
 }
 
+// ── 로딩 점 애니메이션 ──
+let _dotsTimer = null;
+function startDotsAnim(elId) {
+  clearInterval(_dotsTimer);
+  let n = 0;
+  const dots = ['.', '..', '...'];
+  const el = document.getElementById(elId);
+  if (!el) return;
+  _dotsTimer = setInterval(() => {
+    n = (n + 1) % 3;
+    el.textContent = dots[n];
+  }, 500);
+}
+
 // ── 게임 점수 Supabase 저장 ──
 async function saveScore(gameType, score) {
   try {
@@ -360,7 +400,8 @@ function renderDots(total, current, id) {
 }
 
 /* ── GAME 1: 피싱 탐정 ── */
-const emails = [
+// 기본 폴백 데이터 (AI 생성 실패 시 사용)
+const emailsDefault = [
   { isPhishing:true,  from:'카카오뱅크 <security@kakaobank-verify.net>', subject:'[긴급] 계정 이상 감지 — 24시간 내 인증 필요', body:'고객님의 계정에서 이상 접근이 감지되었습니다. 즉시 아래 링크를 클릭하여 본인 인증을 완료하지 않으면 계정이 정지됩니다.', link:'http://kakaobank-secure.verify-now.xyz/auth', clues:['도메인 이상: kakaobank-verify.net (공식: kakaobank.com)','긴급성·공포심 자극','외부 도메인(verify-now.xyz) 링크','24시간 기한 설정'] },
   { isPhishing:false, from:'GitHub <noreply@github.com>', subject:'[GitHub] 비밀번호가 변경되었습니다', body:'귀하의 GitHub 계정 비밀번호가 방금 변경되었습니다. 본인이 변경했다면 이 메일을 무시하세요. 변경하지 않았다면 즉시 계정을 복구하세요.', link:'https://github.com/settings/security', clues:['공식 도메인 noreply@github.com 사용','공식 github.com 링크','공포 유발 없이 정보 제공','본인 아닐 경우 대응 안내'] },
   { isPhishing:true,  from:'국세청 <refund@nts-korea-tax.com>', subject:'세금 환급금 387,000원 지급 안내 — 즉시 신청', body:'2024년도 세금 환급금이 발생했습니다. 환급금 수령을 위해 계좌번호와 주민등록번호를 입력해 주세요. 기한 내 미신청 시 소멸됩니다.', link:'http://nts-refund.korea-gov.xyz/apply', clues:['공식 국세청은 nts.go.kr (.go.kr 사용)','주민번호·계좌번호 요구','소멸 기한 긴급성 조장','비공식 도메인 korea-gov.xyz'] },
@@ -368,11 +409,32 @@ const emails = [
   { isPhishing:true,  from:'인사팀 <hr-team@company-hr-notice.org>', subject:'[전직원 필독] 취업규칙 개정 서명 필요', body:'이번 달까지 취업규칙 개정안에 서명하지 않으면 급여 처리가 지연될 수 있습니다. 첨부파일을 열어 개인정보를 입력해 주세요.', attachment:'employment_rules_2025.exe', clues:['외부 도메인 company-hr-notice.org','급여 지연 위협','실행 파일(.exe) 첨부 — 매우 위험','개인정보 입력 요구'] },
   { isPhishing:true,  from:'Microsoft 365 <admin@microsoft365-storage.info>', subject:'저장공간 초과 — 24시간 후 계정 비활성화', body:'귀하의 Microsoft 365 저장공간이 100% 사용 중입니다. 즉시 업그레이드하지 않으면 이메일 수신이 차단됩니다. 결제 정보를 업데이트하세요.', link:'http://microsoft365-billing.update-now.info/payment', clues:['공식 MS 도메인은 microsoft.com','가짜 도메인 microsoft365-storage.info','결제 정보(카드번호) 요구','24시간 기한 압박'] },
 ];
+let emails = [...emailsDefault]; // AI 생성 시 교체됨
 let pIdx=0, pScore=0;
 
-function startPhishing() {
+async function startPhishing() {
   pIdx=0; pScore=0;
   document.getElementById('phishing-intro').style.display='none';
+  document.getElementById('phishing-loading').style.display='block';
+  startDotsAnim('phishing-dots-anim');
+
+  try {
+    const resp = await fetch('/api/generate-quiz', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type: 'phishing'})
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.questions && data.questions.length >= 4) {
+        emails = data.questions;
+      }
+    }
+  } catch(e) {
+    emails = [...emailsDefault];
+  }
+
+  document.getElementById('phishing-loading').style.display='none';
   document.getElementById('phishing-game').style.display='block';
   renderPhishingEmail();
 }
@@ -424,7 +486,8 @@ function nextPhishing() {
 }
 
 /* ── GAME 2: OX 번개퀴즈 ── */
-const oxQ=[
+// 기본 폴백 데이터 (AI 생성 실패 시 사용)
+const oxQDefault=[
   {q:'피싱 메일은 항상 첨부파일을 포함한다',a:false,exp:'피싱 메일은 링크만 포함하기도 합니다. 첨부파일 없이 악성 링크만으로 정보를 탈취합니다.'},
   {q:'HTTPS 사이트는 항상 안전하다',a:false,exp:'HTTPS는 통신을 암호화할 뿐, 사이트 자체의 안전성을 보장하지 않습니다. 피싱 사이트도 HTTPS를 사용할 수 있습니다.'},
   {q:'강한 비밀번호는 8자 이상에 대소문자·숫자·특수문자를 포함해야 한다',a:true,exp:'일반적으로 비밀번호는 8자 이상에 대소문자·숫자·특수문자 조합이 권장됩니다. 12자 이상이면 더 좋습니다.'},
@@ -436,11 +499,32 @@ const oxQ=[
   {q:'랜섬웨어는 파일을 암호화하여 금전을 요구하는 악성코드다',a:true,exp:'랜섬웨어는 피해자 파일을 암호화한 후 복호화 키를 조건으로 금전을 요구하는 악성코드입니다.'},
   {q:'보안 패치를 빠르게 적용하면 해킹 위험이 증가한다',a:false,exp:'보안 패치는 알려진 취약점을 수정합니다. 빠르게 적용할수록 공격으로부터 보호됩니다.'},
 ];
+let oxQ = [...oxQDefault]; // AI 생성 시 교체됨
 let oxIdx=0,oxScore=0,oxStreak=0,oxMaxStreak=0,oxCorrect=0,oxTimer=null;
 
-function startOX(){
+async function startOX(){
   oxIdx=0;oxScore=0;oxStreak=0;oxMaxStreak=0;oxCorrect=0;
   document.getElementById('ox-intro').style.display='none';
+  document.getElementById('ox-loading').style.display='block';
+  startDotsAnim('ox-dots-anim');
+
+  try {
+    const resp = await fetch('/api/generate-quiz', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type: 'ox'})
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.questions && data.questions.length >= 5) {
+        oxQ = data.questions;
+      }
+    }
+  } catch(e) {
+    oxQ = [...oxQDefault];
+  }
+
+  document.getElementById('ox-loading').style.display='none';
   document.getElementById('ox-game').style.display='block';
   renderOX();
 }
