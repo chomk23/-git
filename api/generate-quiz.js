@@ -57,34 +57,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid type. Use "ox" or "phishing".' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompts[type] }] }],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 3000,
-        },
+        model: 'claude-haiku-4-5',
+        max_tokens: 3000,
+        messages: [{ role: 'user', content: prompts[type] }],
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('Gemini API error:', errText);
+      console.error('Anthropic API error:', errText);
       return res.status(502).json({ error: 'AI API error', detail: errText });
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.content?.[0]?.text || '';
 
     // JSON 배열 추출
     const jsonMatch = text.match(/\[[\s\S]*\]/);
