@@ -83,7 +83,7 @@
           <span class="text-sm text-gray-700">시험 결과</span>
         </a>
         <a href="#" class="nav-item flex items-center justify-between px-3 py-2.5" onclick="event.preventDefault(); filterCourses('leaderboard', this)">
-          <span class="text-sm text-gray-700">🏆 리더보드</span>
+          <span class="text-sm text-gray-700">리더보드</span>
         </a>
       </nav>
 
@@ -168,7 +168,6 @@
         </div>`;
         return;
       }
-      const medals = ['🥇','🥈','🥉'];
       const myEmail = user.email;
       grid.innerHTML = `<div class="col-span-3 bg-white rounded-3xl overflow-hidden shadow-sm">
         <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
@@ -184,7 +183,7 @@
           </tr></thead>
           <tbody>${rows.map((r, i) => {
             const isMe = r.email === myEmail;
-            const rank = medals[i] || `${i + 1}`;
+            const rank = i + 1;
             return `<tr class="border-t border-gray-50${isMe ? '" style="background:#F5F3FF;' : ''}">
               <td class="px-5 py-3 text-center font-medium text-gray-500">${rank}</td>
               <td class="px-5 py-3 font-medium ${isMe ? 'text-purple-700' : 'text-gray-900'}">${r.name}${isMe ? ' <span class="text-xs text-purple-400">(나)</span>' : ''}</td>
