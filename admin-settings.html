@@ -204,16 +204,6 @@
         </div>
       </div>
 
-      <!-- 위험 구역 -->
-      <div class="card" style="border:1.5px solid #FECACA;">
-        <p class="text-sm font-semibold mb-1" style="color:#DC2626;">위험 구역</p>
-        <p class="text-xs mb-4" style="color:#B0ADA9;">아래 작업은 되돌릴 수 없습니다. 신중하게 진행하세요.</p>
-        <div class="flex flex-col gap-2">
-          <button class="btn-sm btn-danger text-left" onclick="resetScores()">모든 게임 점수 초기화</button>
-          <button class="btn-sm btn-danger text-left" onclick="resetPhishing()">피싱 훈련 결과 초기화</button>
-        </div>
-      </div>
-
     </div>
   </main>
 </div>
@@ -276,20 +266,6 @@
     }
   }
 
-  async function resetScores() {
-    if (!confirm('모든 게임 점수를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
-    const { error: e1 } = await sb.from('game_scores').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    const { error: e2 } = await sb.from('profiles').update({ pre_score: 0, post_score: 0, completion: 0 }).neq('role', 'admin');
-    if (e1 || e2) { alert('초기화 중 오류가 발생했습니다.'); return; }
-    showToast('게임 점수가 초기화되었습니다');
-  }
-
-  async function resetPhishing() {
-    if (!confirm('피싱 훈련 결과를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
-    const { error } = await sb.from('profiles').update({ phishing_clicked: false }).neq('role', 'admin');
-    if (error) { alert('초기화 중 오류가 발생했습니다.'); return; }
-    showToast('피싱 훈련 결과가 초기화되었습니다');
-  }
 </script>
 </body>
 </html>
