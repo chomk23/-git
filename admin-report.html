@@ -136,14 +136,8 @@
       </div>
     </div>
 
-    <!-- 차트 2개 row -->
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="stat-card">
-        <p class="text-sm font-semibold text-gray-800 mb-4">월별 이수율 추이 (%)</p>
-        <div style="height:200px;">
-          <canvas id="chart-completion"></canvas>
-        </div>
-      </div>
+    <!-- 차트 -->
+    <div class="mb-4">
       <div class="stat-card">
         <p class="text-sm font-semibold text-gray-800 mb-4">부서별 이수율 (%)</p>
         <div style="height:200px;">
@@ -256,25 +250,6 @@
       }
     });
   }
-
-  // 이수율 추이 차트 (월별 - 고정 데이터)
-  new Chart(document.getElementById('chart-completion'), {
-    type: 'line',
-    data: {
-      labels: ['1월','2월','3월','4월','5월','6월'],
-      datasets: [{ label:'이수율 (%)', data:[30,42,51,58,65,72],
-        borderColor:'#1A1A1A', backgroundColor:'rgba(26,26,26,0.06)',
-        fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#1A1A1A' }]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ labels:{ font:{ family:'Noto Sans KR', size:11 }, color:'#6B7280', boxWidth:10 } } },
-      scales:{
-        x:{ grid:{ color:chartColor.grid }, ticks:{ color:chartColor.text, font:{ size:11 } } },
-        y:{ grid:{ color:chartColor.grid }, ticks:{ color:chartColor.text, font:{ size:11 } } },
-      }
-    }
-  });
 
   loadReport();
 
