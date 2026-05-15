@@ -68,10 +68,32 @@ export default async function handler(req, res) {
       .replace(/\{NAME\}/g, name)
       .replace(/\{TRACKING_URL\}/g, trackingUrl);
 
+    // plain text 버전: AI 템플릿이 제공한 text 사용, 없으면 HTML에서 자동 추출
+    const rawText = tmpl.text || html
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const text = rawText
+      .replace(/\{NAME\}/g, name)
+      .replace(/\{TRACKING_URL\}/g, trackingUrl);
+
+    const payload = {
+      from: fromAddr,
+      to: t.email,
+      reply_to: 'noreply@resend.dev',
+      subject,
+      html,
+      text,
+      headers: {
+        'List-Unsubscribe': '<mailto:unsubscribe@resend.dev>',
+      },
+    };
+
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: fromAddr, to: t.email, subject, html }),
+      body: JSON.stringify(payload),
     });
     if (r.ok) {
       successCount++;

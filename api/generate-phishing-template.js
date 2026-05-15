@@ -34,26 +34,43 @@ ${description
   ? `요청: "${description}"`
   : `요청: 자유롭게 선택하세요. 실제로 많이 쓰이는 피싱 유형 중 하나를 랜덤으로 골라 만들어주세요. (예: 금융기관 사칭, 택배 알림, 정부기관 환급, 포털 계정 보안, 기업 내부 문서 공유, 이벤트 당첨 등 다양하게)`}
 
-다음 규칙을 반드시 따르세요:
-1. 실제 해당 서비스처럼 보이는 디자인 (브랜드 색상, 로고 텍스트 등)
+다음 HTML 템플릿 구조를 정확히 따라주세요 (스팸 필터 회피용 검증된 구조):
+
+\`\`\`html
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;">
+  <div style="background:[브랜드색상];padding:20px;text-align:center;">
+    <span style="color:#fff;font-size:26px;font-weight:bold;">[브랜드명]</span>
+  </div>
+  <div style="padding:32px;">
+    <h2 style="color:#222;font-size:18px;">{NAME}님, [짧은 인사]</h2>
+    <p style="color:#555;line-height:1.7;">[3~5문장 본문 — 자연스럽고 길게]</p>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="{TRACKING_URL}" style="background:[브랜드색상];color:#fff;padding:14px 36px;border-radius:4px;text-decoration:none;font-weight:bold;font-size:15px;">[CTA 텍스트]</a>
+    </div>
+    <p style="color:#aaa;font-size:12px;">[안내 문구]</p>
+  </div>
+  <div style="background:#f5f5f5;padding:16px;text-align:center;">
+    <p style="color:#aaa;font-size:11px;">© [브랜드명]</p>
+  </div>
+</div>
+\`\`\`
+
+규칙:
+1. 위 구조를 그대로 사용 (구조 변경 금지, 색상/내용만 채우기)
 2. 한국어로 작성
-3. 수신자 이름은 반드시 {NAME} 플레이스홀더 사용
-4. 클릭 유도 버튼의 href는 반드시 {TRACKING_URL} 플레이스홀더 사용
-5. max-width: 600px, 인라인 스타일만 사용
-6. 발신자 표시 이름만 설정 (이메일 주소는 시스템이 처리함, 예: "NAVER 보안센터")
-7. 제목은 자연스럽게 작성 (대문자 남용, 느낌표 과다 사용 금지)
-8. 스팸 필터 회피를 위해 다음을 지킬 것:
-   - HTML 구조를 단순하게 유지 (중첩 table 최소화)
-   - 이미지보다 텍스트 비율을 높게
-   - "무료", "긴급", "당첨", "클릭하세요" 같은 스팸 키워드 사용 자제
-   - 본문에 충분한 텍스트 내용 포함 (최소 3문장 이상)
-   - <style> 태그 사용 금지, 인라인 스타일만 사용
+3. 수신자 이름은 반드시 {NAME} 플레이스홀더
+4. CTA 버튼 href는 반드시 {TRACKING_URL} 플레이스홀더
+5. <style> 태그, <script> 태그, <table>, 외부 이미지 사용 금지
+6. 본문은 자연스럽고 충분히 긴 텍스트 (최소 3문장)
+7. "무료", "긴급", "당첨", "지금 즉시", "100%" 같은 스팸 키워드 금지
+8. 제목은 자연스럽게 (느낌표/대문자 남용 금지)
 
 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
 {
-  "from": "발신자 표시 이름",
+  "from": "발신자 표시 이름 (예: NAVER 보안센터)",
   "subject": "이메일 제목",
-  "html": "전체 HTML 코드"
+  "html": "위 구조를 따른 전체 HTML",
+  "text": "이메일 본문의 plain text 버전 (HTML 태그 없이, 줄바꿈 포함)"
 }`;
 
   try {
