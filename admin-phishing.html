@@ -196,31 +196,15 @@
       </button>
     </div>
     <div class="flex flex-col gap-4">
+      <!-- AI 생성 버튼 + 미리보기 -->
       <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1.5">피싱 메일 유형</label>
-        <select id="send-email-type" onchange="onEmailTypeChange()" class="w-full rounded-xl border border-gray-200 p-2.5 text-sm outline-none focus:border-gray-800" style="background:#FAF9F7;">
-          <option>계정 보안 알림 (네이버)</option>
-          <option>비밀번호 변경 요청 (카카오)</option>
-          <option>업무 공유 문서 (Google Docs)</option>
-          <option>택배 배송 안내 (CJ대한통운)</option>
-          <option>국세청 세금 환급 안내</option>
-          <option value="__ai__">AI로 직접 생성...</option>
-        </select>
+        <button id="ai-gen-btn" class="btn-sm btn-outline w-full" onclick="generateAiTemplate()">AI로 메일 자동 생성</button>
       </div>
-
-      <!-- AI 생성 영역 (AI 유형 선택 시 표시) -->
-      <div id="ai-gen-wrap" class="hidden flex flex-col gap-3">
-        <div class="flex gap-2">
-          <input id="ai-description" type="text" placeholder="예: 삼성카드 이상거래 감지 알림 (비워두면 AI가 랜덤으로 생성)" class="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm outline-none focus:border-gray-800" style="background:#FAF9F7;">
-          <button id="ai-gen-btn" class="btn-sm btn-dark whitespace-nowrap" onclick="generateAiTemplate()">생성</button>
+      <div id="ai-preview-wrap" class="hidden">
+        <div class="rounded-xl border border-gray-200 overflow-hidden" style="height:220px;">
+          <iframe id="ai-preview-frame" style="width:100%;height:100%;border:none;"></iframe>
         </div>
-        <button class="btn-sm btn-outline w-full text-xs" style="color:#8C8984;" onclick="document.getElementById('ai-description').value=''; generateAiTemplate()">AI가 알아서 랜덤 생성</button>
-        <div id="ai-preview-wrap" class="hidden">
-          <div class="rounded-xl border border-gray-200 overflow-hidden" style="height:220px;">
-            <iframe id="ai-preview-frame" style="width:100%;height:100%;border:none;"></iframe>
-          </div>
-          <p class="text-xs mt-1.5" style="color:#B0ADA9;">제목: <span id="ai-subject-display"></span></p>
-        </div>
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">제목: <span id="ai-subject-display"></span></p>
       </div>
 
       <div>
@@ -366,9 +350,8 @@
   function openSendModal() {
     aiTemplate = null;
     document.getElementById('send-error').classList.add('hidden');
-    document.getElementById('ai-gen-wrap').classList.add('hidden');
+    aiTemplate = null;
     document.getElementById('ai-preview-wrap').classList.add('hidden');
-    document.getElementById('send-email-type').value = '계정 보안 알림 (네이버)';
     document.getElementById('target-list').innerHTML = phishingData.map((u, i) => `
       <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 cursor-pointer">
         <input type="checkbox" checked class="rounded" id="target-${i}" data-email="${u.email}" data-name="${u.name}">
@@ -380,18 +363,7 @@
   function closeSendModal() { document.getElementById('send-modal').classList.add('hidden'); }
   function closeSendOnBackdrop(e) { if (e.target === document.getElementById('send-modal')) closeSendModal(); }
 
-  function onEmailTypeChange() {
-    const isAi = document.getElementById('send-email-type').value === '__ai__';
-    document.getElementById('ai-gen-wrap').classList.toggle('hidden', !isAi);
-    if (!isAi) {
-      aiTemplate = null;
-      document.getElementById('ai-preview-wrap').classList.add('hidden');
-    }
-  }
-
   async function generateAiTemplate() {
-    const desc = document.getElementById('ai-description').value.trim();
-    if (!desc) return;
     const btn = document.getElementById('ai-gen-btn');
     const errEl = document.getElementById('send-error');
     errEl.classList.add('hidden');
@@ -425,11 +397,8 @@
     const errEl = document.getElementById('send-error');
     errEl.classList.add('hidden');
 
-    const emailType = document.getElementById('send-email-type').value;
-    const isAi = emailType === '__ai__';
-
-    if (isAi && !aiTemplate) {
-      errEl.textContent = '먼저 AI 메일을 생성해주세요.';
+    if (!aiTemplate) {
+      errEl.textContent = '먼저 AI로 메일을 생성해주세요.';
       errEl.classList.remove('hidden'); return;
     }
 
@@ -446,9 +415,7 @@
 
     try {
       const { data: { session } } = await sb.auth.getSession();
-      const body = isAi
-        ? { customTemplate: aiTemplate, targets }
-        : { emailType, targets };
+      const body = { customTemplate: aiTemplate, targets };
       const res = await fetch('/api/send-phishing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
