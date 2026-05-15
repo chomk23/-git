@@ -108,125 +108,19 @@
     <!-- 헤더 -->
     <div class="flex items-center justify-between mb-5">
       <div>
-        <h1 class="text-lg font-bold text-gray-900">강의 관리</h1>
-        <p class="text-xs mt-0.5" style="color:#B0ADA9;">총 <span id="total-count">0</span>개의 강의 · 게이미케이션 콘텐츠 관리</p>
+        <h1 class="text-lg font-bold text-gray-900">강의 목록</h1>
+        <p class="text-xs mt-0.5" style="color:#B0ADA9;">총 <span id="total-count">0</span>개의 강의 · 현재 등록된 보안 교육 콘텐츠</p>
       </div>
-      <button class="btn-sm btn-dark" onclick="openModal()">
-        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        강의 추가
-      </button>
     </div>
 
-    <!-- 강의 테이블 -->
-    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
-      <table class="w-full text-sm">
-        <thead>
-          <tr style="border-bottom:1.5px solid #F0EDEA;">
-            <th class="text-left text-xs font-medium px-5 py-3" style="color:#B0ADA9;width:48px;">순서</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">제목</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;">설명</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:90px;">게임 ID</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:70px;">만점</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:100px;">상태</th>
-            <th class="text-left text-xs font-medium px-4 py-3" style="color:#B0ADA9;width:140px;">작업</th>
-          </tr>
-        </thead>
-        <tbody id="courses-tbody">
-          <tr><td colspan="7" class="text-center py-10 text-sm" style="color:#B0ADA9;">불러오는 중...</td></tr>
-        </tbody>
-      </table>
+    <!-- 강의 카드 그리드 -->
+    <div id="courses-grid" class="grid grid-cols-2 gap-4">
+      <p class="col-span-2 text-center py-10 text-sm" style="color:#B0ADA9;">불러오는 중...</p>
     </div>
 
   </main>
 </div>
 
-<!-- 강의 추가/수정 모달 -->
-<div id="course-modal" class="modal-backdrop hidden" onclick="closeOnBackdrop(event)">
-  <div class="modal-box">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-base font-bold text-gray-900" id="modal-title">강의 추가</h2>
-      <button onclick="closeModal()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-    <div class="flex flex-col gap-4">
-      <!-- 1단계: 강의 종류 선택 -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 mb-2">강의 종류</label>
-        <div class="grid grid-cols-2 gap-2">
-          <label class="type-card cursor-pointer rounded-2xl p-3 border-2 transition" data-type="general" onclick="selectType('general')" style="border-color:#1A1A1A;background:#FAF9F7;">
-            <p class="text-sm font-semibold text-gray-900">일반 강의</p>
-            <p class="text-xs mt-0.5" style="color:#8C8984;">영상/문서 등 점수 없는 콘텐츠</p>
-          </label>
-          <label class="type-card cursor-pointer rounded-2xl p-3 border-2 transition" data-type="game" onclick="selectType('game')" style="border-color:#E4E1DD;background:white;">
-            <p class="text-sm font-semibold text-gray-900">게임 강의</p>
-            <p class="text-xs mt-0.5" style="color:#8C8984;">점수 추적되는 게이미케이션</p>
-          </label>
-        </div>
-      </div>
-
-      <div class="section-divider" style="height:1px;background:#F0EDEA;"></div>
-
-      <!-- 2단계: 표시 정보 -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1.5">제목 *</label>
-        <input id="f-title" type="text" class="input-field" placeholder="예: 피싱 탐지 훈련">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1.5">설명 (한 줄)</label>
-        <input id="f-subtitle" type="text" class="input-field" placeholder="예: 진짜 vs 가짜 이메일 판별 · 6라운드">
-      </div>
-
-      <!-- 3단계: 링크 -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1.5">강의 페이지 *</label>
-        <input id="f-link" type="text" class="input-field" placeholder="예: gamification.html#phishing">
-        <p class="text-xs mt-1.5" style="color:#B0ADA9;">수강생이 강의 카드를 클릭했을 때 이동할 페이지 경로</p>
-      </div>
-
-      <!-- 4단계: 게임 정보 (게임 강의만) -->
-      <div id="game-fields" class="hidden flex flex-col gap-3 p-3 rounded-2xl" style="background:#FAF9F7;">
-        <p class="text-xs font-semibold text-gray-700">게임 설정</p>
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1.5">게임 식별자 *</label>
-          <input id="f-game-type" type="text" class="input-field" placeholder="예: phishing_game">
-          <p class="text-xs mt-1.5" style="color:#B0ADA9;">게임 코드에서 점수 저장 시 쓰는 ID와 정확히 일치해야 합니다 (영문 소문자, 언더스코어). 점수 추적과 만점 계산에 사용돼요.</p>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1.5">만점</label>
-          <input id="f-max-score" type="number" min="0" class="input-field" value="100">
-          <p class="text-xs mt-1.5" style="color:#B0ADA9;">이 게임에서 받을 수 있는 최대 점수 (통과/재도전 판정 기준 60%)</p>
-        </div>
-      </div>
-
-      <!-- 5단계: 표시 옵션 -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1.5">카드 색상</label>
-          <input id="f-color" type="color" class="input-field" style="height:42px;padding:4px;" value="#1A1A1A">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1.5">정렬 순서</label>
-          <input id="f-sort-order" type="number" min="0" class="input-field" value="0">
-        </div>
-      </div>
-      <label class="flex items-center gap-2 cursor-pointer">
-        <input id="f-active" type="checkbox" checked class="rounded">
-        <span class="text-sm text-gray-700">활성화 (수강생에게 표시)</span>
-      </label>
-
-      <div id="form-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2;color:#DC2626;"></div>
-      <div class="flex gap-2 pt-1">
-        <button class="btn-sm btn-outline flex-1" onclick="closeModal()">취소</button>
-        <button id="save-btn" class="btn-sm btn-dark flex-1" onclick="saveCourse()">저장</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
   const stored = sessionStorage.getItem('user');
@@ -238,178 +132,61 @@
   }
   function logout() { sessionStorage.removeItem('user'); location.href = 'login.html'; }
 
-  let courses = [];
-  let editingId = null;
-  let currentType = 'general';
-
-  function selectType(type) {
-    currentType = type;
-    document.querySelectorAll('.type-card').forEach(el => {
-      const isActive = el.dataset.type === type;
-      el.style.borderColor = isActive ? '#1A1A1A' : '#E4E1DD';
-      el.style.background = isActive ? '#FAF9F7' : 'white';
-    });
-    document.getElementById('game-fields').classList.toggle('hidden', type !== 'game');
-  }
-
-  async function loadCourses() {
-    const { data, error } = await sb.from('courses').select('*').order('sort_order', { ascending: true });
-    const tbody = document.getElementById('courses-tbody');
-    if (error) {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-sm" style="color:#DC2626;">불러오기 실패: ${error.message}</td></tr>`;
-      return;
-    }
-    courses = data || [];
-    document.getElementById('total-count').textContent = courses.length;
-    if (!courses.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-sm" style="color:#B0ADA9;">아직 등록된 강의가 없습니다.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = courses.map(c => `
-      <tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
-        <td class="px-5 py-3 text-sm text-gray-600">${c.sort_order ?? 0}</td>
-        <td class="px-4 py-3">
-          <div class="flex items-center gap-2.5">
-            <span class="swatch" style="background:${c.color || '#1A1A1A'};"></span>
-            <span class="font-medium text-gray-900">${escapeHtml(c.title)}</span>
-          </div>
-        </td>
-        <td class="px-4 py-3 text-xs" style="color:#8C8984;">${escapeHtml(c.subtitle || '')}</td>
-        <td class="px-4 py-3 text-xs text-gray-500"><code style="background:#F5F3F0;padding:2px 6px;border-radius:4px;">${c.game_type || '-'}</code></td>
-        <td class="px-4 py-3 text-sm text-gray-600">${c.max_score ?? '-'}</td>
-        <td class="px-4 py-3">
-          <span class="text-xs px-2.5 py-1 rounded-full font-medium" style="background:${c.active?'#F0FDF4':'#F5F3F0'};color:${c.active?'#16A34A':'#6B7280'};">
-            ${c.active ? '활성' : '비활성'}
-          </span>
-        </td>
-        <td class="px-4 py-3">
-          <div class="flex gap-1.5">
-            <button class="btn-sm btn-outline text-xs px-3 py-1.5" onclick="openEdit('${c.id}')">수정</button>
-            <button class="btn-sm btn-danger text-xs px-3 py-1.5" onclick="deleteCourse('${c.id}', '${escapeHtml(c.title).replace(/'/g, "&#39;")}')">삭제</button>
-          </div>
-        </td>
-      </tr>`).join('');
-  }
-
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
   }
 
-  function openModal() {
-    editingId = null;
-    document.getElementById('modal-title').textContent = '강의 추가';
-    document.getElementById('f-title').value = '';
-    document.getElementById('f-subtitle').value = '';
-    document.getElementById('f-link').value = '';
-    document.getElementById('f-game-type').value = '';
-    document.getElementById('f-color').value = '#1A1A1A';
-    document.getElementById('f-max-score').value = 100;
-    document.getElementById('f-sort-order').value = courses.length + 1;
-    document.getElementById('f-active').checked = true;
-    document.getElementById('form-error').classList.add('hidden');
-    selectType('general');
-    document.getElementById('course-modal').classList.remove('hidden');
-  }
-
-  function openEdit(id) {
-    const c = courses.find(x => x.id === id);
-    if (!c) return;
-    editingId = id;
-    document.getElementById('modal-title').textContent = '강의 수정';
-    document.getElementById('f-title').value = c.title || '';
-    document.getElementById('f-subtitle').value = c.subtitle || '';
-    document.getElementById('f-link').value = c.link || '';
-    document.getElementById('f-game-type').value = c.game_type || '';
-    document.getElementById('f-color').value = c.color || '#1A1A1A';
-    document.getElementById('f-max-score').value = c.max_score ?? 100;
-    document.getElementById('f-sort-order').value = c.sort_order ?? 0;
-    document.getElementById('f-active').checked = c.active !== false;
-    document.getElementById('form-error').classList.add('hidden');
-    selectType(c.game_type ? 'game' : 'general');
-    document.getElementById('course-modal').classList.remove('hidden');
-  }
-
-  function closeModal() { document.getElementById('course-modal').classList.add('hidden'); }
-  function closeOnBackdrop(e) { if (e.target === document.getElementById('course-modal')) closeModal(); }
-
-  async function saveCourse() {
-    const errEl = document.getElementById('form-error');
-    errEl.classList.add('hidden');
-
-    const isGame = currentType === 'game';
-    const payload = {
-      title: document.getElementById('f-title').value.trim(),
-      subtitle: document.getElementById('f-subtitle').value.trim() || null,
-      link: document.getElementById('f-link').value.trim(),
-      game_type: isGame ? (document.getElementById('f-game-type').value.trim() || null) : null,
-      color: document.getElementById('f-color').value,
-      max_score: isGame ? (parseInt(document.getElementById('f-max-score').value) || 0) : 0,
-      sort_order: parseInt(document.getElementById('f-sort-order').value) || 0,
-      active: document.getElementById('f-active').checked,
-    };
-
-    if (!payload.title || !payload.link) {
-      errEl.textContent = '제목과 강의 페이지는 필수입니다.';
-      errEl.classList.remove('hidden'); return;
+  async function loadCourses() {
+    const grid = document.getElementById('courses-grid');
+    const { data, error } = await sb.from('courses').select('*').order('sort_order', { ascending: true });
+    if (error) {
+      grid.innerHTML = `<p class="col-span-2 text-center py-10 text-sm" style="color:#DC2626;">불러오기 실패: ${error.message}</p>`;
+      return;
     }
-    if (isGame && !payload.game_type) {
-      errEl.textContent = '게임 강의는 게임 식별자가 필수입니다.';
-      errEl.classList.remove('hidden'); return;
+    const courses = data || [];
+    document.getElementById('total-count').textContent = courses.length;
+    if (!courses.length) {
+      grid.innerHTML = `<p class="col-span-2 text-center py-10 text-sm" style="color:#B0ADA9;">아직 등록된 강의가 없습니다.</p>`;
+      return;
     }
-
-    const btn = document.getElementById('save-btn');
-    btn.disabled = true; btn.textContent = '저장 중...';
-
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      const isEdit = !!editingId;
-      const res = await fetch('/api/admin-courses', {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
-        body: JSON.stringify(isEdit ? { id: editingId, ...payload } : payload),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '저장 실패');
-
-      closeModal();
-      showToast(isEdit ? '강의가 수정되었습니다' : '강의가 추가되었습니다');
-      await loadCourses();
-    } catch (err) {
-      errEl.textContent = '오류: ' + err.message;
-      errEl.classList.remove('hidden');
-    } finally {
-      btn.disabled = false; btn.textContent = '저장';
-    }
-  }
-
-  async function deleteCourse(id, title) {
-    if (!confirm(`"${title}" 강의를 삭제하시겠습니까?\n수강생 페이지에서도 즉시 제거됩니다.`)) return;
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      const res = await fetch(`/api/admin-courses?id=${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${session?.access_token || ''}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '삭제 실패');
-      showToast('강의가 삭제되었습니다');
-      await loadCourses();
-    } catch (err) {
-      alert('삭제 중 오류: ' + err.message);
-    }
-  }
-
-  function showToast(msg) {
-    let t = document.getElementById('toast-msg');
-    if (!t) {
-      t = document.createElement('div');
-      t.id = 'toast-msg';
-      t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1A1A1A;color:white;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:500;z-index:50;transition:all 0.3s;';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
-    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 2500);
+    grid.innerHTML = courses.map(c => {
+      const isGame = !!c.game_type;
+      const typeLabel = isGame ? '게임 강의' : '일반 강의';
+      const typeColor = isGame ? '#7C3AED' : '#1A1A1A';
+      const typeBg    = isGame ? '#F5F3FF' : '#F5F3F0';
+      return `
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+          <div style="height:64px;background:${c.color || '#1A1A1A'};"></div>
+          <div class="p-5">
+            <div class="flex items-start justify-between mb-2">
+              <p class="text-base font-bold text-gray-900 leading-snug">${escapeHtml(c.title)}</p>
+              <span class="text-xs px-2.5 py-1 rounded-full font-medium ml-2 flex-shrink-0" style="background:${typeBg};color:${typeColor};">${typeLabel}</span>
+            </div>
+            <p class="text-xs mb-4" style="color:#8C8984;">${escapeHtml(c.subtitle || '설명 없음')}</p>
+            <div class="flex flex-col gap-2 text-xs">
+              <div class="flex justify-between">
+                <span style="color:#B0ADA9;">페이지</span>
+                <code style="background:#F5F3F0;padding:2px 8px;border-radius:6px;color:#374151;">${escapeHtml(c.link)}</code>
+              </div>
+              ${isGame ? `
+              <div class="flex justify-between">
+                <span style="color:#B0ADA9;">게임 ID</span>
+                <code style="background:#F5F3F0;padding:2px 8px;border-radius:6px;color:#374151;">${escapeHtml(c.game_type)}</code>
+              </div>
+              <div class="flex justify-between">
+                <span style="color:#B0ADA9;">만점</span>
+                <span class="font-medium text-gray-700">${c.max_score ?? '-'}점</span>
+              </div>` : ''}
+              <div class="flex justify-between pt-1">
+                <span style="color:#B0ADA9;">상태</span>
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:${c.active?'#F0FDF4':'#F5F3F0'};color:${c.active?'#16A34A':'#6B7280'};">
+                  ${c.active ? '활성' : '비활성'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
   }
 
   loadCourses();
