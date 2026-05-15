@@ -200,6 +200,15 @@
       <div>
         <button id="ai-gen-btn" class="btn-sm btn-outline w-full" onclick="generateAiTemplate()">AI로 메일 자동 생성</button>
       </div>
+      <div id="ai-progress-wrap" class="hidden">
+        <div class="flex justify-between mb-1.5">
+          <span class="text-xs text-gray-500">AI 생성 중...</span>
+          <span id="ai-progress-pct" class="text-xs font-medium text-gray-700">0%</span>
+        </div>
+        <div class="w-full rounded-full overflow-hidden" style="height:6px;background:#F0EDEA;">
+          <div id="ai-progress-bar" style="height:100%;width:0%;background:#1A1A1A;border-radius:99px;transition:width 0.3s ease;"></div>
+        </div>
+      </div>
       <div id="ai-preview-wrap" class="hidden">
         <div class="rounded-xl border border-gray-200 overflow-hidden" style="height:220px;">
           <iframe id="ai-preview-frame" style="width:100%;height:100%;border:none;"></iframe>
@@ -363,11 +372,37 @@
   function closeSendModal() { document.getElementById('send-modal').classList.add('hidden'); }
   function closeSendOnBackdrop(e) { if (e.target === document.getElementById('send-modal')) closeSendModal(); }
 
+  function startProgress() {
+    const wrap = document.getElementById('ai-progress-wrap');
+    const bar  = document.getElementById('ai-progress-bar');
+    const pct  = document.getElementById('ai-progress-pct');
+    wrap.classList.remove('hidden');
+    let current = 0;
+    const targets = [15, 35, 55, 72, 85, 92];
+    let step = 0;
+    const timer = setInterval(() => {
+      if (step >= targets.length) return;
+      current = targets[step++];
+      bar.style.width = current + '%';
+      pct.textContent = current + '%';
+    }, 600);
+    return { timer, bar, pct, wrap };
+  }
+
+  function finishProgress({ timer, bar, pct, wrap }) {
+    clearInterval(timer);
+    bar.style.width = '100%';
+    pct.textContent = '100%';
+    setTimeout(() => wrap.classList.add('hidden'), 600);
+  }
+
   async function generateAiTemplate() {
     const btn = document.getElementById('ai-gen-btn');
     const errEl = document.getElementById('send-error');
     errEl.classList.add('hidden');
+    document.getElementById('ai-preview-wrap').classList.add('hidden');
     btn.disabled = true; btn.textContent = '생성 중...';
+    const progress = startProgress();
 
     try {
       const { data: { session } } = await sb.auth.getSession();
@@ -385,10 +420,12 @@
       document.getElementById('ai-subject-display').textContent = aiTemplate.subject;
       document.getElementById('ai-preview-wrap').classList.remove('hidden');
     } catch (err) {
+      finishProgress(progress);
       errEl.textContent = '오류: ' + err.message;
       errEl.classList.remove('hidden');
     } finally {
-      btn.disabled = false; btn.textContent = '생성';
+      finishProgress(progress);
+      btn.disabled = false; btn.textContent = 'AI로 메일 자동 생성';
     }
   }
 
