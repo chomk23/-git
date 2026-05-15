@@ -149,15 +149,10 @@
             <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">발송일</th>
             <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">메일 유형</th>
             <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">발송 수</th>
-            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">클릭 수</th>
-            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">클릭률</th>
-            <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">상태</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td colspan="7" class="text-center py-10 text-sm" style="color:#B0ADA9;">아직 진행된 훈련 회차가 없습니다.<br><span class="text-xs">"훈련 메일 발송" 버튼으로 훈련을 시작하세요.</span></td>
-          </tr>
+        <tbody id="sessions-tbody">
+          <tr><td colspan="4" class="text-center py-10 text-sm" style="color:#B0ADA9;">불러오는 중...</td></tr>
         </tbody>
       </table>
     </div>
@@ -201,13 +196,9 @@
       </button>
     </div>
     <div class="flex flex-col gap-4">
-      <div class="rounded-2xl p-4" style="background:#FFFBEB;">
-        <p class="text-xs font-medium" style="color:#D97706;">Supabase + Resend 연동 후 실제 발송이 가능합니다</p>
-        <p class="text-xs mt-1" style="color:#92400E;">현재는 데모 미리보기 모드입니다. 실제 메일은 발송되지 않습니다.</p>
-      </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1.5">피싱 메일 유형</label>
-        <select class="w-full rounded-xl border border-gray-200 p-2.5 text-sm outline-none focus:border-gray-800" style="background:#FAF9F7;">
+        <select id="send-email-type" class="w-full rounded-xl border border-gray-200 p-2.5 text-sm outline-none focus:border-gray-800" style="background:#FAF9F7;">
           <option>계정 보안 알림 (네이버)</option>
           <option>비밀번호 변경 요청 (카카오)</option>
           <option>업무 공유 문서 (Google Docs)</option>
@@ -217,12 +208,12 @@
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-2">발송 대상 (<span id="send-target-count">전체</span>)</label>
-        <div class="flex flex-col gap-1.5" id="target-list" style="max-height:180px;overflow-y:auto;">
-        </div>
+        <div class="flex flex-col gap-1.5" id="target-list" style="max-height:180px;overflow-y:auto;"></div>
       </div>
+      <div id="send-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2;color:#DC2626;"></div>
       <div class="flex gap-2 pt-1">
         <button class="btn-sm btn-outline flex-1" onclick="closeSendModal()">취소</button>
-        <button class="btn-sm btn-dark flex-1" onclick="sendDemo()">발송 (데모)</button>
+        <button class="btn-sm btn-dark flex-1" id="send-btn" onclick="sendPhishing()">메일 발송</button>
       </div>
     </div>
   </div>
@@ -247,6 +238,7 @@
 
     phishingData = data.map(r => ({
       name: r.name,
+      email: r.email,
       dept: r.dept || '미지정',
       clicked: r.phishing_clicked || false,
       completion: r.completion || 0,
@@ -331,13 +323,31 @@
     await loadPhishing();
   }
 
+  async function loadSessions() {
+    const { data } = await sb.from('phishing_sessions').select('*').order('sent_at', { ascending: false });
+    const tbody = document.getElementById('sessions-tbody');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-sm" style="color:#B0ADA9;">아직 진행된 훈련 회차가 없습니다.<br><span class="text-xs">"훈련 메일 발송" 버튼으로 훈련을 시작하세요.</span></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map((s, i) => `
+      <tr style="border-bottom:1px solid #F5F3F0;">
+        <td class="py-3 text-sm text-gray-700">${data.length - i}회차</td>
+        <td class="py-3 text-sm text-gray-600">${s.sent_at ? s.sent_at.slice(0,10) : '-'}</td>
+        <td class="py-3 text-sm text-gray-600">${s.email_type}</td>
+        <td class="py-3 text-sm text-gray-600">${s.sent_count}명</td>
+      </tr>`).join('');
+  }
+
   loadPhishing();
+  loadSessions();
 
   // 모달
   function openSendModal() {
+    document.getElementById('send-error').classList.add('hidden');
     document.getElementById('target-list').innerHTML = phishingData.map((u, i) => `
       <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 cursor-pointer">
-        <input type="checkbox" checked class="rounded" id="target-${i}">
+        <input type="checkbox" checked class="rounded" id="target-${i}" data-email="${u.email}" data-name="${u.name}">
         <span class="text-sm text-gray-700">${u.name}</span>
         <span class="text-xs ml-auto" style="color:#B0ADA9;">${u.dept}</span>
       </label>`).join('');
@@ -345,9 +355,46 @@
   }
   function closeSendModal() { document.getElementById('send-modal').classList.add('hidden'); }
   function closeSendOnBackdrop(e) { if (e.target === document.getElementById('send-modal')) closeSendModal(); }
-  function sendDemo() {
-    closeSendModal();
-    alert('데모 모드: 피싱 훈련 메일이 발송되었습니다.\nSupabase + Resend 연동 후 실제 발송이 가능합니다.');
+
+  async function sendPhishing() {
+    const btn = document.getElementById('send-btn');
+    const errEl = document.getElementById('send-error');
+    errEl.classList.add('hidden');
+
+    const emailType = document.getElementById('send-email-type').value;
+    const targets = phishingData
+      .filter((u, i) => document.getElementById(`target-${i}`)?.checked)
+      .map(u => ({ email: u.email, name: u.name }));
+
+    if (targets.length === 0) {
+      errEl.textContent = '발송 대상을 1명 이상 선택하세요.';
+      errEl.classList.remove('hidden'); return;
+    }
+
+    btn.disabled = true; btn.textContent = '발송 중...';
+
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch('/api/send-phishing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`,
+        },
+        body: JSON.stringify({ emailType, targets }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '발송 실패');
+
+      closeSendModal();
+      showToast(`${data.sent}명에게 피싱 훈련 메일을 발송했습니다`);
+      await loadSessions();
+    } catch (err) {
+      errEl.textContent = '오류: ' + err.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = '메일 발송';
+    }
   }
 </script>
 </body>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 교육 — 피싱 메일 주의</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>* { font-family: 'Noto Sans KR', sans-serif; } body { background: #ECEAE6; }</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-lg">
+
+    <!-- 경고 카드 -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm text-center">
+      <div class="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center" style="background:#FEF2F2;">
+        <svg class="w-10 h-10" style="color:#DC2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+      </div>
+
+      <h1 class="text-xl font-bold text-gray-900 mb-2">피싱 메일을 클릭하셨습니다</h1>
+      <p class="text-sm mb-6" style="color:#8C8984;">방금 클릭하신 링크는 <strong>모의 피싱 훈련</strong>의 일부입니다.<br>실제 피싱 메일이었다면 개인정보가 탈취될 수 있었습니다.</p>
+
+      <!-- 구분선 -->
+      <div class="h-px mb-6" style="background:#F0EDEA;"></div>
+
+      <!-- 피싱 메일 특징 -->
+      <div class="text-left mb-6">
+        <p class="text-sm font-semibold text-gray-900 mb-3">피싱 메일을 구별하는 방법</p>
+        <div class="flex flex-col gap-2.5">
+          <div class="flex gap-3 items-start">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:#FEF2F2;">
+              <span class="text-xs font-bold" style="color:#DC2626;">1</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">발신자 주소 확인</p>
+              <p class="text-xs mt-0.5" style="color:#8C8984;">공식 도메인(@naver.com, @kakao.com)이 아닌 경우 의심하세요.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-start">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:#FEF2F2;">
+              <span class="text-xs font-bold" style="color:#DC2626;">2</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">링크 URL 확인</p>
+              <p class="text-xs mt-0.5" style="color:#8C8984;">클릭 전 링크 주소를 확인하고, 낯선 도메인이면 접속하지 마세요.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-start">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:#FEF2F2;">
+              <span class="text-xs font-bold" style="color:#DC2626;">3</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">긴박감·두려움 유발 문구</p>
+              <p class="text-xs mt-0.5" style="color:#8C8984;">"즉시 확인", "계정 정지" 등 급박한 행동을 요구하면 의심하세요.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-start">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:#FEF2F2;">
+              <span class="text-xs font-bold" style="color:#DC2626;">4</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">개인정보·비밀번호 요구</p>
+              <p class="text-xs mt-0.5" style="color:#8C8984;">정상 서비스는 이메일로 비밀번호나 인증 코드를 요청하지 않습니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl p-4 text-left mb-6" style="background:#F0FDF4;">
+        <p class="text-sm font-medium text-gray-800 mb-1">앞으로 이렇게 하세요</p>
+        <p class="text-xs" style="color:#16A34A;">의심스러운 메일을 받으면 링크를 클릭하지 말고 보안담당자에게 즉시 신고하세요.</p>
+      </div>
+
+      <p class="text-xs" style="color:#B0ADA9;">이 훈련 결과는 보안 담당자에게 기록되었습니다.</p>
+    </div>
+
+  </div>
+</body>
+</html>
