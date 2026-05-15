@@ -63,6 +63,9 @@
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1.5">비밀번호</label>
           <input id="password" type="password" class="input-field" placeholder="비밀번호 입력" required autocomplete="current-password">
+          <div id="capslock-msg" class="hidden mt-1.5 text-xs px-3 py-1.5 rounded-xl" style="background:#FFFBEB; color:#D97706;">
+            Caps Lock이 켜져 있습니다
+          </div>
         </div>
         <div class="pt-1">
           <button type="submit" id="login-btn" class="btn-primary">로그인</button>
@@ -84,6 +87,13 @@
       const u = JSON.parse(stored);
       location.href = u.role === 'admin' ? 'admin.html' : 'index.html';
     }
+
+    // ── Caps Lock 감지 ──
+    const pwInput = document.getElementById('password');
+    const capsMsg = document.getElementById('capslock-msg');
+    pwInput.addEventListener('keyup', (e) => {
+      capsMsg.classList.toggle('hidden', !e.getModifierState('CapsLock'));
+    });
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
