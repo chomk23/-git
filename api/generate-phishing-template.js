@@ -106,13 +106,17 @@ ${description
 7. "무료", "긴급", "당첨", "지금 즉시", "100%" 같은 스팸 키워드 금지
 8. 제목은 자연스럽게 (느낌표/대문자 남용 금지)
 
-아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
-{
-  "from": "발신자 표시 이름 (예: NAVER 보안센터)",
-  "subject": "이메일 제목",
-  "html": "위 구조를 따른 전체 HTML",
-  "text": "이메일 본문의 plain text 버전 (HTML 태그 없이, 줄바꿈 포함)"
-}`;
+아래 형식으로만 응답하세요 (구분자를 정확히 지키고, 다른 설명 텍스트 없이):
+
+===FROM===
+발신자 표시 이름 (예: NAVER 보안센터)
+===SUBJECT===
+이메일 제목
+===HTML===
+위 구조를 따른 전체 HTML
+===TEXT===
+이메일 본문의 plain text 버전 (HTML 태그 없이, 줄바꿈 포함)
+===END===`;
 
   try {
     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -133,10 +137,20 @@ ${description
     const raw = aiData?.content?.[0]?.text?.trim();
     if (!raw) throw new Error('AI 응답 없음');
 
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('JSON 파싱 실패');
+    const extract = (label, nextLabel) => {
+      const re = new RegExp(`===${label}===\\s*([\\s\\S]*?)\\s*===${nextLabel}===`);
+      const m = raw.match(re);
+      return m ? m[1].trim() : '';
+    };
 
-    const template = JSON.parse(jsonMatch[0]);
+    const template = {
+      from:    extract('FROM', 'SUBJECT'),
+      subject: extract('SUBJECT', 'HTML'),
+      html:    extract('HTML', 'TEXT'),
+      text:    extract('TEXT', 'END'),
+    };
+
+    if (!template.html) throw new Error('AI 응답 형식 오류');
     return res.status(200).json({ success: true, template });
   } catch (err) {
     console.error('generate-phishing-template error:', err);
