@@ -1020,11 +1020,20 @@ function answerScen(i){
 // 엔딩 (Supabase 점수 저장 포함)
 // ──────────────────────────────────────────────────────────────────────────
 function showEnding(){
-  // Supabase에 게임 점수 저장
-  try {
-    var u=JSON.parse(sessionStorage.getItem('user')||'{}');
-    if(u.email) sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:G.score});
-  } catch(e){}
+  // Supabase에 게임 점수 저장 + profiles.completion 업데이트
+  (async function(){
+    try {
+      var u=JSON.parse(sessionStorage.getItem('user')||'{}');
+      if(!u.email) return;
+      await sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:G.score});
+      // 완료된 게임 수로 completion % 계산
+      var res=await sb.from('game_scores').select('game_type').eq('user_email',u.email);
+      var types=new Set((res.data||[]).map(function(s){return s.game_type;}));
+      types.add('cyberguard');
+      var completion=Math.min(100, Math.round(types.size/5*100));
+      await sb.from('profiles').update({completion:completion}).eq('email',u.email);
+    } catch(e){}
+  })();
 
   showScr('ENDING');
   running=false;
