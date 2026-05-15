@@ -8,7 +8,10 @@ export default async function handler(req, res) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const resendKey   = process.env.RESEND_API_KEY;
-  const siteUrl     = (process.env.SITE_URL || '').replace(/\/$/, '');
+  const rawSiteUrl  = process.env.SITE_URL
+    || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '')
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
+  const siteUrl     = rawSiteUrl.replace(/\/$/, '');
 
   if (!supabaseUrl || !serviceKey || !resendKey || !siteUrl) {
     return res.status(500).json({ error: '환경변수가 설정되지 않았습니다.' });
