@@ -27,11 +27,12 @@ export default async function handler(req, res) {
   if (profiles?.[0]?.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
 
   const { description } = req.body || {};
-  if (!description) return res.status(400).json({ error: 'description이 필요합니다.' });
 
   const prompt = `당신은 사이버 보안 교육 전문가입니다. 보안 인식 훈련용 모의 피싱 이메일 HTML을 생성해주세요.
 
-요청: "${description}"
+${description
+  ? `요청: "${description}"`
+  : `요청: 자유롭게 선택하세요. 실제로 많이 쓰이는 피싱 유형 중 하나를 랜덤으로 골라 만들어주세요. (예: 금융기관 사칭, 택배 알림, 정부기관 환급, 포털 계정 보안, 기업 내부 문서 공유, 이벤트 당첨 등 다양하게)`}
 
 다음 규칙을 반드시 따르세요:
 1. 실제 해당 서비스처럼 보이는 디자인 (브랜드 색상, 로고 텍스트 등)

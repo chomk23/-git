@@ -211,9 +211,10 @@
       <!-- AI 생성 영역 (AI 유형 선택 시 표시) -->
       <div id="ai-gen-wrap" class="hidden flex flex-col gap-3">
         <div class="flex gap-2">
-          <input id="ai-description" type="text" placeholder="예: 삼성카드 이상거래 감지 알림, 건강보험공단 환급 안내..." class="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm outline-none focus:border-gray-800" style="background:#FAF9F7;">
+          <input id="ai-description" type="text" placeholder="예: 삼성카드 이상거래 감지 알림 (비워두면 AI가 랜덤으로 생성)" class="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm outline-none focus:border-gray-800" style="background:#FAF9F7;">
           <button id="ai-gen-btn" class="btn-sm btn-dark whitespace-nowrap" onclick="generateAiTemplate()">생성</button>
         </div>
+        <button class="btn-sm btn-outline w-full text-xs" style="color:#8C8984;" onclick="document.getElementById('ai-description').value=''; generateAiTemplate()">AI가 알아서 랜덤 생성</button>
         <div id="ai-preview-wrap" class="hidden">
           <div class="rounded-xl border border-gray-200 overflow-hidden" style="height:220px;">
             <iframe id="ai-preview-frame" style="width:100%;height:100%;border:none;"></iframe>
