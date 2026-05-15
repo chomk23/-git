@@ -216,7 +216,7 @@
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-500 mb-2">발송 대상 (전체 8명)</label>
+        <label class="block text-xs font-medium text-gray-500 mb-2">발송 대상 (<span id="send-target-count">전체</span>)</label>
         <div class="flex flex-col gap-1.5" id="target-list" style="max-height:180px;overflow-y:auto;">
         </div>
       </div>
@@ -259,6 +259,7 @@
     const safeRate   = total ? 100 - clickRate : 0;
 
     document.getElementById('kpi-total').textContent      = total + '명';
+    document.getElementById('send-target-count').textContent = '전체 ' + total + '명';
     document.getElementById('kpi-click-rate').textContent = clickRate + '%';
     document.getElementById('kpi-click-sub').textContent  = `${clickCount}명 클릭`;
     document.getElementById('kpi-safe-rate').textContent  = safeRate + '%';
