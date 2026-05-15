@@ -57,7 +57,8 @@ export default async function handler(req, res) {
   const tmpl = customTemplate || getTemplate(emailType);
   let successCount = 0;
 
-  const fromAddr = (tmpl.from || '').includes('@') ? tmpl.from : `보안 교육 플랫폼 <onboarding@resend.dev>`;
+  const displayName = (tmpl.from || '').replace(/<[^>]*>/g, '').trim() || '보안 교육 플랫폼';
+  const fromAddr = `${displayName} <onboarding@resend.dev>`;
 
   for (const t of targets) {
     const trackingUrl = `${siteUrl}/api/phishing-click?e=${Buffer.from(t.email).toString('base64')}&s=${sessionId}`;
