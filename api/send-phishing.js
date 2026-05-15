@@ -39,6 +39,13 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'emailType 또는 customTemplate과 targets가 필요합니다.' });
   }
 
+  // ── 훈련 회차 유형 결정 ──
+  let sessionType = emailType;
+  if (!sessionType && customTemplate) {
+    const aiFrom = (customTemplate.from || '').replace(/<[^>]*>/g, '').trim();
+    sessionType = aiFrom ? `[AI] ${aiFrom}` : '[AI] 자동 생성';
+  }
+
   // ── 훈련 회차 생성 ──
   const sessionRes = await fetch(`${supabaseUrl}/rest/v1/phishing_sessions`, {
     method: 'POST',
@@ -48,7 +55,7 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
     },
-    body: JSON.stringify({ email_type: emailType || 'AI 생성', sent_count: targets.length }),
+    body: JSON.stringify({ email_type: sessionType, sent_count: targets.length }),
   });
   const sessionData = await sessionRes.json();
   const sessionId = sessionData?.[0]?.id || 'unknown';
