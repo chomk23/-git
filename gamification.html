@@ -477,9 +477,10 @@ function nextPhishing() {
   if(pIdx>=emails.length) {
     document.getElementById('phishing-game').style.display='none';
     document.getElementById('phishing-result').style.display='block';
-    document.getElementById('phishing-final-score').textContent=pScore;
-    saveScore('phishing', pScore);
-    const p=pScore/300;
+    const finalScore=Math.min(100, Math.round(pScore/300*100));
+    document.getElementById('phishing-final-score').textContent=finalScore;
+    saveScore('phishing', finalScore);
+    const p=finalScore/100;
     document.getElementById('phishing-grade').textContent=p>=0.9?'탁월한 탐정!':p>=0.7?'훌륭한 탐정!':p>=0.5?'보통 탐정':'탐정 견습생';
     document.getElementById('phishing-comment').textContent=p>=0.7?'피싱 메일 판별 능력이 뛰어납니다.':'피싱 징후를 다시 복습해보세요.';
   } else renderPhishingEmail();
@@ -585,8 +586,9 @@ function answerOX(ans){
 function showOXResult(){
   document.getElementById('ox-game').style.display='none';
   document.getElementById('ox-result').style.display='block';
-  document.getElementById('ox-final-score').textContent=oxScore+'점';
-  saveScore('ox', oxScore);
+  const oxFinal=Math.min(100, Math.round(oxScore/500*100));
+  document.getElementById('ox-final-score').textContent=oxFinal+'점';
+  saveScore('ox', oxFinal);
   document.getElementById('ox-correct-count').textContent=oxCorrect;
   document.getElementById('ox-wrong-count').textContent=oxQ.length-oxCorrect;
   document.getElementById('ox-max-streak').textContent=oxMaxStreak;
@@ -654,7 +656,7 @@ function nextPW(){
   if(pwStage>=pwStages.length){
     document.getElementById('pw-game').style.display='none';
     document.getElementById('pw-result').style.display='block';
-    saveScore('password', 200);
+    saveScore('password', 100);
   } else {
     document.getElementById('pw-input').value='';
     renderPWStage();
@@ -740,7 +742,7 @@ function showBudgetResult(blocked){
   document.getElementById('budget-attack').style.display='none';
   document.getElementById('budget-result').style.display='block';
   const breached=attacks.length-blocked;
-  const score=Math.round((blocked/attacks.length)*400);
+  const score=Math.round((blocked/attacks.length)*100);
   saveScore('budget', score);
   document.getElementById('budget-blocked').textContent=blocked;
   document.getElementById('budget-breached').textContent=breached;

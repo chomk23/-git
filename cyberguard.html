@@ -1020,23 +1020,26 @@ function answerScen(i){
 // 엔딩 (Supabase 점수 저장 포함)
 // ──────────────────────────────────────────────────────────────────────────
 function showEnding(){
+  // 0~100점으로 스케일링 (원래 max ~1200)
+  var finalScore=Math.min(100, Math.round(G.score/1200*100));
+
   // Supabase에 게임 점수 저장
   (async function(){
     try {
       var u=JSON.parse(sessionStorage.getItem('user')||'{}');
       if(!u.email) return;
-      await sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:G.score});
+      await sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:finalScore});
     } catch(e){}
   })();
 
   showScr('ENDING');
   running=false;
-  document.getElementById('endSc').textContent=G.score;
+  document.getElementById('endSc').textContent=finalScore;
   document.getElementById('endLv').textContent=G.level;
   document.getElementById('endBg').textContent=G.badges.length;
   var ico, t, s;
-  if(G.score>=2500){ico='🏆'; t='사이버 보안 전문가!'; s='완벽합니다! 모든 위협을 막아냈어요.';}
-  else if(G.score>=1500){ico='🥈'; t='훌륭한 보안 수호자!'; s='대부분의 위협을 잘 막아냈습니다!';}
+  if(finalScore>=85){ico='🏆'; t='사이버 보안 전문가!'; s='완벽합니다! 모든 위협을 막아냈어요.';}
+  else if(finalScore>=60){ico='🥈'; t='훌륭한 보안 수호자!'; s='대부분의 위협을 잘 막아냈습니다!';}
   else {ico='📚'; t='보안 교육이 더 필요해요'; s='다시 도전해서 더 높은 점수에 도전!';}
   document.getElementById('endIco').textContent=ico;
   document.getElementById('endTitle').textContent=t;
