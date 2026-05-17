@@ -600,57 +600,8 @@
   function getCourseImage(gameType, color) {
     if (gameType === 'security_race') {
       return `
-        <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;display:block;">
-          <defs>
-            <radialGradient id="raceSky" cx="50%" cy="100%" r="80%">
-              <stop offset="0%" stop-color="#ff2d95" stop-opacity="0.7"/>
-              <stop offset="50%" stop-color="#b026ff" stop-opacity="0.5"/>
-              <stop offset="100%" stop-color="#0a0118"/>
-            </radialGradient>
-            <linearGradient id="raceRoad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#2a0e58"/>
-              <stop offset="100%" stop-color="#1a0838"/>
-            </linearGradient>
-          </defs>
-          <rect width="320" height="180" fill="url(#raceSky)"/>
-          <g fill="#fff">
-            <rect x="22" y="22" width="2" height="2"/>
-            <rect x="58" y="14" width="2" height="2"/>
-            <rect x="96" y="30" width="2" height="2"/>
-            <rect x="138" y="18" width="2" height="2"/>
-            <rect x="186" y="26" width="2" height="2"/>
-            <rect x="232" y="14" width="2" height="2"/>
-            <rect x="276" y="34" width="2" height="2"/>
-            <rect x="44" y="46" width="2" height="2"/>
-            <rect x="118" y="52" width="2" height="2"/>
-            <rect x="208" y="48" width="2" height="2"/>
-            <rect x="288" y="58" width="2" height="2"/>
-            <rect x="14" y="70" width="2" height="2"/>
-          </g>
-          <path d="M 0,180 L 60,180 Q 90,120 160,108 Q 230,96 260,40 L 320,40 L 320,180 Z" fill="url(#raceRoad)" stroke="#ff2d95" stroke-width="2"/>
-          <path d="M 0,180 L 60,180 Q 90,120 160,108 Q 230,96 260,40 L 320,40" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.85"/>
-          <g>
-            <rect x="92" y="128" width="14" height="20" fill="#ff2d95" stroke="#fff200" stroke-width="1"/>
-            <rect x="94" y="130" width="10" height="6" fill="#00f0ff"/>
-            <rect x="92" y="146" width="3" height="3" fill="#fff"/>
-            <rect x="103" y="146" width="3" height="3" fill="#fff"/>
-          </g>
-          <g>
-            <rect x="178" y="92" width="13" height="18" fill="#00f0ff" stroke="#fff200" stroke-width="1"/>
-            <rect x="180" y="94" width="9" height="5" fill="#ff2d95"/>
-            <rect x="178" y="108" width="3" height="3" fill="#fff"/>
-            <rect x="188" y="108" width="3" height="3" fill="#fff"/>
-          </g>
-          <g>
-            <rect x="244" y="56" width="12" height="16" fill="#39ff14" stroke="#fff200" stroke-width="1"/>
-            <rect x="246" y="58" width="8" height="4" fill="#b026ff"/>
-            <rect x="244" y="70" width="3" height="3" fill="#fff"/>
-            <rect x="253" y="70" width="3" height="3" fill="#fff"/>
-          </g>
-          <g font-family="monospace" font-size="9" font-weight="bold" fill="#fff200" style="text-shadow:0 0 4px #fff200;">
-            <text x="14" y="22">RACE</text>
-          </g>
-        </svg>`;
+        <img src="./images/race-cover.png" alt="Security Racing" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;">
+        <div style="position:absolute;top:10px;right:14px;font-family:'Courier New',ui-monospace,monospace;font-weight:900;font-size:13px;letter-spacing:2px;color:#fff;text-shadow:0 0 6px #ff2d95,0 0 12px #ff2d95,0 0 20px rgba(255,45,149,0.6),0 1px 0 rgba(0,0,0,0.4);text-transform:uppercase;pointer-events:none;">Security Racing</div>`;
     }
     if (gameType === 'cyberguard') {
       return `
