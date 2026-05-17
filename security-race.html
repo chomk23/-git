@@ -425,18 +425,17 @@
         0 0 10px var(--neon-cyan);
     }
 
-    /* Finish gate — perpendicular to track at the end */
+    /* Finish gate — perpendicular checkered strip across the road */
     .finish-gate {
       position: absolute;
-      width: 26px; height: 200px;
+      width: 22px; height: 180px;
       transform: translate(-50%, -50%);
+      background-color: white;
       background-image:
-        repeating-conic-gradient(
-          from 0deg at 50% 50%,
-          white 0 90deg,
-          var(--bg-deep) 90deg 180deg
-        );
-      background-size: 13px 13px;
+        linear-gradient(45deg, var(--bg-deep) 25%, transparent 25%, transparent 75%, var(--bg-deep) 75%),
+        linear-gradient(45deg, var(--bg-deep) 25%, transparent 25%, transparent 75%, var(--bg-deep) 75%);
+      background-size: 22px 22px;
+      background-position: 0 0, 11px 11px;
       box-shadow:
         0 0 0 3px var(--bg-deep),
         0 0 0 6px var(--neon-yellow),
@@ -565,11 +564,21 @@
       to   { opacity: 1;   transform: translateY(-50%) scaleX(1.25); }
     }
 
-    .shake { animation: shake 0.4s; }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
+    /* 오답 시: transform은 JS rotate로 매 프레임 갱신되므로 transform 대신
+       filter만 건드려서 빨간 플래시 효과를 준다. transform을 만지면
+       회전이 잠시 사라져 차가 90° 돌아 보임. */
+    .shake { animation: hit-flash 0.4s; }
+    @keyframes hit-flash {
+      0%, 100% {
+        filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7));
+      }
+      40% {
+        filter:
+          drop-shadow(0 0 14px var(--neon-pink))
+          drop-shadow(0 0 24px var(--neon-pink))
+          drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7))
+          brightness(1.4) saturate(2);
+      }
     }
 
     /* ── QUESTION CARD ──────────────────────────────────────── */
@@ -1079,7 +1088,7 @@ const QUESTIONS = [
 const RACE_TIME      = 60;
 const WORLD_WIDTH    = 2400;
 const WORLD_HEIGHT   = 1600;
-const LANE_OFFSET    = 30;
+const LANE_OFFSET    = 57;  // 도로 너비 172/3 ≈ 57 — 각 차선 중심
 const PLAYER_BASE    = 1.0;
 const PLAYER_BOOST   = 2.5;
 const AI1_SPEED      = 1.5;
