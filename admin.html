@@ -218,7 +218,7 @@
   async function loadDashboard() {
     const [profileRes, scoreRes, courseRes] = await Promise.all([
       sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true }),
-      sb.from('game_scores').select('user_email, game_type, score'),
+      sb.from('game_scores').select('user_email, game_type, score, played_at'),
       sb.from('courses').select('game_type, active'),
     ]);
     if (profileRes.error || !profileRes.data) return;
@@ -291,28 +291,29 @@
       </tr>`;
     }).join('');
 
-    // ── 부서별 이수율 계산 ──
+    // ── 부서별 평균 이수율 계산 ──
     const deptMap = {};
     users.forEach(u => {
-      if (!deptMap[u.dept]) deptMap[u.dept] = { total: 0, done: 0 };
-      deptMap[u.dept].total++;
-      if (u.completion === 100) deptMap[u.dept].done++;
+      if (!deptMap[u.dept]) deptMap[u.dept] = { count: 0, sum: 0 };
+      deptMap[u.dept].count++;
+      deptMap[u.dept].sum += u.completion;
     });
     const deptLabels = Object.keys(deptMap);
-    const deptRates  = deptLabels.map(d => deptMap[d].total ? Math.round(deptMap[d].done / deptMap[d].total * 100) : 0);
+    const deptRates  = deptLabels.map(d => deptMap[d].count ? Math.round(deptMap[d].sum / deptMap[d].count) : 0);
     chartData.dept.labels   = deptLabels.length ? deptLabels : ['데이터 없음'];
     chartData.dept.datasets[0].data = deptLabels.length ? deptRates : [0];
-    chartData.dept.datasets[0].backgroundColor = deptRates.map(r => r === 100 ? '#16A34A' : r >= 60 ? '#1A1A1A' : '#DC2626');
+    chartData.dept.datasets[0].backgroundColor = deptRates.map(r => r === 100 ? '#16A34A' : r >= 60 ? '#1A1A1A' : r > 0 ? '#D97706' : '#DC2626');
 
     // 부서별 이수율 사이드바 렌더링
     const deptSidebar = document.getElementById('dept-sidebar');
     if (deptLabels.length) {
       deptSidebar.innerHTML = deptLabels.map((d, i) => {
         const r = deptRates[i];
-        const color = r === 100 ? '#16A34A' : r >= 60 ? '#1A1A1A' : '#DC2626';
+        const color = r === 100 ? '#16A34A' : r >= 60 ? '#1A1A1A' : r > 0 ? '#D97706' : '#DC2626';
         return `<div>
           <div class="flex justify-between text-xs mb-1"><span class="text-gray-600">${d}</span><span class="font-medium text-gray-900">${r}%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width:${r}%; background:${color};"></div></div>
+          <p class="text-xs mt-0.5" style="color:#B0ADA9;">${deptMap[d].count}명 평균</p>
         </div>`;
       }).join('');
     } else {
@@ -337,6 +338,45 @@
       chartData.score.datasets[0].data = gAvg;
     }
 
+    // ── 이수율 추이 (일별 누적 평균) ──
+    if (scores.length && users.length && totalGames > 0) {
+      const validScores = scores.filter(s => s.played_at && courseGameTypes.has(s.game_type));
+      if (validScores.length) {
+        const dayMs = 86400 * 1000;
+        const firstDate = new Date(validScores.reduce((min, s) => s.played_at < min ? s.played_at : min, validScores[0].played_at));
+        firstDate.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const maxDays = 30;
+        const diffDays = Math.floor((today - firstDate) / dayMs) + 1;
+        const numDays = Math.min(maxDays, Math.max(1, diffDays));
+        const startDate = new Date(today.getTime() - (numDays - 1) * dayMs);
+
+        const userEmails = users.map(u => u.email);
+        const labels = [];
+        const data = [];
+
+        for (let i = 0; i < numDays; i++) {
+          const d = new Date(startDate.getTime() + i * dayMs);
+          const cutoff = new Date(d.getTime() + dayMs - 1);  // 그 날 23:59:59
+          // 그 시점까지의 각 사용자별 unique 게임 종류
+          const seen = {};
+          validScores.forEach(s => {
+            if (new Date(s.played_at) <= cutoff) {
+              if (!seen[s.user_email]) seen[s.user_email] = new Set();
+              seen[s.user_email].add(s.game_type);
+            }
+          });
+          const avg = Math.round(userEmails.reduce((sum, e) => sum + ((seen[e]?.size || 0) / totalGames * 100), 0) / userEmails.length);
+          labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
+          data.push(avg);
+        }
+        chartData.completion.labels = labels;
+        chartData.completion.datasets[0].data = data;
+      }
+    }
+
     window._dashUsers = users;
     if (mainChart) buildChart(currentChartKey);
   }
@@ -349,10 +389,19 @@
 
   const chartData = {
     completion: {
-      title: '월별 이수율 추이 (수강생 데이터 누적 시 표시)',
-      type: 'bar',
+      title: '일별 평균 이수율 추이 (최근 30일)',
+      type: 'line',
       labels: ['데이터 없음'],
-      datasets: [{ label: '이수율 (%)', data: [0], backgroundColor: '#E4E1DD', borderRadius: 6 }]
+      datasets: [{
+        label: '평균 이수율 (%)',
+        data: [0],
+        borderColor: '#1A1A1A',
+        backgroundColor: 'rgba(26, 26, 26, 0.08)',
+        tension: 0.3,
+        fill: true,
+        pointBackgroundColor: '#1A1A1A',
+        pointRadius: 3,
+      }]
     },
     score: {
       title: '게임별 평균 점수',
@@ -381,6 +430,8 @@
     const d = chartData[key];
     document.getElementById('chart-title').textContent = d.title;
     if (mainChart) mainChart.destroy();
+    // 이수율/부서별 차트는 y축 0-100% 고정
+    const percentScale = (key === 'completion' || key === 'dept');
     mainChart = new Chart(document.getElementById('main-chart'), {
       type: d.type,
       data: { labels: d.labels, datasets: d.datasets },
@@ -389,7 +440,9 @@
         plugins: { legend: { labels: { font: { family: 'Noto Sans KR', size: 11 }, color: '#6B7280', boxWidth: 10 } } },
         scales: {
           x: { grid: { color: chartColors.grid }, ticks: { color: chartColors.text, font: { size: 11 } } },
-          y: { grid: { color: chartColors.grid }, ticks: { color: chartColors.text, font: { size: 11 } } },
+          y: percentScale
+            ? { beginAtZero: true, max: 100, grid: { color: chartColors.grid }, ticks: { color: chartColors.text, font: { size: 11 }, callback: v => v + '%' } }
+            : { beginAtZero: true, grid: { color: chartColors.grid }, ticks: { color: chartColors.text, font: { size: 11 } } },
         },
       }
     });
