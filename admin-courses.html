@@ -136,10 +136,10 @@
       </button>
     </div>
     <div class="flex flex-col gap-3">
-      <div id="e-max-score-wrap">
-        <label class="block text-xs font-medium text-gray-500 mb-1.5">게임 만점</label>
-        <input id="e-max-score" type="number" min="0" class="input-field" placeholder="100">
-        <p class="text-xs mt-1.5" style="color:#B0ADA9;">이 게임에서 받을 수 있는 최대 점수 (이수율/통과 판정 기준)</p>
+      <div id="e-pass-score-wrap">
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">통과 기준점수</label>
+        <input id="e-pass-score" type="number" min="0" max="100" class="input-field" placeholder="60">
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">수강생이 이 점수 이상을 받으면 "통과"로 표시됩니다 (모든 게임은 100점 만점). 기본값 60점.</p>
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1.5">정렬 순서</label>
@@ -217,8 +217,8 @@
                 <code style="background:#F5F3F0;padding:2px 8px;border-radius:6px;color:#374151;">${escapeHtml(c.game_type)}</code>
               </div>
               <div class="flex justify-between">
-                <span style="color:#B0ADA9;">만점</span>
-                <span class="font-medium text-gray-700">${c.max_score ?? '-'}점</span>
+                <span style="color:#B0ADA9;">통과 기준</span>
+                <span class="font-medium text-gray-700">${c.pass_score ?? 60}점 이상</span>
               </div>` : ''}
               <div class="flex justify-between pt-1">
                 <span style="color:#B0ADA9;">상태</span>
@@ -244,8 +244,8 @@
     if (!c) return;
     editingId = id;
     document.getElementById('e-course-name').textContent = c.title;
-    document.getElementById('e-max-score').value = c.max_score ?? 100;
-    document.getElementById('e-max-score-wrap').classList.toggle('hidden', !c.game_type);
+    document.getElementById('e-pass-score').value = c.pass_score ?? 60;
+    document.getElementById('e-pass-score-wrap').classList.toggle('hidden', !c.game_type);
     document.getElementById('e-active').checked = c.active !== false;
     document.getElementById('e-sort').value = c.sort_order ?? 0;
     document.getElementById('edit-error').classList.add('hidden');
@@ -265,7 +265,7 @@
       sort_order: parseInt(document.getElementById('e-sort').value) || 0,
     };
     if (c.game_type) {
-      patch.max_score = parseInt(document.getElementById('e-max-score').value) || 0;
+      patch.pass_score = parseInt(document.getElementById('e-pass-score').value) || 0;
     }
 
     const btn = document.getElementById('e-save-btn');

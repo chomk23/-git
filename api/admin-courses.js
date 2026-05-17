@@ -1,5 +1,5 @@
 // 관리자 전용: courses 행의 일부 필드를 수정
-// 허용 필드: max_score, active, title, subtitle, color, sort_order
+// 허용 필드: pass_score, active, title, subtitle, color, sort_order
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
   if (!id) return res.status(400).json({ error: 'id가 필요합니다.' });
 
   // 화이트리스트 필드만 허용
-  const ALLOWED = ['max_score', 'active', 'title', 'subtitle', 'color', 'sort_order'];
+  const ALLOWED = ['pass_score', 'active', 'title', 'subtitle', 'color', 'sort_order'];
   const patch = {};
   for (const k of ALLOWED) if (k in rawPatch) patch[k] = rawPatch[k];
   if (Object.keys(patch).length === 0) {
