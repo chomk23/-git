@@ -300,7 +300,7 @@
     // 데이터 fetch
     const [scoresRes, profileRes] = await Promise.all([
       sb.from('game_scores').select('*').eq('user_email', user.email).order('played_at', { ascending: true }),
-      sb.from('profiles').select('phishing_clicked, completion').eq('email', user.email).limit(1).single(),
+      sb.from('profiles').select('phishing_clicked').eq('email', user.email).limit(1).single(),
     ]);
     const scores = scoresRes.data || [];
     const profile = profileRes.data || {};
@@ -561,26 +561,18 @@
       const { data: scores } = await sb.from('game_scores')
         .select('*').eq('user_email', user.email);
 
-      if (scores && scores.length > 0) {
-        examScores = scores;
-        const completedTypes = new Set(scores.map(s => s.game_type));
+      examScores = scores || [];
+      if (examScores.length > 0) {
+        const completedTypes = new Set(examScores.map(s => s.game_type));
         courses.forEach(c => {
           if (c.gameType && completedTypes.has(c.gameType)) c.status = 'completed';
         });
         const best = {};
-        scores.forEach(s => { if (!best[s.game_type] || s.score > best[s.game_type]) best[s.game_type] = s.score; });
+        examScores.forEach(s => { if (!best[s.game_type] || s.score > best[s.game_type]) best[s.game_type] = s.score; });
         const total = Object.values(best).reduce((a, b) => a + b, 0);
         const maxTotal = courses.reduce((sum, c) => sum + (c.maxScore || 0), 0) || 2600;
         document.getElementById('security-score').textContent = total.toLocaleString();
         document.getElementById('score-bar').style.width = Math.min(100, Math.round(total / maxTotal * 100)) + '%';
-      } else {
-        // game_scores 조회 실패 시 profiles.completion으로 보완
-        const { data: prof } = await sb.from('profiles').select('completion').eq('email', user.email).limit(1);
-        const comp = prof?.[0]?.completion || 0;
-        if (comp > 0) {
-          const doneCount = Math.round(comp / 100 * courses.length);
-          courses.slice(0, doneCount).forEach(c => { c.status = 'completed'; });
-        }
       }
 
       updateBadges();

@@ -250,16 +250,29 @@
   let pfFilter = 'all';
 
   async function loadPhishing() {
-    const { data } = await sb.from('profiles').select('*').neq('role', 'admin');
-    if (!data) return;
+    const [profileRes, scoreRes, courseRes] = await Promise.all([
+      sb.from('profiles').select('*').neq('role', 'admin'),
+      sb.from('game_scores').select('user_email, game_type'),
+      sb.from('courses').select('game_type, active'),
+    ]);
+    if (!profileRes.data) return;
 
-    phishingData = data.map(r => ({
+    const courseGameTypes = new Set((courseRes.data || []).filter(c => c.active && c.game_type).map(c => c.game_type));
+    const totalGames = courseGameTypes.size;
+    const typesByUser = {};
+    (scoreRes.data || []).forEach(s => {
+      if (!courseGameTypes.has(s.game_type)) return;
+      if (!typesByUser[s.user_email]) typesByUser[s.user_email] = new Set();
+      typesByUser[s.user_email].add(s.game_type);
+    });
+
+    phishingData = profileRes.data.map(r => ({
       name: r.name,
       email: r.email,
       dept: r.dept || '미지정',
       clicked: r.phishing_clicked || false,
       clickedAt: r.phishing_clicked_at || null,
-      completion: r.completion || 0,
+      completion: totalGames ? Math.round((typesByUser[r.email]?.size || 0) / totalGames * 100) : 0,
     }));
 
     const total      = phishingData.length;

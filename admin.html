@@ -216,27 +216,34 @@
 
   // ── Supabase에서 데이터 로드 ──
   async function loadDashboard() {
-    const [profileRes, scoreRes] = await Promise.all([
+    const [profileRes, scoreRes, courseRes] = await Promise.all([
       sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true }),
       sb.from('game_scores').select('user_email, game_type, score'),
+      sb.from('courses').select('game_type, active'),
     ]);
     if (profileRes.error || !profileRes.data) return;
 
     const scores = scoreRes.data || [];
+    // 활성 강의 중 게임 ID가 있는 것만 카운트 (이수율 분모)
+    const courseGameTypes = new Set((courseRes.data || []).filter(c => c.active && c.game_type).map(c => c.game_type));
+    const totalGames = courseGameTypes.size;
+
     const scoresByUser = {};
     scores.forEach(s => {
-      if (!scoresByUser[s.user_email]) scoresByUser[s.user_email] = { plays: 0, total: 0 };
+      if (!scoresByUser[s.user_email]) scoresByUser[s.user_email] = { plays: 0, total: 0, types: new Set() };
       scoresByUser[s.user_email].plays++;
       scoresByUser[s.user_email].total += s.score || 0;
+      if (courseGameTypes.has(s.game_type)) scoresByUser[s.user_email].types.add(s.game_type);
     });
 
     const users = profileRes.data.map(r => {
-      const us = scoresByUser[r.email] || { plays: 0, total: 0 };
+      const us = scoresByUser[r.email] || { plays: 0, total: 0, types: new Set() };
+      const completion = totalGames ? Math.round(us.types.size / totalGames * 100) : 0;
       return {
         name:       r.name,
         email:      r.email,
         dept:       r.dept || '미지정',
-        completion: r.completion  || 0,
+        completion,
         gamePlays:  us.plays,
         gameTotal:  us.total,
         phishing:   r.phishing_clicked || false,
