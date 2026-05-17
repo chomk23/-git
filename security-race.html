@@ -438,85 +438,35 @@
       to   { background-position-y: 28px, 0; }
     }
 
-    /* Race world (the scrolling layer) */
+    /* Race world (the 2D scrolling layer — wider AND taller than viewport) */
     .race-world {
       position: absolute;
-      left: 0; top: 0; bottom: 0;
+      left: 0; top: 0;
       will-change: transform;
-      transition: transform 0.15s linear;
+      transition: transform 0.18s linear;
       z-index: 10;
     }
     .race-world.no-tx { transition: none; }
 
-    /* Pixel road surface */
-    .road {
+    /* SVG road (wavy ribbon) */
+    #road-svg {
       position: absolute;
-      left: 0; right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 168px;
-      background:
-        linear-gradient(to bottom,
-          rgba(0, 0, 0, 0.2) 0%,
-          transparent 8%,
-          transparent 92%,
-          rgba(0, 0, 0, 0.2) 100%),
-        #1a1a2e;
-      border-top: 4px solid var(--neon-pink);
-      border-bottom: 4px solid var(--neon-cyan);
-      box-shadow:
-        0 -2px 0 rgba(255, 45, 149, 0.4),
-        0 2px 0 rgba(0, 240, 255, 0.4),
-        0 0 30px rgba(255, 45, 149, 0.3),
-        0 0 30px rgba(0, 240, 255, 0.3);
+      left: 0; top: 0;
+      shape-rendering: geometricPrecision;
+      pointer-events: none;
     }
-
-    /* Speed lines during boost */
-    .race-viewport.boosting .road::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image:
-        repeating-linear-gradient(to right,
-          rgba(255, 242, 0, 0.4) 0 4px,
-          transparent 4px 16px,
-          rgba(0, 240, 255, 0.4) 16px 20px,
-          transparent 20px 32px,
-          rgba(255, 45, 149, 0.4) 32px 36px,
-          transparent 36px 48px);
-      animation: streak 0.25s linear infinite;
-      mix-blend-mode: screen;
-    }
-    @keyframes streak {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-48px); }
-    }
-
-    /* Lane dividers - pixel dashes */
-    .divider {
-      position: absolute;
-      left: 0; height: 4px;
-      background-image: repeating-linear-gradient(
-        to right,
-        var(--neon-yellow) 0 16px,
-        transparent 16px 32px
-      );
-      box-shadow: 0 0 8px var(--neon-yellow);
-    }
-    .div-1 { top: 50%; transform: translateY(-28px); }
-    .div-2 { top: 50%; transform: translateY(24px); }
 
     /* Distance markers (pixel sign posts) */
     .marker-sign {
       position: absolute;
-      top: 24%;
-      width: 34px; height: 32px;
-      transform: translateX(-50%);
+      width: 34px; height: 36px;
+      transform: translate(-50%, -100%);
       z-index: 11;
     }
     .marker-sign .post {
       position: absolute;
       left: 50%; bottom: 0;
-      width: 4px; height: 16px;
+      width: 4px; height: 18px;
       background: linear-gradient(to bottom, #555, #888);
       transform: translateX(-50%);
     }
@@ -531,24 +481,25 @@
       align-items: center;
       justify-content: center;
       letter-spacing: 1px;
+      font-family: 'Press Start 2P', monospace;
       box-shadow:
         0 0 0 2px var(--bg-deep),
         0 0 0 4px var(--neon-cyan),
         0 0 10px var(--neon-cyan);
     }
 
-    /* Finish zone */
-    .finish-zone {
+    /* Finish gate — perpendicular to track at the end */
+    .finish-gate {
       position: absolute;
-      top: 8%; bottom: 8%;
-      width: 22px;
+      width: 26px; height: 200px;
+      transform: translate(-50%, -50%);
       background-image:
         repeating-conic-gradient(
           from 0deg at 50% 50%,
           white 0 90deg,
           var(--bg-deep) 90deg 180deg
         );
-      background-size: 11px 11px;
+      background-size: 13px 13px;
       box-shadow:
         0 0 0 3px var(--bg-deep),
         0 0 0 6px var(--neon-yellow),
@@ -557,7 +508,6 @@
     }
     .finish-banner {
       position: absolute;
-      top: 6px;
       font-size: 12px;
       color: var(--neon-yellow);
       text-shadow:
@@ -565,31 +515,44 @@
         2px 2px 0 var(--neon-pink),
         3px 3px 0 var(--neon-purple);
       letter-spacing: 3px;
-      transform: translateX(-50%);
+      transform: translate(-50%, -150px);
       z-index: 12;
       animation: finish-pulse 1s ease-in-out infinite alternate;
+      white-space: nowrap;
+      font-family: 'Press Start 2P', monospace;
     }
     @keyframes finish-pulse {
-      from { transform: translateX(-50%) scale(1); }
-      to   { transform: translateX(-50%) scale(1.05); }
+      from { transform: translate(-50%, -150px) scale(1); }
+      to   { transform: translate(-50%, -154px) scale(1.05); }
     }
 
-    /* Lanes (positioned absolutely in world coords) */
-    .lane {
-      position: absolute;
-      left: 0;
-      height: 40px;
-      z-index: 12;
+    /* Boost speed-streak overlay on viewport (covers everything) */
+    .race-viewport.boosting::before {
+      background-image:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 1px,
+          rgba(0, 0, 0, 0.25) 1px,
+          rgba(0, 0, 0, 0.25) 2px
+        ),
+        repeating-linear-gradient(to right,
+          rgba(255, 242, 0, 0.35) 0 6px,
+          transparent 6px 30px,
+          rgba(0, 240, 255, 0.3) 30px 36px,
+          transparent 36px 60px);
+      animation: streak 0.25s linear infinite;
     }
-    .lane-1 { top: 50%; transform: translateY(-76px); }
-    .lane-2 { top: 50%; transform: translateY(-20px); }
-    .lane-3 { top: 50%; transform: translateY(36px); }
+    @keyframes streak {
+      from { background-position: 0 0, 0 0; }
+      to   { background-position: 0 0, -60px 0; }
+    }
 
-    /* Pixel cars (SVG with crispEdges + filter glow) */
+    /* Pixel cars (SVG with crispEdges + filter glow). Positioned by JS. */
     .car {
       position: absolute;
       left: 0; top: 0;
-      transition: left 0.12s linear;
+      transition: left 0.18s linear, top 0.18s linear, transform 0.18s linear;
       filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7));
     }
     .car svg {
@@ -963,70 +926,83 @@
       <div class="mountains"></div>
       <div class="grid-floor"></div>
 
-      <!-- Scrolling world -->
+      <!-- Scrolling 2D world -->
       <div id="world" class="race-world">
-        <div class="road"></div>
-        <div id="div-1" class="divider div-1"></div>
-        <div id="div-2" class="divider div-2"></div>
+        <!-- Wavy SVG road -->
+        <svg id="road-svg">
+          <!-- Cyan outer glow stroke -->
+          <path id="path-glow" stroke="#00f0ff" stroke-width="200" fill="none" stroke-linecap="round" opacity="0.18"/>
+          <!-- Asphalt -->
+          <path id="path-road" stroke="#1a1a2e" stroke-width="172" fill="none" stroke-linecap="round"/>
+          <!-- Top edge (pink) -->
+          <path id="path-edge-top" stroke="#ff2d95" stroke-width="4" fill="none" filter="url(#pinkGlow)"/>
+          <!-- Bottom edge (cyan) -->
+          <path id="path-edge-bot" stroke="#00f0ff" stroke-width="4" fill="none" filter="url(#cyanGlow)"/>
+          <!-- Lane dividers (yellow dashes) -->
+          <path id="path-div-top" stroke="#fff200" stroke-width="3" stroke-dasharray="16 18" fill="none"/>
+          <path id="path-div-bot" stroke="#fff200" stroke-width="3" stroke-dasharray="16 18" fill="none"/>
+          <defs>
+            <filter id="pinkGlow" x="-20%" y="-200%" width="140%" height="500%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="cyanGlow" x="-20%" y="-200%" width="140%" height="500%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+
+        <!-- Distance signs + finish line are positioned by JS along the curve -->
         <div id="markers"></div>
-        <div id="finish-flag" class="finish-zone"></div>
+        <div id="finish-flag" class="finish-gate"></div>
         <div id="finish-text" class="finish-banner">FINISH</div>
 
-        <!-- Lane 1: AI1 (cyan car) -->
-        <div class="lane lane-1" id="lane-1">
-          <div id="ai1" class="car ai1">
-            <div class="car-label">AI 1</div>
-            <svg width="64" height="38" viewBox="0 0 32 19" shape-rendering="crispEdges">
-              <rect x="1"  y="9"  width="30" height="7" fill="#00f0ff"/>
-              <rect x="5"  y="4"  width="22" height="5" fill="#006688"/>
-              <rect x="7"  y="5"  width="7"  height="3" fill="#ffffff"/>
-              <rect x="18" y="5"  width="7"  height="3" fill="#ffffff"/>
-              <rect x="1"  y="9"  width="30" height="1" fill="#ffffff" opacity="0.4"/>
-              <rect x="1"  y="15" width="30" height="1" fill="#000000" opacity="0.4"/>
-              <rect x="3"  y="15" width="5"  height="3" fill="#0a0118"/>
-              <rect x="24" y="15" width="5"  height="3" fill="#0a0118"/>
-              <rect x="30" y="10" width="1"  height="4" fill="#ff2d95"/>
-            </svg>
-          </div>
+        <!-- Cars: positioned and rotated by JS each frame -->
+        <div id="ai1" class="car ai1">
+          <div class="car-label">AI 1</div>
+          <svg width="64" height="38" viewBox="0 0 32 19" shape-rendering="crispEdges">
+            <rect x="1"  y="9"  width="30" height="7" fill="#00f0ff"/>
+            <rect x="5"  y="4"  width="22" height="5" fill="#006688"/>
+            <rect x="7"  y="5"  width="7"  height="3" fill="#ffffff"/>
+            <rect x="18" y="5"  width="7"  height="3" fill="#ffffff"/>
+            <rect x="1"  y="9"  width="30" height="1" fill="#ffffff" opacity="0.4"/>
+            <rect x="1"  y="15" width="30" height="1" fill="#000000" opacity="0.4"/>
+            <rect x="3"  y="15" width="5"  height="3" fill="#0a0118"/>
+            <rect x="24" y="15" width="5"  height="3" fill="#0a0118"/>
+            <rect x="30" y="10" width="1"  height="4" fill="#ff2d95"/>
+          </svg>
         </div>
-
-        <!-- Lane 2: Player (yellow car) -->
-        <div class="lane lane-2" id="lane-2">
-          <div id="player" class="car player">
-            <div class="car-label">YOU</div>
-            <svg width="68" height="42" viewBox="0 0 34 21" shape-rendering="crispEdges">
-              <rect x="1"  y="10" width="32" height="8" fill="#fff200"/>
-              <rect x="5"  y="4"  width="24" height="6" fill="#ff6b00"/>
-              <rect x="7"  y="5"  width="8"  height="4" fill="#00f0ff"/>
-              <rect x="19" y="5"  width="8"  height="4" fill="#00f0ff"/>
-              <rect x="7"  y="5"  width="2"  height="1" fill="#ffffff"/>
-              <rect x="19" y="5"  width="2"  height="1" fill="#ffffff"/>
-              <rect x="1"  y="10" width="32" height="1" fill="#ffffff" opacity="0.5"/>
-              <rect x="1"  y="17" width="32" height="1" fill="#000000" opacity="0.4"/>
-              <rect x="3"  y="17" width="5"  height="3" fill="#0a0118"/>
-              <rect x="26" y="17" width="5"  height="3" fill="#0a0118"/>
-              <rect x="32" y="11" width="1"  height="5" fill="#ff2d95"/>
-              <rect x="0"  y="12" width="1"  height="3" fill="#cccccc"/>
-            </svg>
-          </div>
+        <div id="player" class="car player">
+          <div class="car-label">YOU</div>
+          <svg width="68" height="42" viewBox="0 0 34 21" shape-rendering="crispEdges">
+            <rect x="1"  y="10" width="32" height="8" fill="#fff200"/>
+            <rect x="5"  y="4"  width="24" height="6" fill="#ff6b00"/>
+            <rect x="7"  y="5"  width="8"  height="4" fill="#00f0ff"/>
+            <rect x="19" y="5"  width="8"  height="4" fill="#00f0ff"/>
+            <rect x="7"  y="5"  width="2"  height="1" fill="#ffffff"/>
+            <rect x="19" y="5"  width="2"  height="1" fill="#ffffff"/>
+            <rect x="1"  y="10" width="32" height="1" fill="#ffffff" opacity="0.5"/>
+            <rect x="1"  y="17" width="32" height="1" fill="#000000" opacity="0.4"/>
+            <rect x="3"  y="17" width="5"  height="3" fill="#0a0118"/>
+            <rect x="26" y="17" width="5"  height="3" fill="#0a0118"/>
+            <rect x="32" y="11" width="1"  height="5" fill="#ff2d95"/>
+            <rect x="0"  y="12" width="1"  height="3" fill="#cccccc"/>
+          </svg>
         </div>
-
-        <!-- Lane 3: AI2 (pink car) -->
-        <div class="lane lane-3" id="lane-3">
-          <div id="ai2" class="car ai2">
-            <div class="car-label">AI 2</div>
-            <svg width="64" height="38" viewBox="0 0 32 19" shape-rendering="crispEdges">
-              <rect x="1"  y="9"  width="30" height="7" fill="#ff2d95"/>
-              <rect x="5"  y="4"  width="22" height="5" fill="#b026ff"/>
-              <rect x="7"  y="5"  width="7"  height="3" fill="#ffffff"/>
-              <rect x="18" y="5"  width="7"  height="3" fill="#ffffff"/>
-              <rect x="1"  y="9"  width="30" height="1" fill="#ffffff" opacity="0.4"/>
-              <rect x="1"  y="15" width="30" height="1" fill="#000000" opacity="0.4"/>
-              <rect x="3"  y="15" width="5"  height="3" fill="#0a0118"/>
-              <rect x="24" y="15" width="5"  height="3" fill="#0a0118"/>
-              <rect x="30" y="10" width="1"  height="4" fill="#fff200"/>
-            </svg>
-          </div>
+        <div id="ai2" class="car ai2">
+          <div class="car-label">AI 2</div>
+          <svg width="64" height="38" viewBox="0 0 32 19" shape-rendering="crispEdges">
+            <rect x="1"  y="9"  width="30" height="7" fill="#ff2d95"/>
+            <rect x="5"  y="4"  width="22" height="5" fill="#b026ff"/>
+            <rect x="7"  y="5"  width="7"  height="3" fill="#ffffff"/>
+            <rect x="18" y="5"  width="7"  height="3" fill="#ffffff"/>
+            <rect x="1"  y="9"  width="30" height="1" fill="#ffffff" opacity="0.4"/>
+            <rect x="1"  y="15" width="30" height="1" fill="#000000" opacity="0.4"/>
+            <rect x="3"  y="15" width="5"  height="3" fill="#0a0118"/>
+            <rect x="24" y="15" width="5"  height="3" fill="#0a0118"/>
+            <rect x="30" y="10" width="1"  height="4" fill="#fff200"/>
+          </svg>
         </div>
       </div>
     </div>
@@ -1127,7 +1103,10 @@ const QUESTIONS = [
 // ── 게임 상수 ──
 const RACE_TIME      = 60;
 const WORLD_WIDTH    = 3200;
-const FINISH_X       = WORLD_WIDTH - 80;
+const WORLD_HEIGHT   = 600;
+const FINISH_X       = WORLD_WIDTH - 100;
+const TRACK_BASELINE = 300;   // 도로 중앙선의 수직 기준점
+const LANE_OFFSET    = 38;    // 차선 간격(px)
 const PLAYER_BASE    = 1.0;
 const PLAYER_BOOST   = 2.5;
 const AI1_SPEED      = 1.5;
@@ -1135,6 +1114,23 @@ const AI2_SPEED      = 0.85;
 const BOOST_DURATION = 1800;
 const SLOW_DURATION  = 1000;
 const CORRECT_JUMP   = 5;
+
+// ── 곡선 트랙 함수 ──
+// 사인파 두 개 조합으로 부드러운 곡선 만들기
+function trackY(x) {
+  return Math.sin(x * 0.0024) * 90 + Math.sin(x * 0.0058) * 38;
+}
+// 트랙의 접선 각도(deg) — 자동차 회전용
+function trackAngle(x) {
+  const dy = Math.cos(x * 0.0024) * 0.216 + Math.cos(x * 0.0058) * 0.2204;
+  return Math.atan(dy) * 180 / Math.PI;
+}
+// 트랙 위 점의 수직 단위 노멀 벡터 (lane offset용)
+function trackNormal(x) {
+  const dy = Math.cos(x * 0.0024) * 0.216 + Math.cos(x * 0.0058) * 0.2204;
+  const len = Math.hypot(1, dy);
+  return { nx: -dy / len, ny: 1 / len };
+}
 
 let playerPos = 0, ai1Pos = 0, ai2Pos = 0;
 let playerBoostUntil = 0, playerSlowUntil = 0;
@@ -1144,7 +1140,7 @@ let correctCount = 0, totalAnswered = 0;
 let questionPool = [];
 let currentQIdx = 0;
 let currentShuffled = null;
-let cameraX = 0;
+let cameraX = 0, cameraY = 0;
 
 function shuffle(arr) {
   const a = [...arr];
@@ -1168,37 +1164,71 @@ function shuffle(arr) {
   } catch (e) {}
 })();
 
+// SVG path 문자열 생성 (centerline에서 yOffset만큼 떨어진 평행 곡선)
+function buildPathD(yOffset) {
+  const pts = [];
+  for (let x = 0; x <= WORLD_WIDTH; x += 10) {
+    const { nx, ny } = trackNormal(x);
+    const cy = TRACK_BASELINE + trackY(x);
+    // 노멀 방향으로 offset
+    pts.push(`${(x + nx * yOffset).toFixed(1)},${(cy + ny * yOffset).toFixed(1)}`);
+  }
+  return 'M ' + pts.join(' L ');
+}
+
 function setupWorld() {
   const world = document.getElementById('world');
-  world.style.width = WORLD_WIDTH + 'px';
-  document.getElementById('div-1').style.width = WORLD_WIDTH + 'px';
-  document.getElementById('div-2').style.width = WORLD_WIDTH + 'px';
+  world.style.width  = WORLD_WIDTH  + 'px';
+  world.style.height = WORLD_HEIGHT + 'px';
 
-  // 거리 마커
+  // SVG 도로 사이즈 + 경로
+  const svg = document.getElementById('road-svg');
+  svg.setAttribute('width',  WORLD_WIDTH);
+  svg.setAttribute('height', WORLD_HEIGHT);
+  document.getElementById('path-glow').setAttribute('d', buildPathD(0));
+  document.getElementById('path-road').setAttribute('d', buildPathD(0));
+  document.getElementById('path-edge-top').setAttribute('d', buildPathD(-86));
+  document.getElementById('path-edge-bot').setAttribute('d', buildPathD(86));
+  document.getElementById('path-div-top').setAttribute('d', buildPathD(-29));
+  document.getElementById('path-div-bot').setAttribute('d', buildPathD(29));
+
+  // 거리 마커 — 곡선 위 해당 지점에 노멀 방향으로 위쪽 살짝 배치
   const markers = document.getElementById('markers');
   markers.innerHTML = '';
   [25, 50, 75].forEach(p => {
     const x = (p / 100) * FINISH_X;
+    const cy = TRACK_BASELINE + trackY(x);
+    const { nx, ny } = trackNormal(x);
+    // 도로 위쪽으로 110px 떨어진 곳
+    const signX = x + nx * -110;
+    const signY = cy + ny * -110;
     const sign = document.createElement('div');
     sign.className = 'marker-sign';
-    sign.style.left = x + 'px';
+    sign.style.left = signX + 'px';
+    sign.style.top  = signY + 'px';
     sign.innerHTML = `<div class="board">${p}%</div><div class="post"></div>`;
     markers.appendChild(sign);
   });
 
-  // 결승선
-  document.getElementById('finish-flag').style.left = FINISH_X + 'px';
-  document.getElementById('finish-text').style.left = (FINISH_X + 10) + 'px';
+  // 결승선 — 트랙 마지막 지점, 접선에 수직으로 회전
+  const fx = FINISH_X;
+  const fcy = TRACK_BASELINE + trackY(fx);
+  const fAngle = trackAngle(fx);
+  document.getElementById('finish-flag').style.left = fx + 'px';
+  document.getElementById('finish-flag').style.top  = fcy + 'px';
+  document.getElementById('finish-flag').style.transform = `translate(-50%, -50%) rotate(${fAngle}deg)`;
+  document.getElementById('finish-text').style.left = fx + 'px';
+  document.getElementById('finish-text').style.top  = fcy + 'px';
 
   // 카메라 리셋
   world.classList.add('no-tx');
-  world.style.transform = 'translateX(0px)';
+  world.style.transform = 'translate(0px, 0px)';
   requestAnimationFrame(() => world.classList.remove('no-tx'));
 }
 
 function startRace() {
   playerPos = ai1Pos = ai2Pos = 0;
-  cameraX = 0;
+  cameraX = cameraY = 0;
   correctCount = 0;
   totalAnswered = 0;
   currentQIdx = 0;
@@ -1210,9 +1240,9 @@ function startRace() {
   document.getElementById('game').style.display = 'block';
 
   setupWorld();
-  updateCarPos('player', 0);
-  updateCarPos('ai1', 0);
-  updateCarPos('ai2', 0);
+  updateCarPos('player', 0, 0);     // 중앙선
+  updateCarPos('ai1', 0, -1);       // 위 차선
+  updateCarPos('ai2', 0, 1);        // 아래 차선
   updateMinimap();
 
   showQuestion();
@@ -1239,9 +1269,9 @@ function loop(now) {
   ai1Pos = Math.min(100, ai1Pos + AI1_SPEED * dt);
   ai2Pos = Math.min(100, ai2Pos + AI2_SPEED * dt);
 
-  updateCarPos('player', playerPos);
-  updateCarPos('ai1', ai1Pos);
-  updateCarPos('ai2', ai2Pos);
+  updateCarPos('player', playerPos, 0);
+  updateCarPos('ai1', ai1Pos, -1);
+  updateCarPos('ai2', ai2Pos, 1);
   updateCamera();
   updateMinimap();
 
@@ -1266,21 +1296,38 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-function updateCarPos(id, pct) {
+// 차선 인덱스(-1, 0, 1) + 진행도 pct → 월드 좌표
+function carWorldPos(pct, laneIdx) {
+  const x = (pct / 100) * FINISH_X;
+  const cy = TRACK_BASELINE + trackY(x);
+  const { nx, ny } = trackNormal(x);
+  // 노멀 방향으로 lane offset 적용
+  const offset = laneIdx * LANE_OFFSET;
+  return { x: x + nx * offset, y: cy + ny * offset, angle: trackAngle(x) };
+}
+
+function updateCarPos(id, pct, laneIdx) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.style.left = ((pct / 100) * FINISH_X) + 'px';
+  const { x, y, angle } = carWorldPos(pct, laneIdx);
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
 }
 
 function updateCamera() {
   const viewport = document.getElementById('viewport');
   const world = document.getElementById('world');
   const vw = viewport.offsetWidth;
-  const playerWorldX = (playerPos / 100) * FINISH_X;
-  let target = playerWorldX - vw * 0.32;
-  target = Math.max(0, Math.min(WORLD_WIDTH - vw, target));
-  cameraX = target;
-  world.style.transform = `translateX(${-cameraX}px)`;
+  const vh = viewport.offsetHeight;
+  const player = carWorldPos(playerPos, 0);
+  let tx = player.x - vw * 0.32;
+  let ty = player.y - vh * 0.50;
+  tx = Math.max(0, Math.min(WORLD_WIDTH - vw, tx));
+  ty = Math.max(0, Math.min(WORLD_HEIGHT - vh, ty));
+  cameraX = tx;
+  cameraY = ty;
+  world.style.transform = `translate(${-cameraX}px, ${-cameraY}px)`;
 }
 
 function updateMinimap() {
