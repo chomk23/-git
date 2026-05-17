@@ -3,375 +3,1067 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>보안 레이싱 — 보안 교육 플랫폼</title>
+  <title>SECURITY RACE — 보안 교육 플랫폼</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="supabase.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { font-family: 'Noto Sans KR', sans-serif; }
-    body { background-color: #ECEAE6; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
 
-    /* ── 카메라 따라가는 스크롤 트랙 ── */
-    .race-viewport {
-      position: relative; height: 260px; border-radius: 24px; overflow: hidden;
-      background:
-        radial-gradient(ellipse at 50% 0%, #1E1B4B 0%, #0F172A 60%);
-      box-shadow: inset 0 -40px 80px rgba(0,0,0,0.5);
+  <style>
+    :root {
+      --neon-pink:   #ff2d95;
+      --neon-cyan:   #00f0ff;
+      --neon-yellow: #fff200;
+      --neon-purple: #b026ff;
+      --neon-orange: #ff6b00;
+      --neon-green:  #39ff14;
+      --bg-deep:     #0a0118;
+      --bg-mid:      #1e0b3c;
+      --bg-band:     #2a0e58;
+      --text-cream:  #ffe8d0;
     }
-    /* 스카이라인의 별 (장식) */
-    .race-viewport::before {
-      content:''; position:absolute; inset:0; pointer-events:none;
+
+    * { box-sizing: border-box; }
+    /* Pixel font as default — Korean text gets .ko class for legibility */
+    body {
+      font-family: 'Press Start 2P', monospace;
+    }
+    .ko, .ko * {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 500;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      color: var(--text-cream);
+      background-color: var(--bg-deep);
       background-image:
-        radial-gradient(1px 1px at 20% 12%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 78% 8%,  rgba(255,255,255,0.6), transparent),
-        radial-gradient(1px 1px at 45% 18%, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 8% 28%,  rgba(255,255,255,0.4), transparent);
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(176, 38, 255, 0.35) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 40% at 50% 100%, rgba(255, 45, 149, 0.25) 0%, transparent 60%);
+      overflow-x: hidden;
+      image-rendering: pixelated;
     }
+
+    /* Twinkling stars background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 7%  12%, white, transparent),
+        radial-gradient(1px 1px at 21% 28%, white, transparent),
+        radial-gradient(1px 1px at 35% 16%, white, transparent),
+        radial-gradient(1px 1px at 48% 22%, white, transparent),
+        radial-gradient(1px 1px at 62% 8%,  white, transparent),
+        radial-gradient(1px 1px at 79% 18%, white, transparent),
+        radial-gradient(1px 1px at 91% 31%, white, transparent),
+        radial-gradient(2px 2px at 14% 42%, white, transparent),
+        radial-gradient(1px 1px at 88% 47%, white, transparent),
+        radial-gradient(1px 1px at 4%  60%, white, transparent),
+        radial-gradient(1px 1px at 96% 70%, white, transparent),
+        radial-gradient(2px 2px at 30% 75%, white, transparent);
+      opacity: 0.7;
+      animation: twinkle 3s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.45; }
+      to   { opacity: 0.85; }
+    }
+
+    /* Global CRT scanlines */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 2px,
+        rgba(0, 0, 0, 0.18) 2px,
+        rgba(0, 0, 0, 0.18) 3px
+      );
+      z-index: 100;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Pixel frame (chunky neon border) */
+    .pixel-frame {
+      border: 4px solid var(--neon-cyan);
+      background: var(--bg-mid);
+      box-shadow:
+        0 0 0 4px var(--bg-deep),
+        0 0 0 8px var(--neon-cyan),
+        0 0 30px rgba(0, 240, 255, 0.5),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    /* Header */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 12px;
+      margin-bottom: 22px;
+    }
+    .arcade-title {
+      font-size: 11px;
+      color: var(--neon-pink);
+      text-shadow:
+        0 0 4px var(--neon-pink),
+        0 0 14px var(--neon-pink),
+        2px 2px 0 var(--neon-purple);
+      letter-spacing: 3px;
+    }
+    .back-link {
+      font-size: 8px;
+      color: var(--neon-cyan);
+      text-decoration: none;
+      letter-spacing: 1.5px;
+      padding: 6px 10px;
+      border: 2px solid var(--neon-cyan);
+      transition: all 0.1s;
+    }
+    .back-link:hover {
+      background: var(--neon-cyan);
+      color: var(--bg-deep);
+      box-shadow: 0 0 12px var(--neon-cyan);
+    }
+
+    /* ── INTRO CARD ───────────────────────────────────────── */
+    .intro-card { padding: 36px 28px; text-align: center; }
+    .intro-title {
+      font-size: 20px;
+      color: var(--neon-yellow);
+      text-shadow:
+        0 0 8px var(--neon-yellow),
+        3px 3px 0 var(--neon-pink),
+        4px 4px 0 var(--neon-purple);
+      margin: 18px 0 16px;
+      letter-spacing: 3px;
+      line-height: 1.5;
+    }
+    .intro-sub {
+      font-size: 13px;
+      color: var(--text-cream);
+      line-height: 1.9;
+      margin-bottom: 22px;
+    }
+    .info-chips {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 22px 0;
+    }
+    .info-chip {
+      padding: 14px 6px;
+      border: 3px solid;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .info-chip .chip-label {
+      font-size: 7px;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      opacity: 0.75;
+    }
+    .info-chip .chip-value {
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+    .chip-correct { border-color: var(--neon-green);  box-shadow: 0 0 10px rgba(57, 255, 20, 0.3); }
+    .chip-correct .chip-value { color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); }
+    .chip-wrong   { border-color: var(--neon-pink);   box-shadow: 0 0 10px rgba(255, 45, 149, 0.3); }
+    .chip-wrong .chip-value { color: var(--neon-pink); text-shadow: 0 0 6px var(--neon-pink); }
+    .chip-time    { border-color: var(--neon-cyan);   box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+    .chip-time .chip-value { color: var(--neon-cyan); text-shadow: 0 0 6px var(--neon-cyan); }
+
+    .replay-notice {
+      margin: 20px 0;
+      padding: 14px;
+      border: 3px solid var(--neon-yellow);
+      background: rgba(255, 242, 0, 0.08);
+      color: var(--neon-yellow);
+      font-size: 8px;
+      line-height: 1.8;
+      letter-spacing: 1px;
+      animation: warn-blink 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes warn-blink {
+      from { box-shadow: 0 0 8px rgba(255, 242, 0, 0.2); }
+      to   { box-shadow: 0 0 20px rgba(255, 242, 0, 0.6); }
+    }
+
+    /* Big arcade button */
+    .arcade-btn {
+      display: inline-block;
+      padding: 18px 36px;
+      background: var(--neon-pink);
+      color: var(--bg-deep);
+      border: none;
+      font-size: 12px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      box-shadow:
+        0 0 0 4px var(--bg-deep),
+        0 0 0 8px var(--neon-pink),
+        0 8px 0 var(--neon-purple),
+        0 0 24px rgba(255, 45, 149, 0.5);
+      transition: transform 0.08s, box-shadow 0.08s;
+      animation: btn-pulse 1.4s ease-in-out infinite alternate;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .arcade-btn:hover { transform: translateY(-2px); }
+    .arcade-btn:active {
+      transform: translateY(6px);
+      box-shadow:
+        0 0 0 4px var(--bg-deep),
+        0 0 0 8px var(--neon-pink),
+        0 2px 0 var(--neon-purple),
+        0 0 24px rgba(255, 45, 149, 0.5);
+    }
+    @keyframes btn-pulse {
+      from {
+        box-shadow:
+          0 0 0 4px var(--bg-deep),
+          0 0 0 8px var(--neon-pink),
+          0 8px 0 var(--neon-purple),
+          0 0 20px rgba(255, 45, 149, 0.4);
+      }
+      to {
+        box-shadow:
+          0 0 0 4px var(--bg-deep),
+          0 0 0 8px var(--neon-pink),
+          0 8px 0 var(--neon-purple),
+          0 0 40px rgba(255, 45, 149, 0.9);
+      }
+    }
+
+    /* ── GAME HUD ──────────────────────────────────────────── */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .hud-card {
+      padding: 12px 8px;
+      border: 3px solid var(--neon-cyan);
+      background: var(--bg-mid);
+      text-align: center;
+      box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.1);
+    }
+    .hud-label {
+      font-size: 7px;
+      color: var(--neon-cyan);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+    .hud-value {
+      font-size: 18px;
+      color: var(--neon-yellow);
+      text-shadow: 0 0 8px var(--neon-yellow), 0 0 16px rgba(255, 242, 0, 0.5);
+      letter-spacing: 1px;
+    }
+
+    /* ── MINIMAP ───────────────────────────────────────────── */
+    .minimap {
+      position: relative;
+      height: 30px;
+      border: 3px solid var(--neon-purple);
+      background: var(--bg-deep);
+      margin-bottom: 14px;
+      overflow: hidden;
+      box-shadow: inset 0 0 8px rgba(176, 38, 255, 0.4);
+    }
+    .mini-track-line {
+      position: absolute;
+      left: 8px; right: 24px;
+      top: 50%; height: 2px;
+      transform: translateY(-50%);
+      background-image: repeating-linear-gradient(
+        to right,
+        var(--neon-purple) 0 4px,
+        transparent 4px 10px
+      );
+      opacity: 0.7;
+    }
+    .mini-finish {
+      position: absolute;
+      right: 4px; top: 4px; bottom: 4px;
+      width: 10px;
+      background: repeating-linear-gradient(to bottom, white 0 4px, var(--bg-deep) 4px 8px);
+      box-shadow: 0 0 8px white;
+    }
+    .mini-dot {
+      position: absolute;
+      top: 50%;
+      width: 10px; height: 10px;
+      transform: translate(-50%, -50%);
+      transition: left 0.18s linear;
+    }
+    .mini-dot.player {
+      background: var(--neon-yellow);
+      box-shadow: 0 0 8px var(--neon-yellow);
+      z-index: 3;
+      width: 12px; height: 12px;
+    }
+    .mini-dot.ai1 { background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); z-index: 2; }
+    .mini-dot.ai2 { background: var(--neon-pink); box-shadow: 0 0 6px var(--neon-pink); z-index: 1; }
+
+    /* ── RACE VIEWPORT (CRT screen) ────────────────────────── */
+    .race-viewport {
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+      border: 4px solid var(--neon-pink);
+      box-shadow:
+        0 0 0 4px var(--bg-deep),
+        0 0 0 8px var(--neon-pink),
+        0 0 40px rgba(255, 45, 149, 0.5),
+        inset 0 0 50px rgba(0, 0, 0, 0.6);
+      margin-bottom: 14px;
+      background:
+        linear-gradient(
+          to bottom,
+          #1a0033 0%,
+          #2a0e58 18%,
+          #6b1f9c 38%,
+          #ff2d95 55%,
+          #ff6b00 65%,
+          #2a0e58 75%,
+          #0a0118 100%
+        );
+    }
+
+    /* Viewport CRT scanlines (denser than global) */
+    .race-viewport::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 1px,
+        rgba(0, 0, 0, 0.25) 1px,
+        rgba(0, 0, 0, 0.25) 2px
+      );
+      pointer-events: none;
+      z-index: 60;
+    }
+    /* Viewport vignette */
+    .race-viewport::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+      pointer-events: none;
+      z-index: 55;
+    }
+
+    /* Pixel mountains silhouette */
+    .mountains {
+      position: absolute;
+      left: 0; right: 0;
+      bottom: 48%;
+      height: 60px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none' shape-rendering='crispEdges'><path d='M0 60 L0 36 L20 36 L20 24 L40 24 L40 12 L60 12 L60 24 L80 24 L80 36 L100 36 L100 30 L120 30 L120 18 L140 18 L140 6 L160 6 L160 24 L180 24 L180 36 L200 36 L200 30 L220 30 L220 18 L240 18 L240 30 L260 30 L260 24 L280 24 L280 12 L300 12 L300 24 L320 24 L320 30 L340 30 L340 36 L360 36 L360 24 L380 24 L380 36 L400 36 L400 60 Z' fill='%231a0033'/></svg>");
+      background-size: cover;
+      image-rendering: pixelated;
+      z-index: 2;
+    }
+    /* Sun on horizon */
+    .sun {
+      position: absolute;
+      left: 50%; bottom: 46%;
+      width: 90px; height: 90px;
+      transform: translate(-50%, 50%);
+      background:
+        linear-gradient(
+          to bottom,
+          #fff200 0%,
+          #fff200 35%,
+          transparent 38%,
+          #ff6b00 41%,
+          #ff6b00 48%,
+          transparent 51%,
+          #ff2d95 54%,
+          #ff2d95 60%,
+          transparent 63%,
+          #b026ff 66%,
+          #b026ff 73%,
+          transparent 76%,
+          #6b1f9c 79%,
+          #6b1f9c 87%
+        );
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(255, 107, 0, 0.5);
+      z-index: 1;
+    }
+
+    /* Synthwave perspective grid floor */
+    .grid-floor {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 48%;
+      perspective: 220px;
+      overflow: hidden;
+      z-index: 3;
+    }
+    .grid-floor::before {
+      content: '';
+      position: absolute;
+      left: -10%; right: -10%;
+      top: 0; bottom: -30px;
+      background-image:
+        repeating-linear-gradient(to bottom,
+          transparent 0, transparent 14px,
+          var(--neon-cyan) 14px, var(--neon-cyan) 15px),
+        repeating-linear-gradient(to right,
+          transparent 0, transparent 30px,
+          var(--neon-pink) 30px, var(--neon-pink) 31px);
+      transform: rotateX(62deg);
+      transform-origin: top;
+      animation: grid-scroll 1.2s linear infinite;
+      opacity: 0.55;
+    }
+    @keyframes grid-scroll {
+      from { background-position-y: 0, 0; }
+      to   { background-position-y: 28px, 0; }
+    }
+
+    /* Race world (the scrolling layer) */
     .race-world {
-      position: absolute; left: 0; top: 0; height: 100%;
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
       will-change: transform;
-      transition: transform 0.18s linear;
+      transition: transform 0.15s linear;
+      z-index: 10;
     }
     .race-world.no-tx { transition: none; }
 
-    /* 도로 영역 */
+    /* Pixel road surface */
     .road {
-      position: absolute; left: 0; right: 0; top: 50px; bottom: 0;
-      background: #1F2937;
-      box-shadow: 0 -2px 0 #FBBF24, inset 0 2px 0 #374151;
+      position: absolute;
+      left: 0; right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 168px;
+      background:
+        linear-gradient(to bottom,
+          rgba(0, 0, 0, 0.2) 0%,
+          transparent 8%,
+          transparent 92%,
+          rgba(0, 0, 0, 0.2) 100%),
+        #1a1a2e;
+      border-top: 4px solid var(--neon-pink);
+      border-bottom: 4px solid var(--neon-cyan);
+      box-shadow:
+        0 -2px 0 rgba(255, 45, 149, 0.4),
+        0 2px 0 rgba(0, 240, 255, 0.4),
+        0 0 30px rgba(255, 45, 149, 0.3),
+        0 0 30px rgba(0, 240, 255, 0.3);
     }
-    /* 가속 시 도로 위에 흐르는 모션 라인 */
-    .road::after {
-      content:''; position:absolute; inset:0; opacity:0;
-      background-image: repeating-linear-gradient(to right, rgba(255,255,255,0.25) 0 40px, transparent 40px 80px);
-      animation: streak 0.4s linear infinite;
-      transition: opacity 0.2s;
+
+    /* Speed lines during boost */
+    .race-viewport.boosting .road::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(to right,
+          rgba(255, 242, 0, 0.4) 0 4px,
+          transparent 4px 16px,
+          rgba(0, 240, 255, 0.4) 16px 20px,
+          transparent 20px 32px,
+          rgba(255, 45, 149, 0.4) 32px 36px,
+          transparent 36px 48px);
+      animation: streak 0.25s linear infinite;
+      mix-blend-mode: screen;
     }
-    .race-viewport.boosting .road::after { opacity: 1; }
     @keyframes streak {
       from { transform: translateX(0); }
-      to   { transform: translateX(-80px); }
+      to   { transform: translateX(-48px); }
     }
 
-    .lane {
-      position: absolute; left: 0; height: 56px;
-      display: flex; align-items: center;
-    }
-    .lane-1 { top: 60px; }
-    .lane-2 { top: 122px; }
-    .lane-3 { top: 184px; }
-    /* 차선 사이 노란 점선 */
+    /* Lane dividers - pixel dashes */
     .divider {
-      position: absolute; left: 0; height: 3px;
-      background-image: repeating-linear-gradient(to right, #FBBF24 0 32px, transparent 32px 64px);
+      position: absolute;
+      left: 0; height: 4px;
+      background-image: repeating-linear-gradient(
+        to right,
+        var(--neon-yellow) 0 16px,
+        transparent 16px 32px
+      );
+      box-shadow: 0 0 8px var(--neon-yellow);
     }
-    .div-1 { top: 116px; }
-    .div-2 { top: 178px; }
+    .div-1 { top: 50%; transform: translateY(-28px); }
+    .div-2 { top: 50%; transform: translateY(24px); }
 
-    /* 거리 마커 */
-    .marker {
-      position: absolute; top: 50px; bottom: 0; width: 3px;
-      background: linear-gradient(to bottom, transparent, #38BDF8 40%, #38BDF8 60%, transparent);
-      opacity: 0.7;
+    /* Distance markers (pixel sign posts) */
+    .marker-sign {
+      position: absolute;
+      top: 24%;
+      width: 34px; height: 32px;
+      transform: translateX(-50%);
+      z-index: 11;
     }
-    .marker-label {
-      position: absolute; top: 50px; transform: translateX(-50%);
-      font-size: 10px; font-weight: 700; color: #38BDF8;
-      background: rgba(15, 23, 42, 0.8);
-      padding: 2px 6px; border-radius: 4px;
-      letter-spacing: 0.5px;
+    .marker-sign .post {
+      position: absolute;
+      left: 50%; bottom: 0;
+      width: 4px; height: 16px;
+      background: linear-gradient(to bottom, #555, #888);
+      transform: translateX(-50%);
+    }
+    .marker-sign .board {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 16px;
+      background: var(--neon-cyan);
+      color: var(--bg-deep);
+      font-size: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 1px;
+      box-shadow:
+        0 0 0 2px var(--bg-deep),
+        0 0 0 4px var(--neon-cyan),
+        0 0 10px var(--neon-cyan);
     }
 
-    /* 결승선 */
-    .finish-flag {
-      position: absolute; top: 50px; bottom: 0; width: 18px;
-      background: repeating-linear-gradient(45deg, #fff 0 10px, #1F2937 10px 20px);
-      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    /* Finish zone */
+    .finish-zone {
+      position: absolute;
+      top: 8%; bottom: 8%;
+      width: 22px;
+      background-image:
+        repeating-conic-gradient(
+          from 0deg at 50% 50%,
+          white 0 90deg,
+          var(--bg-deep) 90deg 180deg
+        );
+      background-size: 11px 11px;
+      box-shadow:
+        0 0 0 3px var(--bg-deep),
+        0 0 0 6px var(--neon-yellow),
+        0 0 25px var(--neon-yellow);
+      z-index: 9;
     }
-    .finish-text {
-      position: absolute; top: 16px; transform: translateX(-50%);
-      font-size: 14px; font-weight: 800; color: #FBBF24;
-      letter-spacing: 2px;
+    .finish-banner {
+      position: absolute;
+      top: 6px;
+      font-size: 12px;
+      color: var(--neon-yellow);
+      text-shadow:
+        0 0 8px var(--neon-yellow),
+        2px 2px 0 var(--neon-pink),
+        3px 3px 0 var(--neon-purple);
+      letter-spacing: 3px;
+      transform: translateX(-50%);
+      z-index: 12;
+      animation: finish-pulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes finish-pulse {
+      from { transform: translateX(-50%) scale(1); }
+      to   { transform: translateX(-50%) scale(1.05); }
     }
 
-    /* 자동차 */
+    /* Lanes (positioned absolutely in world coords) */
+    .lane {
+      position: absolute;
+      left: 0;
+      height: 40px;
+      z-index: 12;
+    }
+    .lane-1 { top: 50%; transform: translateY(-76px); }
+    .lane-2 { top: 50%; transform: translateY(-20px); }
+    .lane-3 { top: 50%; transform: translateY(36px); }
+
+    /* Pixel cars (SVG with crispEdges + filter glow) */
     .car {
-      position: absolute; left: 0; top: 50%;
-      margin-top: -16px;
+      position: absolute;
+      left: 0; top: 0;
       transition: left 0.12s linear;
-      z-index: 5;
+      filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7));
     }
-    .car.player { margin-top: -17px; z-index: 10; }
-    .car svg { display: block; }
+    .car svg {
+      display: block;
+      shape-rendering: crispEdges;
+    }
+    .car.player {
+      z-index: 20;
+      filter:
+        drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7))
+        drop-shadow(0 0 8px rgba(255, 242, 0, 0.6));
+    }
     .car-label {
-      position: absolute; left: 50%; top: -14px; transform: translateX(-50%);
-      font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; letter-spacing: 1px;
+      position: absolute;
+      left: 50%; top: -16px;
+      transform: translateX(-50%);
+      font-size: 7px;
+      letter-spacing: 1.5px;
+      color: white;
+      text-shadow: 1px 1px 0 var(--bg-deep), 0 0 4px var(--bg-deep);
       white-space: nowrap;
     }
-    .car.player .car-label { color: #FCD34D; }
+    .car.player .car-label {
+      color: var(--neon-yellow);
+      text-shadow:
+        1px 1px 0 var(--bg-deep),
+        0 0 6px var(--neon-yellow);
+    }
+    .car.ai1 .car-label   { color: var(--neon-cyan); text-shadow: 1px 1px 0 var(--bg-deep), 0 0 5px var(--neon-cyan); }
+    .car.ai2 .car-label   { color: var(--neon-pink); text-shadow: 1px 1px 0 var(--bg-deep), 0 0 5px var(--neon-pink); }
 
-    /* 부스트 효과 */
+    /* Boost flash on player */
     .speed-burst { animation: burst 0.6s ease; }
     @keyframes burst {
-      0%, 100% { filter: brightness(1); }
-      40%      { filter: brightness(1.6) drop-shadow(0 0 14px #FBBF24); }
+      0%, 100% {
+        filter:
+          drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7))
+          drop-shadow(0 0 8px rgba(255, 242, 0, 0.6));
+      }
+      30% {
+        filter:
+          drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7))
+          drop-shadow(0 0 20px var(--neon-yellow))
+          drop-shadow(0 0 30px var(--neon-pink))
+          brightness(1.5) hue-rotate(40deg);
+      }
+      60% {
+        filter:
+          drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7))
+          drop-shadow(0 0 20px var(--neon-cyan))
+          brightness(1.5) hue-rotate(-40deg);
+      }
     }
+    /* Boost trail */
     .car.player.boosting::after {
-      content:''; position:absolute; right:100%; top:50%; transform:translateY(-50%);
-      width: 60px; height: 6px;
-      background: linear-gradient(to left, #FBBF24, transparent);
-      border-radius: 4px; margin-right: 2px;
-      animation: trail-pulse 0.3s ease-in-out infinite alternate;
+      content: '';
+      position: absolute;
+      right: 100%; top: 50%;
+      transform: translateY(-50%);
+      width: 90px; height: 22px;
+      background: linear-gradient(to left,
+        var(--neon-yellow) 0%,
+        var(--neon-orange) 30%,
+        var(--neon-pink) 60%,
+        transparent 100%);
+      mix-blend-mode: screen;
+      animation: trail 0.18s linear infinite alternate;
+      margin-right: -2px;
+      filter: blur(1px);
     }
-    @keyframes trail-pulse {
-      from { opacity: 0.6; transform: translateY(-50%) scaleX(1); }
-      to   { opacity: 1;   transform: translateY(-50%) scaleX(1.4); }
+    @keyframes trail {
+      from { opacity: 0.8; transform: translateY(-50%) scaleX(1); }
+      to   { opacity: 1;   transform: translateY(-50%) scaleX(1.25); }
     }
+
     .shake { animation: shake 0.4s; }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      25%      { transform: translateX(-4px); }
-      75%      { transform: translateX(4px); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
     }
 
-    /* ── 미니맵 (트랙 전체 조감) ── */
-    .minimap {
+    /* ── QUESTION CARD ──────────────────────────────────────── */
+    .question-card {
+      padding: 22px;
+      background: var(--bg-mid);
+      border: 4px solid var(--neon-green);
+      box-shadow:
+        0 0 0 4px var(--bg-deep),
+        0 0 0 8px var(--neon-green),
+        0 0 30px rgba(57, 255, 20, 0.4);
       position: relative;
-      height: 28px; border-radius: 14px; overflow: hidden;
-      background: linear-gradient(to right, #1F2937 0%, #1F2937 100%);
-      border: 1.5px solid #374151;
     }
-    .mini-track-line {
-      position: absolute; left: 8px; right: 24px; top: 50%; height: 2px;
-      transform: translateY(-50%);
-      background-image: repeating-linear-gradient(to right, #4B5563 0 6px, transparent 6px 12px);
+    .q-number {
+      display: inline-block;
+      padding: 6px 12px;
+      background: var(--neon-green);
+      color: var(--bg-deep);
+      font-size: 8px;
+      margin-bottom: 14px;
+      letter-spacing: 2px;
+      box-shadow: 3px 3px 0 var(--bg-deep);
     }
-    .mini-finish {
-      position: absolute; right: 8px; top: 4px; bottom: 4px; width: 8px;
-      background: repeating-linear-gradient(to bottom, #fff 0 3px, #1F2937 3px 6px);
-      border-radius: 2px;
+    .q-text {
+      font-size: 13px;
+      color: var(--text-cream);
+      margin-bottom: 18px;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
     }
-    .mini-dot {
-      position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: left 0.18s linear;
-      box-shadow: 0 0 6px rgba(0,0,0,0.4);
+    .q-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    .mini-dot.player { background: #FBBF24; border: 1.5px solid #fff; width: 12px; height: 12px; z-index: 3; }
-    .mini-dot.ai1    { background: #9CA3AF; z-index: 2; }
-    .mini-dot.ai2    { background: #EF4444; z-index: 1; }
-    .mini-legend {
-      position: absolute; right: 36px; top: 50%; transform: translateY(-50%);
-      font-size: 9px; color: #9CA3AF; letter-spacing: 0.5px;
+    .answer-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: transparent;
+      border: 3px solid var(--text-cream);
+      color: var(--text-cream);
+      font-size: 11px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.1s;
+      letter-spacing: 0.2px;
+      line-height: 1.5;
+    }
+    .answer-btn .letter {
+      display: inline-flex;
+      width: 26px; height: 26px;
+      align-items: center;
+      justify-content: center;
+      background: var(--text-cream);
+      color: var(--bg-deep);
+      font-size: 11px;
+      font-family: 'Press Start 2P', monospace;
+      flex-shrink: 0;
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    }
+    .answer-btn:hover:not(:disabled) {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      transform: translate(-3px, -3px);
+      box-shadow: 5px 5px 0 var(--neon-cyan);
+    }
+    .answer-btn:hover:not(:disabled) .letter {
+      background: var(--neon-cyan);
+    }
+    .answer-btn.correct {
+      border-color: var(--neon-green);
+      color: var(--neon-green);
+      background: rgba(57, 255, 20, 0.12);
+      box-shadow: 0 0 18px rgba(57, 255, 20, 0.5);
+    }
+    .answer-btn.correct .letter { background: var(--neon-green); }
+    .answer-btn.wrong {
+      border-color: var(--neon-pink);
+      color: var(--neon-pink);
+      background: rgba(255, 45, 149, 0.12);
+    }
+    .answer-btn.wrong .letter { background: var(--neon-pink); }
+    .answer-btn:disabled { cursor: default; }
+
+    /* ── RESULT SCREEN ──────────────────────────────────────── */
+    .result-card {
+      padding: 36px 28px;
+      text-align: center;
+      border-color: var(--neon-yellow);
+      box-shadow:
+        0 0 0 4px var(--bg-deep),
+        0 0 0 8px var(--neon-yellow),
+        0 0 40px rgba(255, 242, 0, 0.5);
+    }
+    .result-title-big {
+      font-size: 24px;
+      color: var(--neon-yellow);
+      text-shadow:
+        0 0 10px var(--neon-yellow),
+        3px 3px 0 var(--neon-pink),
+        5px 5px 0 var(--neon-purple);
+      letter-spacing: 4px;
+      margin-bottom: 14px;
+      animation: result-glow 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes result-glow {
+      from { text-shadow: 0 0 6px var(--neon-yellow), 3px 3px 0 var(--neon-pink), 5px 5px 0 var(--neon-purple); }
+      to   { text-shadow: 0 0 22px var(--neon-yellow), 3px 3px 0 var(--neon-pink), 5px 5px 0 var(--neon-purple); }
+    }
+    .result-sub {
+      font-size: 13px;
+      color: var(--text-cream);
+      margin-bottom: 26px;
+      line-height: 1.8;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      padding: 16px 6px;
+      border: 3px solid;
+      background: var(--bg-mid);
+    }
+    .stat-card.gold  { border-color: var(--neon-yellow); }
+    .stat-card.cyan  { border-color: var(--neon-cyan); }
+    .stat-card.green { border-color: var(--neon-green); }
+    .stat-label {
+      font-size: 7px;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+    .stat-value {
+      font-size: 18px;
+      letter-spacing: 1px;
+    }
+    .stat-card.gold  .stat-value { color: var(--neon-yellow); text-shadow: 0 0 6px var(--neon-yellow); }
+    .stat-card.cyan  .stat-value { color: var(--neon-cyan);   text-shadow: 0 0 6px var(--neon-cyan); }
+    .stat-card.green .stat-value { color: var(--neon-green);  text-shadow: 0 0 6px var(--neon-green); }
+
+    .rank-info {
+      font-size: 8px;
+      color: var(--text-cream);
+      opacity: 0.75;
+      margin-bottom: 22px;
+      letter-spacing: 1px;
+      line-height: 1.8;
     }
 
-    .question-card { background:white; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
-    .answer-btn { padding:14px 18px; border-radius:14px; text-align:left; border:1.5px solid #E4E1DD; background:white; cursor:pointer; transition:all 0.12s; width:100%; font-size:14px; color:#374151; }
-    .answer-btn:hover:not(:disabled) { border-color:#1A1A1A; background:#FAF9F7; }
-    .answer-btn.correct { border-color:#16A34A; background:#F0FDF4; color:#15803D; font-weight:600; }
-    .answer-btn.wrong   { border-color:#DC2626; background:#FEF2F2; color:#DC2626; font-weight:600; }
-    .answer-btn:disabled { cursor:default; }
-
-    .btn-primary {
-      padding: 12px 28px; border-radius: 14px;
-      background: #1A1A1A; color: #fff; font-size: 14px; font-weight: 600;
-      border: none; cursor: pointer; transition: background 0.12s;
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
-    .btn-primary:hover { background: #333; }
-    .btn-outline {
-      padding: 12px 28px; border-radius: 14px; background: white;
-      color: #1A1A1A; font-size: 14px; font-weight: 600; border: 1.5px solid #E4E1DD;
-      cursor: pointer; transition: background 0.12s;
+    .btn-ghost, .btn-solid {
+      padding: 16px;
+      font-size: 10px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      transition: all 0.1s;
     }
-    .btn-outline:hover { background: #F5F3F0; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--neon-cyan);
+      border: 3px solid var(--neon-cyan);
+    }
+    .btn-ghost:hover {
+      background: var(--neon-cyan);
+      color: var(--bg-deep);
+      box-shadow: 0 0 18px var(--neon-cyan);
+    }
+    .btn-solid {
+      background: var(--neon-pink);
+      color: var(--bg-deep);
+      border: 3px solid var(--neon-pink);
+    }
+    .btn-solid:hover {
+      box-shadow: 0 0 18px var(--neon-pink);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
-<body class="min-h-screen p-4">
+<body>
 
-<div class="max-w-3xl mx-auto">
+<div class="container">
 
   <!-- Header -->
-  <div class="flex items-center justify-between mb-4">
-    <div>
-      <h1 class="text-lg font-bold text-gray-900">보안 레이싱</h1>
-      <p class="text-xs mt-0.5" style="color:#8C8984;">보안 문제를 풀어 결승선까지 달리세요</p>
-    </div>
-    <button onclick="location.href='index.html'" class="text-xs hover:text-gray-900" style="color:#8C8984;">← 메인으로</button>
+  <div class="game-header">
+    <div class="arcade-title">▶ SECURITY RACE</div>
+    <a href="index.html" class="back-link">◀ EXIT</a>
   </div>
 
-  <!-- ── Intro 화면 ── -->
-  <div id="intro" class="bg-white rounded-3xl p-8 shadow-sm text-center">
-    <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style="background:linear-gradient(135deg,#DC2626,#F59E0B);">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 17h2l1.5-4h7L17 17h2"/>
-        <path d="M7 17v2a1 1 0 001 1h1a1 1 0 001-1v-2"/>
-        <path d="M14 17v2a1 1 0 001 1h1a1 1 0 001-1v-2"/>
-        <circle cx="8" cy="13" r="1"/>
-        <circle cx="16" cy="13" r="1"/>
+  <!-- ── INTRO ── -->
+  <div id="intro" class="pixel-frame intro-card">
+    <!-- Pixel car logo (SVG) -->
+    <div style="display:inline-block; margin: 0 auto 10px;">
+      <svg width="120" height="80" viewBox="0 0 30 20" shape-rendering="crispEdges" style="display:block;">
+        <!-- Body bottom -->
+        <rect x="1"  y="9"  width="28" height="7" fill="#fff200"/>
+        <!-- Top cabin -->
+        <rect x="5"  y="4"  width="20" height="5" fill="#ff6b00"/>
+        <!-- Windows -->
+        <rect x="7"  y="5"  width="6"  height="3" fill="#00f0ff"/>
+        <rect x="17" y="5"  width="6"  height="3" fill="#00f0ff"/>
+        <!-- Window reflection -->
+        <rect x="7"  y="5"  width="2"  height="1" fill="#ffffff"/>
+        <rect x="17" y="5"  width="2"  height="1" fill="#ffffff"/>
+        <!-- Highlights/shadow -->
+        <rect x="1"  y="9"  width="28" height="1" fill="#ffffff" opacity="0.4"/>
+        <rect x="1"  y="15" width="28" height="1" fill="#000000" opacity="0.3"/>
+        <!-- Wheels -->
+        <rect x="3"  y="15" width="5"  height="4" fill="#0a0118"/>
+        <rect x="22" y="15" width="5"  height="4" fill="#0a0118"/>
+        <rect x="4"  y="16" width="3"  height="2" fill="#555"/>
+        <rect x="23" y="16" width="3"  height="2" fill="#555"/>
+        <!-- Tail light -->
+        <rect x="28" y="10" width="1"  height="4" fill="#ff2d95"/>
+        <!-- Bumper -->
+        <rect x="0"  y="12" width="1"  height="2" fill="#888"/>
       </svg>
     </div>
-    <h2 class="text-lg font-bold text-gray-900 mb-2">보안 레이싱</h2>
-    <p class="text-sm leading-relaxed" style="color:#6B7280;">
-      60초 안에 보안 문제를 풀어 결승선까지 달리세요.<br>
-      정답을 맞히면 차가 가속하고, 오답은 잠시 멈춥니다.<br>
+    <div class="intro-title">START YOUR<br>ENGINE</div>
+    <div class="intro-sub ko">
+      60초 안에 보안 문제를 풀어<br>
+      결승선까지 달려라!<br>
       AI 차들을 제치고 1등을 노려보세요.
-    </p>
+    </div>
 
-    <div class="grid grid-cols-3 gap-2 mt-5">
-      <div class="rounded-xl py-3" style="background:#F0FDF4;">
-        <p class="text-xs" style="color:#16A34A;">정답</p>
-        <p class="text-sm font-bold" style="color:#15803D;">속도 부스트</p>
+    <div class="info-chips">
+      <div class="info-chip chip-correct">
+        <div class="chip-label">CORRECT</div>
+        <div class="chip-value">+SPEED</div>
       </div>
-      <div class="rounded-xl py-3" style="background:#FEF2F2;">
-        <p class="text-xs" style="color:#DC2626;">오답</p>
-        <p class="text-sm font-bold" style="color:#DC2626;">1초 정지</p>
+      <div class="info-chip chip-wrong">
+        <div class="chip-label">WRONG</div>
+        <div class="chip-value">-1S STOP</div>
       </div>
-      <div class="rounded-xl py-3" style="background:#EFF6FF;">
-        <p class="text-xs" style="color:#2563EB;">제한 시간</p>
-        <p class="text-sm font-bold" style="color:#1E40AF;">60초</p>
+      <div class="info-chip chip-time">
+        <div class="chip-label">TIME</div>
+        <div class="chip-value">60S</div>
       </div>
     </div>
 
-    <div id="replay-notice" class="hidden mt-5 p-3 rounded-2xl" style="background:#FFFBEB; color:#92400E; font-size:13px; font-weight:500; border:1px solid #FDE68A;">
-      이미 한 번 플레이한 교육입니다.<br>이번 점수는 기록되지 않으니 연습용으로 활용하세요.
+    <div id="replay-notice" class="replay-notice" style="display:none;">
+      ! ALREADY PLAYED !<br>
+      <span class="ko">이번 점수는 기록되지 않습니다</span>
     </div>
 
-    <button class="btn-primary mt-6 w-full" onclick="startRace()">레이스 시작</button>
+    <button class="arcade-btn" onclick="startRace()">▶ PRESS START</button>
   </div>
 
-  <!-- ── 게임 화면 ── -->
-  <div id="game" class="hidden">
+  <!-- ── GAME ── -->
+  <div id="game" style="display:none;">
+
     <!-- HUD -->
-    <div class="grid grid-cols-3 gap-3 mb-4">
-      <div class="bg-white rounded-2xl px-4 py-3 shadow-sm">
-        <p class="text-xs" style="color:#B0ADA9;">남은 시간</p>
-        <p id="time-left" class="text-xl font-bold text-gray-900 mt-0.5">60.0초</p>
+    <div class="hud-grid">
+      <div class="hud-card">
+        <div class="hud-label">TIME</div>
+        <div id="time-left" class="hud-value">60.0</div>
       </div>
-      <div class="bg-white rounded-2xl px-4 py-3 shadow-sm">
-        <p class="text-xs" style="color:#B0ADA9;">진행도</p>
-        <p id="progress-pct" class="text-xl font-bold text-gray-900 mt-0.5">0%</p>
+      <div class="hud-card">
+        <div class="hud-label">POSITION</div>
+        <div id="progress-pct" class="hud-value">0%</div>
       </div>
-      <div class="bg-white rounded-2xl px-4 py-3 shadow-sm">
-        <p class="text-xs" style="color:#B0ADA9;">정답</p>
-        <p id="correct-count" class="text-xl font-bold text-gray-900 mt-0.5">0</p>
+      <div class="hud-card">
+        <div class="hud-label">HITS</div>
+        <div id="correct-count" class="hud-value">0</div>
       </div>
     </div>
 
-    <!-- 미니맵 (트랙 전체 조감) -->
-    <div class="minimap mb-3">
+    <!-- Minimap -->
+    <div class="minimap">
       <div class="mini-track-line"></div>
-      <div class="mini-legend">FINISH</div>
       <div id="mini-ai1"    class="mini-dot ai1"    style="left:8px;"></div>
       <div id="mini-ai2"    class="mini-dot ai2"    style="left:8px;"></div>
       <div id="mini-player" class="mini-dot player" style="left:8px;"></div>
       <div class="mini-finish"></div>
     </div>
 
-    <!-- 카메라 따라가는 스크롤 트랙 -->
-    <div id="viewport" class="race-viewport mb-4">
-      <!-- 월드 (viewport보다 훨씬 넓음, 카메라가 따라감) -->
+    <!-- Race viewport (CRT screen) -->
+    <div id="viewport" class="race-viewport">
+      <!-- Background decoration -->
+      <div class="sun"></div>
+      <div class="mountains"></div>
+      <div class="grid-floor"></div>
+
+      <!-- Scrolling world -->
       <div id="world" class="race-world">
-        <!-- 도로 -->
         <div class="road"></div>
-        <!-- 차선 사이 노란 점선 -->
         <div id="div-1" class="divider div-1"></div>
         <div id="div-2" class="divider div-2"></div>
-        <!-- 거리 마커 (25%, 50%, 75%) -->
         <div id="markers"></div>
-        <!-- 결승선 -->
-        <div id="finish-flag" class="finish-flag"></div>
-        <div id="finish-text" class="finish-text">FINISH</div>
+        <div id="finish-flag" class="finish-zone"></div>
+        <div id="finish-text" class="finish-banner">FINISH</div>
 
-        <!-- 차들 (각 lane 안에) -->
+        <!-- Lane 1: AI1 (cyan car) -->
         <div class="lane lane-1" id="lane-1">
-          <div id="ai1" class="car">
+          <div id="ai1" class="car ai1">
             <div class="car-label">AI 1</div>
-            <svg width="48" height="34" viewBox="0 0 48 34" fill="none">
-              <rect x="4" y="14" width="40" height="12" rx="3" fill="#9CA3AF"/>
-              <rect x="11" y="7" width="22" height="10" rx="2" fill="#6B7280"/>
-              <rect x="13" y="9" width="7" height="6" rx="1" fill="#E5E7EB"/>
-              <rect x="24" y="9" width="7" height="6" rx="1" fill="#E5E7EB"/>
-              <circle cx="13" cy="28" r="5" fill="#0F172A"/>
-              <circle cx="35" cy="28" r="5" fill="#0F172A"/>
-              <circle cx="13" cy="28" r="2" fill="#9CA3AF"/>
-              <circle cx="35" cy="28" r="2" fill="#9CA3AF"/>
+            <svg width="64" height="38" viewBox="0 0 32 19" shape-rendering="crispEdges">
+              <rect x="1"  y="9"  width="30" height="7" fill="#00f0ff"/>
+              <rect x="5"  y="4"  width="22" height="5" fill="#006688"/>
+              <rect x="7"  y="5"  width="7"  height="3" fill="#ffffff"/>
+              <rect x="18" y="5"  width="7"  height="3" fill="#ffffff"/>
+              <rect x="1"  y="9"  width="30" height="1" fill="#ffffff" opacity="0.4"/>
+              <rect x="1"  y="15" width="30" height="1" fill="#000000" opacity="0.4"/>
+              <rect x="3"  y="15" width="5"  height="3" fill="#0a0118"/>
+              <rect x="24" y="15" width="5"  height="3" fill="#0a0118"/>
+              <rect x="30" y="10" width="1"  height="4" fill="#ff2d95"/>
             </svg>
           </div>
         </div>
+
+        <!-- Lane 2: Player (yellow car) -->
         <div class="lane lane-2" id="lane-2">
           <div id="player" class="car player">
             <div class="car-label">YOU</div>
-            <svg width="52" height="36" viewBox="0 0 52 36" fill="none">
-              <rect x="4" y="15" width="44" height="13" rx="3" fill="#FBBF24"/>
-              <rect x="12" y="7" width="24" height="11" rx="2" fill="#F59E0B"/>
-              <rect x="14" y="9" width="8" height="7" rx="1" fill="#FEF3C7"/>
-              <rect x="26" y="9" width="8" height="7" rx="1" fill="#FEF3C7"/>
-              <circle cx="14" cy="30" r="5.5" fill="#0F172A"/>
-              <circle cx="38" cy="30" r="5.5" fill="#0F172A"/>
-              <circle cx="14" cy="30" r="2.2" fill="#FBBF24"/>
-              <circle cx="38" cy="30" r="2.2" fill="#FBBF24"/>
+            <svg width="68" height="42" viewBox="0 0 34 21" shape-rendering="crispEdges">
+              <rect x="1"  y="10" width="32" height="8" fill="#fff200"/>
+              <rect x="5"  y="4"  width="24" height="6" fill="#ff6b00"/>
+              <rect x="7"  y="5"  width="8"  height="4" fill="#00f0ff"/>
+              <rect x="19" y="5"  width="8"  height="4" fill="#00f0ff"/>
+              <rect x="7"  y="5"  width="2"  height="1" fill="#ffffff"/>
+              <rect x="19" y="5"  width="2"  height="1" fill="#ffffff"/>
+              <rect x="1"  y="10" width="32" height="1" fill="#ffffff" opacity="0.5"/>
+              <rect x="1"  y="17" width="32" height="1" fill="#000000" opacity="0.4"/>
+              <rect x="3"  y="17" width="5"  height="3" fill="#0a0118"/>
+              <rect x="26" y="17" width="5"  height="3" fill="#0a0118"/>
+              <rect x="32" y="11" width="1"  height="5" fill="#ff2d95"/>
+              <rect x="0"  y="12" width="1"  height="3" fill="#cccccc"/>
             </svg>
           </div>
         </div>
+
+        <!-- Lane 3: AI2 (pink car) -->
         <div class="lane lane-3" id="lane-3">
-          <div id="ai2" class="car">
+          <div id="ai2" class="car ai2">
             <div class="car-label">AI 2</div>
-            <svg width="48" height="34" viewBox="0 0 48 34" fill="none">
-              <rect x="4" y="14" width="40" height="12" rx="3" fill="#EF4444"/>
-              <rect x="11" y="7" width="22" height="10" rx="2" fill="#DC2626"/>
-              <rect x="13" y="9" width="7" height="6" rx="1" fill="#FEE2E2"/>
-              <rect x="24" y="9" width="7" height="6" rx="1" fill="#FEE2E2"/>
-              <circle cx="13" cy="28" r="5" fill="#0F172A"/>
-              <circle cx="35" cy="28" r="5" fill="#0F172A"/>
-              <circle cx="13" cy="28" r="2" fill="#EF4444"/>
-              <circle cx="35" cy="28" r="2" fill="#EF4444"/>
+            <svg width="64" height="38" viewBox="0 0 32 19" shape-rendering="crispEdges">
+              <rect x="1"  y="9"  width="30" height="7" fill="#ff2d95"/>
+              <rect x="5"  y="4"  width="22" height="5" fill="#b026ff"/>
+              <rect x="7"  y="5"  width="7"  height="3" fill="#ffffff"/>
+              <rect x="18" y="5"  width="7"  height="3" fill="#ffffff"/>
+              <rect x="1"  y="9"  width="30" height="1" fill="#ffffff" opacity="0.4"/>
+              <rect x="1"  y="15" width="30" height="1" fill="#000000" opacity="0.4"/>
+              <rect x="3"  y="15" width="5"  height="3" fill="#0a0118"/>
+              <rect x="24" y="15" width="5"  height="3" fill="#0a0118"/>
+              <rect x="30" y="10" width="1"  height="4" fill="#fff200"/>
             </svg>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 문제 -->
-    <div id="question-area" class="question-card">
-      <p id="q-text" class="text-base font-semibold text-gray-900 mb-4"></p>
-      <div id="q-options" class="flex flex-col gap-2"></div>
+    <!-- Question -->
+    <div class="question-card">
+      <div id="q-number" class="q-number">QUESTION 1</div>
+      <p id="q-text" class="q-text ko"></p>
+      <div id="q-options" class="q-options"></div>
     </div>
   </div>
 
-  <!-- ── 결과 화면 ── -->
-  <div id="result" class="hidden bg-white rounded-3xl p-8 shadow-sm text-center">
-    <div id="result-icon-wrap" class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-      <svg id="result-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2l2.4 7.4H22l-6.2 4.5L18.2 22 12 17.5 5.8 22l2.4-8.1L2 9.4h7.6z"/>
-      </svg>
-    </div>
-    <h2 class="text-lg font-bold text-gray-900 mb-1">레이스 종료</h2>
-    <p id="result-title" class="text-sm mb-6" style="color:#6B7280;"></p>
+  <!-- ── RESULT ── -->
+  <div id="result" class="pixel-frame result-card" style="display:none;">
+    <div id="result-title-big" class="result-title-big">RACE COMPLETE</div>
+    <div id="result-sub" class="result-sub ko"></div>
 
-    <div class="grid grid-cols-3 gap-3 mb-6">
-      <div class="rounded-2xl p-4" style="background:#F5F3F0;">
-        <p class="text-xs" style="color:#B0ADA9;">최종 점수</p>
-        <p id="final-score" class="text-2xl font-bold text-gray-900 mt-1">0</p>
+    <div class="stat-grid">
+      <div class="stat-card gold">
+        <div class="stat-label">SCORE</div>
+        <div id="final-score" class="stat-value">0</div>
       </div>
-      <div class="rounded-2xl p-4" style="background:#EFF6FF;">
-        <p class="text-xs" style="color:#B0ADA9;">진행도</p>
-        <p id="final-progress" class="text-2xl font-bold mt-1" style="color:#2563EB;">0%</p>
+      <div class="stat-card cyan">
+        <div class="stat-label">DISTANCE</div>
+        <div id="final-progress" class="stat-value">0%</div>
       </div>
-      <div class="rounded-2xl p-4" style="background:#F0FDF4;">
-        <p class="text-xs" style="color:#B0ADA9;">정답 수</p>
-        <p id="final-correct" class="text-2xl font-bold mt-1" style="color:#16A34A;">0</p>
+      <div class="stat-card green">
+        <div class="stat-label">HITS</div>
+        <div id="final-correct" class="stat-value">0</div>
       </div>
     </div>
 
-    <p id="rank-info" class="text-xs mb-6" style="color:#8C8984;"></p>
+    <div id="rank-info" class="rank-info"></div>
 
-    <div class="flex gap-2">
-      <button onclick="location.href='index.html'" class="btn-outline flex-1">메인으로</button>
-      <button onclick="location.reload()" class="btn-primary flex-1">다시 도전</button>
+    <div class="btn-row">
+      <button class="btn-ghost" onclick="location.href='index.html'">◀ MAIN</button>
+      <button class="btn-solid" onclick="location.reload()">RETRY ▶</button>
     </div>
   </div>
 
@@ -380,7 +1072,7 @@
 <script>
 if (!sessionStorage.getItem('user')) location.href = 'login.html';
 
-// ── 문제 풀 (16문항) ──
+// ── 문제 풀 ──
 const QUESTIONS = [
   { q:'강력한 비밀번호의 조건으로 가장 적절한 것은?',
     options:['짧고 외우기 쉬운 단어', '8자 이상 + 대소문자 + 숫자 + 특수문자', '생년월일이나 전화번호', '동일한 문자 반복'],
@@ -433,18 +1125,16 @@ const QUESTIONS = [
 ];
 
 // ── 게임 상수 ──
-const RACE_TIME      = 60;     // 초
-const WORLD_WIDTH    = 3200;   // 트랙 전체 길이(px). viewport보다 훨씬 넓어서 카메라가 스크롤
-const FINISH_X       = WORLD_WIDTH - 80;  // 결승선 위치(px) — 오른쪽 여유 두기
-
-// 속도: %/sec (논리적 진행도 단위)
-const PLAYER_BASE    = 1.0;    // 무답일 때 60초에 60% 정도 진행
-const PLAYER_BOOST   = 2.5;    // 부스트 중 속도 (정답 직후 1.8초)
-const AI1_SPEED      = 1.5;    // 빠른 AI — 60초에 90% (정답 없으면 짐)
-const AI2_SPEED      = 0.85;   // 느린 AI — 60초에 ~51%
+const RACE_TIME      = 60;
+const WORLD_WIDTH    = 3200;
+const FINISH_X       = WORLD_WIDTH - 80;
+const PLAYER_BASE    = 1.0;
+const PLAYER_BOOST   = 2.5;
+const AI1_SPEED      = 1.5;
+const AI2_SPEED      = 0.85;
 const BOOST_DURATION = 1800;
 const SLOW_DURATION  = 1000;
-const CORRECT_JUMP   = 5;      // 정답 시 즉시 +5%
+const CORRECT_JUMP   = 5;
 
 let playerPos = 0, ai1Pos = 0, ai2Pos = 0;
 let playerBoostUntil = 0, playerSlowUntil = 0;
@@ -465,7 +1155,7 @@ function shuffle(arr) {
   return a;
 }
 
-// 페이지 로드 시 재도전 안내 체크
+// ── 재도전 안내 ──
 (async function init() {
   try {
     const u = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -473,41 +1163,34 @@ function shuffle(arr) {
     const { data } = await sb.from('game_scores')
       .select('id').eq('user_email', u.email).eq('game_type', 'security_race').limit(1);
     if (data && data.length > 0) {
-      document.getElementById('replay-notice').classList.remove('hidden');
+      document.getElementById('replay-notice').style.display = 'block';
     }
   } catch (e) {}
 })();
 
-// 거리 마커와 결승선 표시 위치 세팅 (월드 좌표 기준)
 function setupWorld() {
   const world = document.getElementById('world');
   world.style.width = WORLD_WIDTH + 'px';
-
-  // 차선 사이 점선
   document.getElementById('div-1').style.width = WORLD_WIDTH + 'px';
   document.getElementById('div-2').style.width = WORLD_WIDTH + 'px';
 
-  // 거리 마커 (25%, 50%, 75%)
+  // 거리 마커
   const markers = document.getElementById('markers');
   markers.innerHTML = '';
   [25, 50, 75].forEach(p => {
     const x = (p / 100) * FINISH_X;
-    const line = document.createElement('div');
-    line.className = 'marker';
-    line.style.left = x + 'px';
-    markers.appendChild(line);
-    const label = document.createElement('div');
-    label.className = 'marker-label';
-    label.style.left = x + 'px';
-    label.textContent = p + '%';
-    markers.appendChild(label);
+    const sign = document.createElement('div');
+    sign.className = 'marker-sign';
+    sign.style.left = x + 'px';
+    sign.innerHTML = `<div class="board">${p}%</div><div class="post"></div>`;
+    markers.appendChild(sign);
   });
 
   // 결승선
   document.getElementById('finish-flag').style.left = FINISH_X + 'px';
-  document.getElementById('finish-text').style.left = (FINISH_X + 9) + 'px';
+  document.getElementById('finish-text').style.left = (FINISH_X + 10) + 'px';
 
-  // 카메라 즉시 리셋 (transition 끄고)
+  // 카메라 리셋
   world.classList.add('no-tx');
   world.style.transform = 'translateX(0px)';
   requestAnimationFrame(() => world.classList.remove('no-tx'));
@@ -523,11 +1206,10 @@ function startRace() {
   playerSlowUntil = 0;
   questionPool = shuffle(QUESTIONS);
 
-  document.getElementById('intro').classList.add('hidden');
-  document.getElementById('game').classList.remove('hidden');
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
 
   setupWorld();
-  // 카들 초기 위치
   updateCarPos('player', 0);
   updateCarPos('ai1', 0);
   updateCarPos('ai2', 0);
@@ -548,11 +1230,10 @@ function loop(now) {
   const elapsed = (now - raceStart) / 1000;
   const remaining = Math.max(0, RACE_TIME - elapsed);
 
-  // 플레이어 속도
   let playerSpeed = PLAYER_BASE;
   const boosting = now < playerBoostUntil;
-  if (boosting)               playerSpeed = PLAYER_BOOST;
-  if (now < playerSlowUntil)  playerSpeed = 0;
+  if (boosting)              playerSpeed = PLAYER_BOOST;
+  if (now < playerSlowUntil) playerSpeed = 0;
   playerPos = Math.min(100, playerPos + playerSpeed * dt);
 
   ai1Pos = Math.min(100, ai1Pos + AI1_SPEED * dt);
@@ -564,7 +1245,6 @@ function loop(now) {
   updateCamera();
   updateMinimap();
 
-  // 부스트 UI 효과
   const viewport = document.getElementById('viewport');
   const playerEl = document.getElementById('player');
   if (boosting) {
@@ -575,7 +1255,7 @@ function loop(now) {
     playerEl.classList.remove('boosting');
   }
 
-  document.getElementById('time-left').textContent     = remaining.toFixed(1) + '초';
+  document.getElementById('time-left').textContent     = remaining.toFixed(1);
   document.getElementById('progress-pct').textContent  = Math.round(playerPos) + '%';
   document.getElementById('correct-count').textContent = correctCount;
 
@@ -586,28 +1266,24 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-// 차의 월드 좌표상 위치를 설정 (lane 안 left 속성)
 function updateCarPos(id, pct) {
   const el = document.getElementById(id);
   if (!el) return;
-  const worldX = (pct / 100) * FINISH_X;
-  el.style.left = worldX + 'px';
+  el.style.left = ((pct / 100) * FINISH_X) + 'px';
 }
 
-// 카메라가 플레이어를 화면 35% 지점에 두고 따라감
 function updateCamera() {
   const viewport = document.getElementById('viewport');
   const world = document.getElementById('world');
   const vw = viewport.offsetWidth;
   const playerWorldX = (playerPos / 100) * FINISH_X;
-  let target = playerWorldX - vw * 0.35;
+  let target = playerWorldX - vw * 0.32;
   target = Math.max(0, Math.min(WORLD_WIDTH - vw, target));
   cameraX = target;
   world.style.transform = `translateX(${-cameraX}px)`;
 }
 
 function updateMinimap() {
-  // 미니맵: 트랙 전체를 좌→우로, 8px ~ (width-24px) 사이에 매핑
   const mini = document.querySelector('.minimap');
   if (!mini) return;
   const total = mini.offsetWidth - 32;
@@ -622,16 +1298,19 @@ function updateMinimap() {
 
 function showQuestion() {
   const q = questionPool[currentQIdx % questionPool.length];
-  // 답안 순서를 랜덤화 (정답 위치 추적)
   const tagged = q.options.map((opt, i) => ({ opt, isCorrect: i === q.answer }));
   const shuffledOpts = shuffle(tagged);
   const correctIdx = shuffledOpts.findIndex(o => o.isCorrect);
   currentShuffled = { shuffledOpts, correctIdx };
 
-  document.getElementById('q-text').textContent = `Q${totalAnswered + 1}. ${q.q}`;
+  document.getElementById('q-number').textContent = `QUESTION ${totalAnswered + 1}`;
+  document.getElementById('q-text').textContent = q.q;
   const opts = document.getElementById('q-options');
   opts.innerHTML = shuffledOpts.map((o, i) =>
-    `<button class="answer-btn" onclick="answer(${i})">${o.opt}</button>`
+    `<button class="answer-btn" onclick="answer(${i})">
+       <span class="letter">${'ABCD'[i]}</span>
+       <span class="ko">${o.opt}</span>
+     </button>`
   ).join('');
 }
 
@@ -659,7 +1338,6 @@ function answer(idx) {
   }
   totalAnswered++;
 
-  // 다음 문제 (0.9초 후)
   setTimeout(() => {
     if (!raceRunning) return;
     currentQIdx++;
@@ -669,10 +1347,13 @@ function answer(idx) {
 
 function endRace() {
   raceRunning = false;
+  document.getElementById('viewport').classList.remove('boosting');
+  const playerEl = document.getElementById('player');
+  if (playerEl) playerEl.classList.remove('boosting');
+
   const elapsed = Math.min(RACE_TIME, (performance.now() - raceStart) / 1000);
   const finished = playerPos >= 100;
 
-  // 순위
   const positions = [
     { name: 'YOU', pos: playerPos },
     { name: 'AI 1', pos: ai1Pos },
@@ -680,37 +1361,35 @@ function endRace() {
   ].sort((a, b) => b.pos - a.pos);
   const myRank = positions.findIndex(p => p.name === 'YOU') + 1;
 
-  // 점수: 결승선 통과 시 70 + 남은 시간 보너스(최대 30), 미완주 시 진행도 × 0.7
-  let finalScore, title;
+  let finalScore, subText, bigTitle;
   if (finished) {
     const timeBonus = Math.round((RACE_TIME - elapsed) / RACE_TIME * 30);
     finalScore = Math.min(100, 70 + timeBonus);
-    title = myRank === 1 ? '1등! 모든 차를 제쳤습니다.'
-          : myRank === 2 ? '2등 — 결승선 통과 성공!'
-          : '결승선 통과! 시간 내 완주했습니다.';
+    if (myRank === 1) {
+      bigTitle = '★ 1ST PLACE ★';
+      subText = '모든 차를 제치고 우승했습니다!';
+    } else if (myRank === 2) {
+      bigTitle = 'RACE CLEAR';
+      subText = '2등 — 결승선을 통과했습니다!';
+    } else {
+      bigTitle = 'RACE CLEAR';
+      subText = '결승선 통과! 시간 내 완주했습니다.';
+    }
   } else {
     finalScore = Math.round(playerPos * 0.7);
-    title = '시간 초과 — 다음엔 더 빠르게 답해보세요.';
+    bigTitle = 'TIME UP';
+    subText = '시간 초과 — 다음엔 더 빠르게 답해보세요.';
   }
 
-  // 결과 아이콘
-  const iconWrap = document.getElementById('result-icon-wrap');
-  if (myRank === 1 && finished) {
-    iconWrap.style.background = 'linear-gradient(135deg,#F59E0B,#FBBF24)';
-  } else if (finished) {
-    iconWrap.style.background = 'linear-gradient(135deg,#10B981,#34D399)';
-  } else {
-    iconWrap.style.background = 'linear-gradient(135deg,#6B7280,#9CA3AF)';
-  }
-
-  document.getElementById('game').classList.add('hidden');
-  document.getElementById('result').classList.remove('hidden');
-  document.getElementById('result-title').textContent = title;
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result-title-big').textContent = bigTitle;
+  document.getElementById('result-sub').textContent = subText;
   document.getElementById('final-score').textContent = finalScore;
   document.getElementById('final-progress').textContent = Math.round(playerPos) + '%';
   document.getElementById('final-correct').textContent = `${correctCount}/${totalAnswered}`;
   document.getElementById('rank-info').textContent =
-    `최종 순위: ${myRank}등 · ${positions.map(p => `${p.name} ${Math.round(p.pos)}%`).join(' / ')}`;
+    `RANK ${myRank} / 3   ·   ` + positions.map(p => `${p.name} ${Math.round(p.pos)}%`).join(' · ');
 
   saveScore(finalScore);
 }
@@ -721,7 +1400,7 @@ async function saveScore(score) {
     if (!u.email) return;
     const { data: existing } = await sb.from('game_scores')
       .select('id').eq('user_email', u.email).eq('game_type', 'security_race').limit(1);
-    if (existing && existing.length > 0) return;  // 재도전 — 저장 안 함
+    if (existing && existing.length > 0) return;
     await sb.from('game_scores').insert({
       user_email: u.email,
       game_type:  'security_race',
@@ -730,5 +1409,6 @@ async function saveScore(score) {
   } catch (e) {}
 }
 </script>
+
 </body>
 </html>
