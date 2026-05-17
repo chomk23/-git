@@ -121,6 +121,47 @@
   </main>
 </div>
 
+<!-- 수정 모달 -->
+<div id="edit-modal" class="modal-backdrop hidden" onclick="closeEditOnBackdrop(event)">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-base font-bold text-gray-900">강의 수정</h2>
+        <p class="text-xs mt-0.5" style="color:#8C8984;" id="e-course-name"></p>
+      </div>
+      <button onclick="closeEdit()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div id="e-max-score-wrap">
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">게임 만점</label>
+        <input id="e-max-score" type="number" min="0" class="input-field" placeholder="100">
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">이 게임에서 받을 수 있는 최대 점수 (이수율/통과 판정 기준)</p>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">정렬 순서</label>
+        <input id="e-sort" type="number" min="0" class="input-field" placeholder="0">
+        <p class="text-xs mt-1.5" style="color:#B0ADA9;">작은 숫자가 먼저 표시됩니다</p>
+      </div>
+      <label class="flex items-center gap-2 cursor-pointer mt-1 p-3 rounded-2xl" style="background:#FAF9F7;">
+        <input id="e-active" type="checkbox" class="rounded">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900">활성화 (수강생에게 표시)</p>
+          <p class="text-xs mt-0.5" style="color:#8C8984;">비활성 시 사용자 메인 페이지에 노출되지 않습니다</p>
+        </div>
+      </label>
+      <div id="edit-error" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEF2F2;color:#DC2626;"></div>
+      <div class="flex gap-2 pt-2">
+        <button class="btn-sm btn-outline flex-1" onclick="closeEdit()">취소</button>
+        <button id="e-save-btn" class="btn-sm btn-dark flex-1" onclick="saveEdit()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
   const stored = sessionStorage.getItem('user');
@@ -136,6 +177,8 @@
     return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
   }
 
+  let coursesCache = [];
+
   async function loadCourses() {
     const grid = document.getElementById('courses-grid');
     const { data, error } = await sb.from('courses').select('*').order('sort_order', { ascending: true });
@@ -143,19 +186,19 @@
       grid.innerHTML = `<p class="col-span-2 text-center py-10 text-sm" style="color:#DC2626;">불러오기 실패: ${error.message}</p>`;
       return;
     }
-    const courses = data || [];
-    document.getElementById('total-count').textContent = courses.length;
-    if (!courses.length) {
+    coursesCache = data || [];
+    document.getElementById('total-count').textContent = coursesCache.length;
+    if (!coursesCache.length) {
       grid.innerHTML = `<p class="col-span-2 text-center py-10 text-sm" style="color:#B0ADA9;">아직 등록된 강의가 없습니다.</p>`;
       return;
     }
-    grid.innerHTML = courses.map(c => {
+    grid.innerHTML = coursesCache.map(c => {
       const isGame = !!c.game_type;
       const typeLabel = isGame ? '게임 강의' : '일반 강의';
       const typeColor = isGame ? '#7C3AED' : '#1A1A1A';
       const typeBg    = isGame ? '#F5F3FF' : '#F5F3F0';
       return `
-        <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden" style="opacity:${c.active?'1':'0.7'};">
           <div style="height:64px;background:${c.color || '#1A1A1A'};"></div>
           <div class="p-5">
             <div class="flex items-start justify-between mb-2">
@@ -184,9 +227,98 @@
                 </span>
               </div>
             </div>
+            <div class="flex gap-2 mt-4 pt-4" style="border-top:1px solid #F5F3F0;">
+              <button class="btn-sm btn-outline flex-1" onclick="openEdit('${c.id}')">수정</button>
+              <button class="btn-sm flex-1" style="background:${c.active?'#FEF2F2':'#F0FDF4'};color:${c.active?'#DC2626':'#16A34A'};border:1.5px solid ${c.active?'#FECACA':'#BBF7D0'};" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '비활성' : '활성'}</button>
+            </div>
           </div>
         </div>`;
     }).join('');
+  }
+
+  // ── 수정 모달 ──
+  let editingId = null;
+
+  function openEdit(id) {
+    const c = coursesCache.find(x => x.id === id);
+    if (!c) return;
+    editingId = id;
+    document.getElementById('e-course-name').textContent = c.title;
+    document.getElementById('e-max-score').value = c.max_score ?? 100;
+    document.getElementById('e-max-score-wrap').classList.toggle('hidden', !c.game_type);
+    document.getElementById('e-active').checked = c.active !== false;
+    document.getElementById('e-sort').value = c.sort_order ?? 0;
+    document.getElementById('edit-error').classList.add('hidden');
+    document.getElementById('edit-modal').classList.remove('hidden');
+  }
+  function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+  function closeEditOnBackdrop(e) { if (e.target === document.getElementById('edit-modal')) closeEdit(); }
+
+  async function saveEdit() {
+    const errEl = document.getElementById('edit-error');
+    errEl.classList.add('hidden');
+    const c = coursesCache.find(x => x.id === editingId);
+    if (!c) return;
+
+    const patch = {
+      active: document.getElementById('e-active').checked,
+      sort_order: parseInt(document.getElementById('e-sort').value) || 0,
+    };
+    if (c.game_type) {
+      patch.max_score = parseInt(document.getElementById('e-max-score').value) || 0;
+    }
+
+    const btn = document.getElementById('e-save-btn');
+    btn.disabled = true; btn.textContent = '저장 중...';
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch('/api/admin-courses', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ id: editingId, ...patch }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '저장 실패');
+      closeEdit();
+      showToast('강의가 수정되었습니다');
+      await loadCourses();
+    } catch (err) {
+      errEl.textContent = '오류: ' + err.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = '저장';
+    }
+  }
+
+  // 카드에서 활성/비활성 빠른 토글
+  async function toggleActive(id, newValue) {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch('/api/admin-courses', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ id, active: newValue }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '변경 실패');
+      showToast(newValue ? '강의를 활성화했습니다' : '강의를 비활성화했습니다');
+      await loadCourses();
+    } catch (err) {
+      alert('오류: ' + err.message);
+    }
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById('toast-msg');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast-msg';
+      t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1A1A1A;color:white;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:500;z-index:50;transition:all 0.3s;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 2500);
   }
 
   loadCourses();
