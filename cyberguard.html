@@ -1023,12 +1023,27 @@ function showEnding(){
   // 0~100점으로 스케일링 (원래 max ~1200)
   var finalScore=Math.min(100, Math.round(G.score/1200*100));
 
-  // Supabase에 게임 점수 저장
+  // Supabase에 게임 점수 저장 (첫 플레이만)
   (async function(){
     try {
       var u=JSON.parse(sessionStorage.getItem('user')||'{}');
       if(!u.email) return;
-      await sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:finalScore});
+      var existing=await sb.from('game_scores').select('id').eq('user_email',u.email).eq('game_type','cyberguard').limit(1);
+      var alreadyPlayed=(existing.data && existing.data.length > 0);
+      if(!alreadyPlayed){
+        await sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:finalScore});
+      }
+      // 결과 화면에 안내
+      if(alreadyPlayed){
+        var sub=document.getElementById('endSub');
+        if(sub && !sub.querySelector('.replay-notice')){
+          var note=document.createElement('div');
+          note.className='replay-notice';
+          note.style.cssText='margin-top:14px;padding:10px 14px;border-radius:10px;background:#FFFBEB;color:#92400E;font-size:13px;font-weight:500;';
+          note.textContent='재도전이므로 이번 점수는 기록되지 않습니다.';
+          sub.parentNode.appendChild(note);
+        }
+      }
     } catch(e){}
   })();
 

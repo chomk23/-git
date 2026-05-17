@@ -377,17 +377,42 @@ function startDotsAnim(elId) {
   }, 500);
 }
 
-// ── 게임 점수 Supabase 저장 ──
+// ── 게임 점수 Supabase 저장 (첫 플레이만 저장) ──
 async function saveScore(gameType, score) {
   try {
     const user = JSON.parse(sessionStorage.getItem('user') || '{}');
-    if (!user.email) return;
+    if (!user.email) return { saved: false };
+    // 이미 점수가 있는지 확인
+    const { data: existing } = await sb.from('game_scores')
+      .select('id').eq('user_email', user.email).eq('game_type', gameType).limit(1);
+    if (existing && existing.length > 0) {
+      window.lastScoreSaved = false; // 재도전 — 기록은 저장 안 됨
+      return { saved: false };
+    }
     await sb.from('game_scores').insert({
       user_email: user.email,
       game_type:  gameType,
       score:      score,
     });
-  } catch (e) { /* 점수 저장 실패해도 게임 진행에 영향 없음 */ }
+    window.lastScoreSaved = true;
+    return { saved: true };
+  } catch (e) {
+    window.lastScoreSaved = false;
+    return { saved: false };
+  }
+}
+
+// 결과 화면에 "재도전 안내" 띄우기 (저장 안 됐을 때)
+function showReplayNotice(resultElId) {
+  const el = document.getElementById(resultElId);
+  if (!el || !window.lastScoreSaved === false) return;
+  if (window.lastScoreSaved === false && !el.querySelector('.replay-notice')) {
+    const note = document.createElement('div');
+    note.className = 'replay-notice';
+    note.style.cssText = 'margin-top:16px;padding:12px 14px;border-radius:12px;background:#FFFBEB;color:#92400E;font-size:13px;font-weight:500;text-align:center;';
+    note.textContent = '재도전이므로 이번 점수는 기록되지 않습니다.';
+    el.appendChild(note);
+  }
 }
 function startGame(type) {
   const titles = { phishing:'피싱 탐정', ox:'OX 번개퀴즈', password:'비밀번호 요새', budget:'보안 예산 작전' };
@@ -479,7 +504,7 @@ function nextPhishing() {
     document.getElementById('phishing-result').style.display='block';
     const finalScore=Math.min(100, Math.round(pScore/300*100));
     document.getElementById('phishing-final-score').textContent=finalScore;
-    saveScore('phishing', finalScore);
+    saveScore('phishing', finalScore).then(()=>showReplayNotice('phishing-result'));
     const p=finalScore/100;
     document.getElementById('phishing-grade').textContent=p>=0.9?'탁월한 탐정!':p>=0.7?'훌륭한 탐정!':p>=0.5?'보통 탐정':'탐정 견습생';
     document.getElementById('phishing-comment').textContent=p>=0.7?'피싱 메일 판별 능력이 뛰어납니다.':'피싱 징후를 다시 복습해보세요.';
@@ -588,7 +613,7 @@ function showOXResult(){
   document.getElementById('ox-result').style.display='block';
   const oxFinal=Math.min(100, Math.round(oxScore/500*100));
   document.getElementById('ox-final-score').textContent=oxFinal+'점';
-  saveScore('ox', oxFinal);
+  saveScore('ox', oxFinal).then(()=>showReplayNotice('ox-result'));
   document.getElementById('ox-correct-count').textContent=oxCorrect;
   document.getElementById('ox-wrong-count').textContent=oxQ.length-oxCorrect;
   document.getElementById('ox-max-streak').textContent=oxMaxStreak;
@@ -656,7 +681,7 @@ function nextPW(){
   if(pwStage>=pwStages.length){
     document.getElementById('pw-game').style.display='none';
     document.getElementById('pw-result').style.display='block';
-    saveScore('password', 100);
+    saveScore('password', 100).then(()=>showReplayNotice('pw-result'));
   } else {
     document.getElementById('pw-input').value='';
     renderPWStage();
@@ -743,7 +768,7 @@ function showBudgetResult(blocked){
   document.getElementById('budget-result').style.display='block';
   const breached=attacks.length-blocked;
   const score=Math.round((blocked/attacks.length)*100);
-  saveScore('budget', score);
+  saveScore('budget', score).then(()=>showReplayNotice('budget-result'));
   document.getElementById('budget-blocked').textContent=blocked;
   document.getElementById('budget-breached').textContent=breached;
   document.getElementById('budget-final-score').textContent=score+'점';
