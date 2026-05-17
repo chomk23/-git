@@ -1,7 +1,5 @@
-import { checkRateLimit } from './_rate-limit.js';
-
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', (process.env.SITE_URL || '').replace(/\/$/, ''));
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -27,18 +25,6 @@ export default async function handler(req, res) {
   );
   const profiles = await profileRes.json();
   if (profiles?.[0]?.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
-
-  // Rate limit: 관리자라도 분당 6회 (AI 비용 폭주 방지)
-  const rl = await checkRateLimit({
-    supabaseUrl, serviceKey,
-    identifier: callerUser.email,
-    endpoint: 'generate-phishing-template',
-    maxPerWindow: 6,
-    windowSec: 60,
-  });
-  if (!rl.allowed) {
-    return res.status(429).json({ error: 'Rate limit: 분당 6회까지만 호출할 수 있습니다.' });
-  }
 
   const { description } = req.body || {};
 
