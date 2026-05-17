@@ -1,11 +1,30 @@
+import { checkRateLimit, getClientIp } from './_rate-limit.js';
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', (process.env.SITE_URL || '').replace(/\/$/, ''));
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Rate limit: IP당 60초에 5회까지만
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (supabaseUrl && serviceKey) {
+    const ip = getClientIp(req);
+    const rl = await checkRateLimit({
+      supabaseUrl, serviceKey,
+      identifier: ip,
+      endpoint: 'generate-quiz',
+      maxPerWindow: 5,
+      windowSec: 60,
+    });
+    if (!rl.allowed) {
+      return res.status(429).json({ error: 'Rate limit exceeded. Please wait a minute.' });
+    }
   }
 
   const { type } = req.body || {};

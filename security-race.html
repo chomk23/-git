@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SECURITY RACE — 보안 교육 플랫폼</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.4/dist/umd/supabase.js" integrity="sha384-7SfFUrg31wOnGWBLLniKFCNmCSguYA5wI1WPDOt7kP/mom4R9/0pwghVEnv0uwYP" crossorigin="anonymous"></script>
   <script src="supabase.js"></script>
+  <script src="auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
@@ -1475,15 +1476,15 @@ function endRace() {
 
 async function saveScore(score) {
   try {
-    const u = JSON.parse(sessionStorage.getItem('user') || '{}');
-    if (!u.email) return;
-    const { data: existing } = await sb.from('game_scores')
-      .select('id').eq('user_email', u.email).eq('game_type', 'security_race').limit(1);
-    if (existing && existing.length > 0) return;
-    await sb.from('game_scores').insert({
-      user_email: u.email,
-      game_type:  'security_race',
-      score:      score,
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) return;
+    await fetch('/api/save-game-score', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ game_type: 'security_race', score }),
     });
   } catch (e) {}
 }

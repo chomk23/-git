@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보안 게이미피케이션 교육</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.4/dist/umd/supabase.js" integrity="sha384-7SfFUrg31wOnGWBLLniKFCNmCSguYA5wI1WPDOt7kP/mom4R9/0pwghVEnv0uwYP" crossorigin="anonymous"></script>
   <script src="supabase.js"></script>
+  <script src="auth.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -248,25 +249,25 @@ function startDotsAnim(elId) {
   }, 500);
 }
 
-// ── 게임 점수 Supabase 저장 (첫 플레이만 저장) ──
+// ── 게임 점수 저장 (서버 API 경유, 첫 플레이만) ──
 async function saveScore(gameType, score) {
   try {
-    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
-    if (!user.email) return { saved: false };
-    // 이미 점수가 있는지 확인
-    const { data: existing } = await sb.from('game_scores')
-      .select('id').eq('user_email', user.email).eq('game_type', gameType).limit(1);
-    if (existing && existing.length > 0) {
-      window.lastScoreSaved = false; // 재도전 — 기록은 저장 안 됨
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) {
+      window.lastScoreSaved = false;
       return { saved: false };
     }
-    await sb.from('game_scores').insert({
-      user_email: user.email,
-      game_type:  gameType,
-      score:      score,
+    const res = await fetch('/api/save-game-score', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ game_type: gameType, score }),
     });
-    window.lastScoreSaved = true;
-    return { saved: true };
+    const data = await res.json();
+    window.lastScoreSaved = !!data.saved;
+    return data;
   } catch (e) {
     window.lastScoreSaved = false;
     return { saved: false };
