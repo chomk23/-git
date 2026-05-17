@@ -520,6 +520,20 @@
     .car.ai1 .car-label   { color: var(--neon-cyan); text-shadow: 1px 1px 0 var(--bg-deep), 0 0 5px var(--neon-cyan); }
     .car.ai2 .car-label   { color: var(--neon-pink); text-shadow: 1px 1px 0 var(--bg-deep), 0 0 5px var(--neon-pink); }
 
+    /* AI 부스트 시 글로우 */
+    .car.ai1.boosting-ai {
+      filter:
+        drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7))
+        drop-shadow(0 0 14px var(--neon-cyan))
+        brightness(1.25);
+    }
+    .car.ai2.boosting-ai {
+      filter:
+        drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.7))
+        drop-shadow(0 0 14px var(--neon-pink))
+        brightness(1.25);
+    }
+
     /* Boost flash on player */
     .speed-burst { animation: burst 0.6s ease; }
     @keyframes burst {
@@ -1107,6 +1121,9 @@ let trackLength = 0;
 
 let playerPos = 0, ai1Pos = 0, ai2Pos = 0;
 let playerBoostUntil = 0, playerSlowUntil = 0;
+let ai1BoostUntil = 0, ai1NextBoostAt = 0;
+let ai2BoostUntil = 0, ai2NextBoostAt = 0;
+const AI_BOOST_MULT = 1.7;  // AI 부스트 시 속도 배율
 let raceRunning = false;
 let raceStart = 0, lastFrame = 0;
 let correctCount = 0, totalAnswered = 0;
@@ -1199,7 +1216,9 @@ function setupWorld() {
   const flag = document.getElementById('finish-flag');
   flag.style.left = endP.x + 'px';
   flag.style.top  = endP.y + 'px';
-  flag.style.transform = `translate(-50%, -50%) rotate(${fAngle + 90}deg)`;
+  // 게이트는 기본이 세로 strip(width 22, height 180) — 본질적으로 이미 도로에
+  // 직각이다. 그래서 도로 진행 방향 그대로 회전하면 도로 위를 가로지르는 모양이 됨.
+  flag.style.transform = `translate(-50%, -50%) rotate(${fAngle}deg)`;
   const ftext = document.getElementById('finish-text');
   ftext.style.left = endP.x + 'px';
   ftext.style.top  = endP.y + 'px';
@@ -1218,6 +1237,9 @@ function startRace() {
   currentQIdx = 0;
   playerBoostUntil = 0;
   playerSlowUntil = 0;
+  // AI 첫 부스트는 2~4초 사이
+  ai1BoostUntil = 0; ai1NextBoostAt = performance.now() + 2000 + Math.random() * 2000;
+  ai2BoostUntil = 0; ai2NextBoostAt = performance.now() + 2500 + Math.random() * 2500;
   questionPool = shuffle(QUESTIONS);
 
   document.getElementById('intro').style.display = 'none';
@@ -1250,8 +1272,27 @@ function loop(now) {
   if (now < playerSlowUntil) playerSpeed = 0;
   playerPos = Math.min(100, playerPos + playerSpeed * dt);
 
-  ai1Pos = Math.min(100, ai1Pos + AI1_SPEED * dt);
-  ai2Pos = Math.min(100, ai2Pos + AI2_SPEED * dt);
+  // AI 부스트 스케줄링: 정해진 시각이 되면 1.0~1.8초 부스트, 끝나면 2~4초 후 다음 부스트
+  if (now >= ai1NextBoostAt) {
+    const dur = 1000 + Math.random() * 800;
+    ai1BoostUntil = now + dur;
+    ai1NextBoostAt = ai1BoostUntil + 2000 + Math.random() * 2000;
+  }
+  if (now >= ai2NextBoostAt) {
+    const dur = 900 + Math.random() * 700;
+    ai2BoostUntil = now + dur;
+    ai2NextBoostAt = ai2BoostUntil + 2500 + Math.random() * 2500;
+  }
+  const ai1Boosting = now < ai1BoostUntil;
+  const ai2Boosting = now < ai2BoostUntil;
+  const ai1Speed = ai1Boosting ? AI1_SPEED * AI_BOOST_MULT : AI1_SPEED;
+  const ai2Speed = ai2Boosting ? AI2_SPEED * AI_BOOST_MULT : AI2_SPEED;
+  ai1Pos = Math.min(100, ai1Pos + ai1Speed * dt);
+  ai2Pos = Math.min(100, ai2Pos + ai2Speed * dt);
+
+  // AI 부스트 비주얼
+  document.getElementById('ai1').classList.toggle('boosting-ai', ai1Boosting);
+  document.getElementById('ai2').classList.toggle('boosting-ai', ai2Boosting);
 
   updateCarPos('player', playerPos, 0);
   updateCarPos('ai1', ai1Pos, -1);
