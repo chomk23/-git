@@ -14,30 +14,159 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-    .race-track { background:#1F2937; border-radius:24px; padding:14px; position:relative; overflow:hidden; }
-    .lane { position:relative; height:64px; background:#2D3748; border-radius:14px; margin-bottom:8px; overflow:hidden; }
-    .lane:last-child { margin-bottom:0; }
-    .lane::before {
-      content:''; position:absolute; left:0; right:60px; top:50%; transform:translateY(-50%);
-      height:4px;
-      background-image:repeating-linear-gradient(to right, #FBBF24 0, #FBBF24 24px, transparent 24px, transparent 48px);
+    /* ── 카메라 따라가는 스크롤 트랙 ── */
+    .race-viewport {
+      position: relative; height: 260px; border-radius: 24px; overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 0%, #1E1B4B 0%, #0F172A 60%);
+      box-shadow: inset 0 -40px 80px rgba(0,0,0,0.5);
     }
-    .lane-player { background:linear-gradient(to right, #1E3A8A, #1E40AF); }
-    .car { position:absolute; top:50%; left:0; transform:translate(0, -50%); transition:left 0.25s linear; }
-    .car svg { display:block; }
-    .car-label { position:absolute; left:0; top:-2px; font-size:9px; color:rgba(255,255,255,0.6); font-weight:600; letter-spacing:0.5px; }
-    .finish-line { position:absolute; right:8px; top:0; bottom:0; width:8px; background:repeating-linear-gradient(to bottom, white 0, white 6px, #1F2937 6px, #1F2937 12px); }
+    /* 스카이라인의 별 (장식) */
+    .race-viewport::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background-image:
+        radial-gradient(1px 1px at 20% 12%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 78% 8%,  rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 45% 18%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 8% 28%,  rgba(255,255,255,0.4), transparent);
+    }
+    .race-world {
+      position: absolute; left: 0; top: 0; height: 100%;
+      will-change: transform;
+      transition: transform 0.18s linear;
+    }
+    .race-world.no-tx { transition: none; }
+
+    /* 도로 영역 */
+    .road {
+      position: absolute; left: 0; right: 0; top: 50px; bottom: 0;
+      background: #1F2937;
+      box-shadow: 0 -2px 0 #FBBF24, inset 0 2px 0 #374151;
+    }
+    /* 가속 시 도로 위에 흐르는 모션 라인 */
+    .road::after {
+      content:''; position:absolute; inset:0; opacity:0;
+      background-image: repeating-linear-gradient(to right, rgba(255,255,255,0.25) 0 40px, transparent 40px 80px);
+      animation: streak 0.4s linear infinite;
+      transition: opacity 0.2s;
+    }
+    .race-viewport.boosting .road::after { opacity: 1; }
+    @keyframes streak {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-80px); }
+    }
+
+    .lane {
+      position: absolute; left: 0; height: 56px;
+      display: flex; align-items: center;
+    }
+    .lane-1 { top: 60px; }
+    .lane-2 { top: 122px; }
+    .lane-3 { top: 184px; }
+    /* 차선 사이 노란 점선 */
+    .divider {
+      position: absolute; left: 0; height: 3px;
+      background-image: repeating-linear-gradient(to right, #FBBF24 0 32px, transparent 32px 64px);
+    }
+    .div-1 { top: 116px; }
+    .div-2 { top: 178px; }
+
+    /* 거리 마커 */
+    .marker {
+      position: absolute; top: 50px; bottom: 0; width: 3px;
+      background: linear-gradient(to bottom, transparent, #38BDF8 40%, #38BDF8 60%, transparent);
+      opacity: 0.7;
+    }
+    .marker-label {
+      position: absolute; top: 50px; transform: translateX(-50%);
+      font-size: 10px; font-weight: 700; color: #38BDF8;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 2px 6px; border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* 결승선 */
+    .finish-flag {
+      position: absolute; top: 50px; bottom: 0; width: 18px;
+      background: repeating-linear-gradient(45deg, #fff 0 10px, #1F2937 10px 20px);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    }
+    .finish-text {
+      position: absolute; top: 16px; transform: translateX(-50%);
+      font-size: 14px; font-weight: 800; color: #FBBF24;
+      letter-spacing: 2px;
+    }
+
+    /* 자동차 */
+    .car {
+      position: absolute; left: 0; top: 50%;
+      margin-top: -16px;
+      transition: left 0.12s linear;
+      z-index: 5;
+    }
+    .car.player { margin-top: -17px; z-index: 10; }
+    .car svg { display: block; }
+    .car-label {
+      position: absolute; left: 50%; top: -14px; transform: translateX(-50%);
+      font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .car.player .car-label { color: #FCD34D; }
+
+    /* 부스트 효과 */
     .speed-burst { animation: burst 0.6s ease; }
     @keyframes burst {
-      0%   { filter: brightness(1); }
-      40%  { filter: brightness(1.6) drop-shadow(0 0 12px #FBBF24); }
-      100% { filter: brightness(1); }
+      0%, 100% { filter: brightness(1); }
+      40%      { filter: brightness(1.6) drop-shadow(0 0 14px #FBBF24); }
+    }
+    .car.player.boosting::after {
+      content:''; position:absolute; right:100%; top:50%; transform:translateY(-50%);
+      width: 60px; height: 6px;
+      background: linear-gradient(to left, #FBBF24, transparent);
+      border-radius: 4px; margin-right: 2px;
+      animation: trail-pulse 0.3s ease-in-out infinite alternate;
+    }
+    @keyframes trail-pulse {
+      from { opacity: 0.6; transform: translateY(-50%) scaleX(1); }
+      to   { opacity: 1;   transform: translateY(-50%) scaleX(1.4); }
     }
     .shake { animation: shake 0.4s; }
     @keyframes shake {
-      0%, 100% { transform: translate(0, -50%); }
-      25%      { transform: translate(-3px, -50%); }
-      75%      { transform: translate(3px, -50%); }
+      0%, 100% { transform: translateX(0); }
+      25%      { transform: translateX(-4px); }
+      75%      { transform: translateX(4px); }
+    }
+
+    /* ── 미니맵 (트랙 전체 조감) ── */
+    .minimap {
+      position: relative;
+      height: 28px; border-radius: 14px; overflow: hidden;
+      background: linear-gradient(to right, #1F2937 0%, #1F2937 100%);
+      border: 1.5px solid #374151;
+    }
+    .mini-track-line {
+      position: absolute; left: 8px; right: 24px; top: 50%; height: 2px;
+      transform: translateY(-50%);
+      background-image: repeating-linear-gradient(to right, #4B5563 0 6px, transparent 6px 12px);
+    }
+    .mini-finish {
+      position: absolute; right: 8px; top: 4px; bottom: 4px; width: 8px;
+      background: repeating-linear-gradient(to bottom, #fff 0 3px, #1F2937 3px 6px);
+      border-radius: 2px;
+    }
+    .mini-dot {
+      position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 0.18s linear;
+      box-shadow: 0 0 6px rgba(0,0,0,0.4);
+    }
+    .mini-dot.player { background: #FBBF24; border: 1.5px solid #fff; width: 12px; height: 12px; z-index: 3; }
+    .mini-dot.ai1    { background: #9CA3AF; z-index: 2; }
+    .mini-dot.ai2    { background: #EF4444; z-index: 1; }
+    .mini-legend {
+      position: absolute; right: 36px; top: 50%; transform: translateY(-50%);
+      font-size: 9px; color: #9CA3AF; letter-spacing: 0.5px;
     }
 
     .question-card { background:white; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
@@ -132,54 +261,76 @@
       </div>
     </div>
 
-    <!-- 트랙 -->
-    <div class="race-track mb-4">
-      <div class="lane">
-        <div class="finish-line"></div>
-        <div id="ai1" class="car">
-          <div class="car-label">AI 1</div>
-          <svg width="44" height="32" viewBox="0 0 44 32" fill="none">
-            <rect x="4" y="12" width="36" height="12" rx="3" fill="#9CA3AF"/>
-            <rect x="10" y="6" width="20" height="9" rx="2" fill="#6B7280"/>
-            <rect x="12" y="8" width="6" height="5" rx="1" fill="#E5E7EB"/>
-            <rect x="22" y="8" width="6" height="5" rx="1" fill="#E5E7EB"/>
-            <circle cx="12" cy="26" r="5" fill="#1F2937"/>
-            <circle cx="32" cy="26" r="5" fill="#1F2937"/>
-            <circle cx="12" cy="26" r="2" fill="#9CA3AF"/>
-            <circle cx="32" cy="26" r="2" fill="#9CA3AF"/>
-          </svg>
+    <!-- 미니맵 (트랙 전체 조감) -->
+    <div class="minimap mb-3">
+      <div class="mini-track-line"></div>
+      <div class="mini-legend">FINISH</div>
+      <div id="mini-ai1"    class="mini-dot ai1"    style="left:8px;"></div>
+      <div id="mini-ai2"    class="mini-dot ai2"    style="left:8px;"></div>
+      <div id="mini-player" class="mini-dot player" style="left:8px;"></div>
+      <div class="mini-finish"></div>
+    </div>
+
+    <!-- 카메라 따라가는 스크롤 트랙 -->
+    <div id="viewport" class="race-viewport mb-4">
+      <!-- 월드 (viewport보다 훨씬 넓음, 카메라가 따라감) -->
+      <div id="world" class="race-world">
+        <!-- 도로 -->
+        <div class="road"></div>
+        <!-- 차선 사이 노란 점선 -->
+        <div id="div-1" class="divider div-1"></div>
+        <div id="div-2" class="divider div-2"></div>
+        <!-- 거리 마커 (25%, 50%, 75%) -->
+        <div id="markers"></div>
+        <!-- 결승선 -->
+        <div id="finish-flag" class="finish-flag"></div>
+        <div id="finish-text" class="finish-text">FINISH</div>
+
+        <!-- 차들 (각 lane 안에) -->
+        <div class="lane lane-1" id="lane-1">
+          <div id="ai1" class="car">
+            <div class="car-label">AI 1</div>
+            <svg width="48" height="34" viewBox="0 0 48 34" fill="none">
+              <rect x="4" y="14" width="40" height="12" rx="3" fill="#9CA3AF"/>
+              <rect x="11" y="7" width="22" height="10" rx="2" fill="#6B7280"/>
+              <rect x="13" y="9" width="7" height="6" rx="1" fill="#E5E7EB"/>
+              <rect x="24" y="9" width="7" height="6" rx="1" fill="#E5E7EB"/>
+              <circle cx="13" cy="28" r="5" fill="#0F172A"/>
+              <circle cx="35" cy="28" r="5" fill="#0F172A"/>
+              <circle cx="13" cy="28" r="2" fill="#9CA3AF"/>
+              <circle cx="35" cy="28" r="2" fill="#9CA3AF"/>
+            </svg>
+          </div>
         </div>
-      </div>
-      <div class="lane lane-player">
-        <div class="finish-line"></div>
-        <div id="player" class="car">
-          <div class="car-label" style="color:#FCD34D;">YOU</div>
-          <svg width="48" height="34" viewBox="0 0 48 34" fill="none">
-            <rect x="4" y="14" width="40" height="12" rx="3" fill="#FBBF24"/>
-            <rect x="11" y="7" width="22" height="10" rx="2" fill="#F59E0B"/>
-            <rect x="13" y="9" width="7" height="6" rx="1" fill="#FEF3C7"/>
-            <rect x="24" y="9" width="7" height="6" rx="1" fill="#FEF3C7"/>
-            <circle cx="13" cy="28" r="5" fill="#1F2937"/>
-            <circle cx="35" cy="28" r="5" fill="#1F2937"/>
-            <circle cx="13" cy="28" r="2" fill="#FBBF24"/>
-            <circle cx="35" cy="28" r="2" fill="#FBBF24"/>
-          </svg>
+        <div class="lane lane-2" id="lane-2">
+          <div id="player" class="car player">
+            <div class="car-label">YOU</div>
+            <svg width="52" height="36" viewBox="0 0 52 36" fill="none">
+              <rect x="4" y="15" width="44" height="13" rx="3" fill="#FBBF24"/>
+              <rect x="12" y="7" width="24" height="11" rx="2" fill="#F59E0B"/>
+              <rect x="14" y="9" width="8" height="7" rx="1" fill="#FEF3C7"/>
+              <rect x="26" y="9" width="8" height="7" rx="1" fill="#FEF3C7"/>
+              <circle cx="14" cy="30" r="5.5" fill="#0F172A"/>
+              <circle cx="38" cy="30" r="5.5" fill="#0F172A"/>
+              <circle cx="14" cy="30" r="2.2" fill="#FBBF24"/>
+              <circle cx="38" cy="30" r="2.2" fill="#FBBF24"/>
+            </svg>
+          </div>
         </div>
-      </div>
-      <div class="lane">
-        <div class="finish-line"></div>
-        <div id="ai2" class="car">
-          <div class="car-label">AI 2</div>
-          <svg width="44" height="32" viewBox="0 0 44 32" fill="none">
-            <rect x="4" y="12" width="36" height="12" rx="3" fill="#EF4444"/>
-            <rect x="10" y="6" width="20" height="9" rx="2" fill="#DC2626"/>
-            <rect x="12" y="8" width="6" height="5" rx="1" fill="#FEE2E2"/>
-            <rect x="22" y="8" width="6" height="5" rx="1" fill="#FEE2E2"/>
-            <circle cx="12" cy="26" r="5" fill="#1F2937"/>
-            <circle cx="32" cy="26" r="5" fill="#1F2937"/>
-            <circle cx="12" cy="26" r="2" fill="#EF4444"/>
-            <circle cx="32" cy="26" r="2" fill="#EF4444"/>
-          </svg>
+        <div class="lane lane-3" id="lane-3">
+          <div id="ai2" class="car">
+            <div class="car-label">AI 2</div>
+            <svg width="48" height="34" viewBox="0 0 48 34" fill="none">
+              <rect x="4" y="14" width="40" height="12" rx="3" fill="#EF4444"/>
+              <rect x="11" y="7" width="22" height="10" rx="2" fill="#DC2626"/>
+              <rect x="13" y="9" width="7" height="6" rx="1" fill="#FEE2E2"/>
+              <rect x="24" y="9" width="7" height="6" rx="1" fill="#FEE2E2"/>
+              <circle cx="13" cy="28" r="5" fill="#0F172A"/>
+              <circle cx="35" cy="28" r="5" fill="#0F172A"/>
+              <circle cx="13" cy="28" r="2" fill="#EF4444"/>
+              <circle cx="35" cy="28" r="2" fill="#EF4444"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -281,15 +432,19 @@ const QUESTIONS = [
     answer:1 },
 ];
 
-// ── 게임 상태 ──
-const RACE_TIME    = 60;     // 초
-const PLAYER_BASE  = 28;     // %/sec (60초 동안 자동으로 ~93%까지 진행 — 결승선 통과 위해선 정답 필요)
-const PLAYER_BOOST = 70;     // %/sec (부스트 시)
-const AI1_SPEED    = 32;     // %/sec (빠른 AI — 정답 없으면 짐)
-const AI2_SPEED    = 24;     // %/sec (느린 AI)
-const BOOST_DURATION = 1800; // ms
-const SLOW_DURATION  = 1000; // ms
-const CORRECT_JUMP   = 4;    // % 즉시 점프
+// ── 게임 상수 ──
+const RACE_TIME      = 60;     // 초
+const WORLD_WIDTH    = 3200;   // 트랙 전체 길이(px). viewport보다 훨씬 넓어서 카메라가 스크롤
+const FINISH_X       = WORLD_WIDTH - 80;  // 결승선 위치(px) — 오른쪽 여유 두기
+
+// 속도: %/sec (논리적 진행도 단위)
+const PLAYER_BASE    = 1.0;    // 무답일 때 60초에 60% 정도 진행
+const PLAYER_BOOST   = 2.5;    // 부스트 중 속도 (정답 직후 1.8초)
+const AI1_SPEED      = 1.5;    // 빠른 AI — 60초에 90% (정답 없으면 짐)
+const AI2_SPEED      = 0.85;   // 느린 AI — 60초에 ~51%
+const BOOST_DURATION = 1800;
+const SLOW_DURATION  = 1000;
+const CORRECT_JUMP   = 5;      // 정답 시 즉시 +5%
 
 let playerPos = 0, ai1Pos = 0, ai2Pos = 0;
 let playerBoostUntil = 0, playerSlowUntil = 0;
@@ -298,7 +453,8 @@ let raceStart = 0, lastFrame = 0;
 let correctCount = 0, totalAnswered = 0;
 let questionPool = [];
 let currentQIdx = 0;
-let currentShuffled = null;   // { shuffledOptions, correctIdx }
+let currentShuffled = null;
+let cameraX = 0;
 
 function shuffle(arr) {
   const a = [...arr];
@@ -322,8 +478,44 @@ function shuffle(arr) {
   } catch (e) {}
 })();
 
+// 거리 마커와 결승선 표시 위치 세팅 (월드 좌표 기준)
+function setupWorld() {
+  const world = document.getElementById('world');
+  world.style.width = WORLD_WIDTH + 'px';
+
+  // 차선 사이 점선
+  document.getElementById('div-1').style.width = WORLD_WIDTH + 'px';
+  document.getElementById('div-2').style.width = WORLD_WIDTH + 'px';
+
+  // 거리 마커 (25%, 50%, 75%)
+  const markers = document.getElementById('markers');
+  markers.innerHTML = '';
+  [25, 50, 75].forEach(p => {
+    const x = (p / 100) * FINISH_X;
+    const line = document.createElement('div');
+    line.className = 'marker';
+    line.style.left = x + 'px';
+    markers.appendChild(line);
+    const label = document.createElement('div');
+    label.className = 'marker-label';
+    label.style.left = x + 'px';
+    label.textContent = p + '%';
+    markers.appendChild(label);
+  });
+
+  // 결승선
+  document.getElementById('finish-flag').style.left = FINISH_X + 'px';
+  document.getElementById('finish-text').style.left = (FINISH_X + 9) + 'px';
+
+  // 카메라 즉시 리셋 (transition 끄고)
+  world.classList.add('no-tx');
+  world.style.transform = 'translateX(0px)';
+  requestAnimationFrame(() => world.classList.remove('no-tx'));
+}
+
 function startRace() {
   playerPos = ai1Pos = ai2Pos = 0;
+  cameraX = 0;
   correctCount = 0;
   totalAnswered = 0;
   currentQIdx = 0;
@@ -333,6 +525,13 @@ function startRace() {
 
   document.getElementById('intro').classList.add('hidden');
   document.getElementById('game').classList.remove('hidden');
+
+  setupWorld();
+  // 카들 초기 위치
+  updateCarPos('player', 0);
+  updateCarPos('ai1', 0);
+  updateCarPos('ai2', 0);
+  updateMinimap();
 
   showQuestion();
 
@@ -351,7 +550,8 @@ function loop(now) {
 
   // 플레이어 속도
   let playerSpeed = PLAYER_BASE;
-  if (now < playerBoostUntil) playerSpeed = PLAYER_BOOST;
+  const boosting = now < playerBoostUntil;
+  if (boosting)               playerSpeed = PLAYER_BOOST;
   if (now < playerSlowUntil)  playerSpeed = 0;
   playerPos = Math.min(100, playerPos + playerSpeed * dt);
 
@@ -361,6 +561,19 @@ function loop(now) {
   updateCarPos('player', playerPos);
   updateCarPos('ai1', ai1Pos);
   updateCarPos('ai2', ai2Pos);
+  updateCamera();
+  updateMinimap();
+
+  // 부스트 UI 효과
+  const viewport = document.getElementById('viewport');
+  const playerEl = document.getElementById('player');
+  if (boosting) {
+    viewport.classList.add('boosting');
+    playerEl.classList.add('boosting');
+  } else {
+    viewport.classList.remove('boosting');
+    playerEl.classList.remove('boosting');
+  }
 
   document.getElementById('time-left').textContent     = remaining.toFixed(1) + '초';
   document.getElementById('progress-pct').textContent  = Math.round(playerPos) + '%';
@@ -373,13 +586,38 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
+// 차의 월드 좌표상 위치를 설정 (lane 안 left 속성)
 function updateCarPos(id, pct) {
   const el = document.getElementById(id);
   if (!el) return;
-  const lane = el.parentElement;
-  const carWidth = el.offsetWidth || 48;
-  const laneWidth = lane.offsetWidth - carWidth - 18;  // -18 for finish-line area
-  el.style.left = Math.max(0, Math.min(laneWidth, pct / 100 * laneWidth)) + 'px';
+  const worldX = (pct / 100) * FINISH_X;
+  el.style.left = worldX + 'px';
+}
+
+// 카메라가 플레이어를 화면 35% 지점에 두고 따라감
+function updateCamera() {
+  const viewport = document.getElementById('viewport');
+  const world = document.getElementById('world');
+  const vw = viewport.offsetWidth;
+  const playerWorldX = (playerPos / 100) * FINISH_X;
+  let target = playerWorldX - vw * 0.35;
+  target = Math.max(0, Math.min(WORLD_WIDTH - vw, target));
+  cameraX = target;
+  world.style.transform = `translateX(${-cameraX}px)`;
+}
+
+function updateMinimap() {
+  // 미니맵: 트랙 전체를 좌→우로, 8px ~ (width-24px) 사이에 매핑
+  const mini = document.querySelector('.minimap');
+  if (!mini) return;
+  const total = mini.offsetWidth - 32;
+  const startX = 8;
+  ['player', 'ai1', 'ai2'].forEach(name => {
+    const dot = document.getElementById('mini-' + name);
+    if (!dot) return;
+    const pos = name === 'player' ? playerPos : (name === 'ai1' ? ai1Pos : ai2Pos);
+    dot.style.left = (startX + (pos / 100) * total) + 'px';
+  });
 }
 
 function showQuestion() {
