@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보안 레이싱 — 보안 교육 플랫폼</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #ECEAE6; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+    .race-track { background:#1F2937; border-radius:24px; padding:14px; position:relative; overflow:hidden; }
+    .lane { position:relative; height:64px; background:#2D3748; border-radius:14px; margin-bottom:8px; overflow:hidden; }
+    .lane:last-child { margin-bottom:0; }
+    .lane::before {
+      content:''; position:absolute; left:0; right:60px; top:50%; transform:translateY(-50%);
+      height:4px;
+      background-image:repeating-linear-gradient(to right, #FBBF24 0, #FBBF24 24px, transparent 24px, transparent 48px);
+    }
+    .lane-player { background:linear-gradient(to right, #1E3A8A, #1E40AF); }
+    .car { position:absolute; top:50%; left:0; transform:translate(0, -50%); transition:left 0.25s linear; }
+    .car svg { display:block; }
+    .car-label { position:absolute; left:0; top:-2px; font-size:9px; color:rgba(255,255,255,0.6); font-weight:600; letter-spacing:0.5px; }
+    .finish-line { position:absolute; right:8px; top:0; bottom:0; width:8px; background:repeating-linear-gradient(to bottom, white 0, white 6px, #1F2937 6px, #1F2937 12px); }
+    .speed-burst { animation: burst 0.6s ease; }
+    @keyframes burst {
+      0%   { filter: brightness(1); }
+      40%  { filter: brightness(1.6) drop-shadow(0 0 12px #FBBF24); }
+      100% { filter: brightness(1); }
+    }
+    .shake { animation: shake 0.4s; }
+    @keyframes shake {
+      0%, 100% { transform: translate(0, -50%); }
+      25%      { transform: translate(-3px, -50%); }
+      75%      { transform: translate(3px, -50%); }
+    }
+
+    .question-card { background:white; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+    .answer-btn { padding:14px 18px; border-radius:14px; text-align:left; border:1.5px solid #E4E1DD; background:white; cursor:pointer; transition:all 0.12s; width:100%; font-size:14px; color:#374151; }
+    .answer-btn:hover:not(:disabled) { border-color:#1A1A1A; background:#FAF9F7; }
+    .answer-btn.correct { border-color:#16A34A; background:#F0FDF4; color:#15803D; font-weight:600; }
+    .answer-btn.wrong   { border-color:#DC2626; background:#FEF2F2; color:#DC2626; font-weight:600; }
+    .answer-btn:disabled { cursor:default; }
+
+    .btn-primary {
+      padding: 12px 28px; border-radius: 14px;
+      background: #1A1A1A; color: #fff; font-size: 14px; font-weight: 600;
+      border: none; cursor: pointer; transition: background 0.12s;
+    }
+    .btn-primary:hover { background: #333; }
+    .btn-outline {
+      padding: 12px 28px; border-radius: 14px; background: white;
+      color: #1A1A1A; font-size: 14px; font-weight: 600; border: 1.5px solid #E4E1DD;
+      cursor: pointer; transition: background 0.12s;
+    }
+    .btn-outline:hover { background: #F5F3F0; }
+  </style>
+</head>
+<body class="min-h-screen p-4">
+
+<div class="max-w-3xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h1 class="text-lg font-bold text-gray-900">보안 레이싱</h1>
+      <p class="text-xs mt-0.5" style="color:#8C8984;">보안 문제를 풀어 결승선까지 달리세요</p>
+    </div>
+    <button onclick="location.href='index.html'" class="text-xs hover:text-gray-900" style="color:#8C8984;">← 메인으로</button>
+  </div>
+
+  <!-- ── Intro 화면 ── -->
+  <div id="intro" class="bg-white rounded-3xl p-8 shadow-sm text-center">
+    <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style="background:linear-gradient(135deg,#DC2626,#F59E0B);">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 17h2l1.5-4h7L17 17h2"/>
+        <path d="M7 17v2a1 1 0 001 1h1a1 1 0 001-1v-2"/>
+        <path d="M14 17v2a1 1 0 001 1h1a1 1 0 001-1v-2"/>
+        <circle cx="8" cy="13" r="1"/>
+        <circle cx="16" cy="13" r="1"/>
+      </svg>
+    </div>
+    <h2 class="text-lg font-bold text-gray-900 mb-2">보안 레이싱</h2>
+    <p class="text-sm leading-relaxed" style="color:#6B7280;">
+      60초 안에 보안 문제를 풀어 결승선까지 달리세요.<br>
+      정답을 맞히면 차가 가속하고, 오답은 잠시 멈춥니다.<br>
+      AI 차들을 제치고 1등을 노려보세요.
+    </p>
+
+    <div class="grid grid-cols-3 gap-2 mt-5">
+      <div class="rounded-xl py-3" style="background:#F0FDF4;">
+        <p class="text-xs" style="color:#16A34A;">정답</p>
+        <p class="text-sm font-bold" style="color:#15803D;">속도 부스트</p>
+      </div>
+      <div class="rounded-xl py-3" style="background:#FEF2F2;">
+        <p class="text-xs" style="color:#DC2626;">오답</p>
+        <p class="text-sm font-bold" style="color:#DC2626;">1초 정지</p>
+      </div>
+      <div class="rounded-xl py-3" style="background:#EFF6FF;">
+        <p class="text-xs" style="color:#2563EB;">제한 시간</p>
+        <p class="text-sm font-bold" style="color:#1E40AF;">60초</p>
+      </div>
+    </div>
+
+    <div id="replay-notice" class="hidden mt-5 p-3 rounded-2xl" style="background:#FFFBEB; color:#92400E; font-size:13px; font-weight:500; border:1px solid #FDE68A;">
+      이미 한 번 플레이한 교육입니다.<br>이번 점수는 기록되지 않으니 연습용으로 활용하세요.
+    </div>
+
+    <button class="btn-primary mt-6 w-full" onclick="startRace()">레이스 시작</button>
+  </div>
+
+  <!-- ── 게임 화면 ── -->
+  <div id="game" class="hidden">
+    <!-- HUD -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <div class="bg-white rounded-2xl px-4 py-3 shadow-sm">
+        <p class="text-xs" style="color:#B0ADA9;">남은 시간</p>
+        <p id="time-left" class="text-xl font-bold text-gray-900 mt-0.5">60.0초</p>
+      </div>
+      <div class="bg-white rounded-2xl px-4 py-3 shadow-sm">
+        <p class="text-xs" style="color:#B0ADA9;">진행도</p>
+        <p id="progress-pct" class="text-xl font-bold text-gray-900 mt-0.5">0%</p>
+      </div>
+      <div class="bg-white rounded-2xl px-4 py-3 shadow-sm">
+        <p class="text-xs" style="color:#B0ADA9;">정답</p>
+        <p id="correct-count" class="text-xl font-bold text-gray-900 mt-0.5">0</p>
+      </div>
+    </div>
+
+    <!-- 트랙 -->
+    <div class="race-track mb-4">
+      <div class="lane">
+        <div class="finish-line"></div>
+        <div id="ai1" class="car">
+          <div class="car-label">AI 1</div>
+          <svg width="44" height="32" viewBox="0 0 44 32" fill="none">
+            <rect x="4" y="12" width="36" height="12" rx="3" fill="#9CA3AF"/>
+            <rect x="10" y="6" width="20" height="9" rx="2" fill="#6B7280"/>
+            <rect x="12" y="8" width="6" height="5" rx="1" fill="#E5E7EB"/>
+            <rect x="22" y="8" width="6" height="5" rx="1" fill="#E5E7EB"/>
+            <circle cx="12" cy="26" r="5" fill="#1F2937"/>
+            <circle cx="32" cy="26" r="5" fill="#1F2937"/>
+            <circle cx="12" cy="26" r="2" fill="#9CA3AF"/>
+            <circle cx="32" cy="26" r="2" fill="#9CA3AF"/>
+          </svg>
+        </div>
+      </div>
+      <div class="lane lane-player">
+        <div class="finish-line"></div>
+        <div id="player" class="car">
+          <div class="car-label" style="color:#FCD34D;">YOU</div>
+          <svg width="48" height="34" viewBox="0 0 48 34" fill="none">
+            <rect x="4" y="14" width="40" height="12" rx="3" fill="#FBBF24"/>
+            <rect x="11" y="7" width="22" height="10" rx="2" fill="#F59E0B"/>
+            <rect x="13" y="9" width="7" height="6" rx="1" fill="#FEF3C7"/>
+            <rect x="24" y="9" width="7" height="6" rx="1" fill="#FEF3C7"/>
+            <circle cx="13" cy="28" r="5" fill="#1F2937"/>
+            <circle cx="35" cy="28" r="5" fill="#1F2937"/>
+            <circle cx="13" cy="28" r="2" fill="#FBBF24"/>
+            <circle cx="35" cy="28" r="2" fill="#FBBF24"/>
+          </svg>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="finish-line"></div>
+        <div id="ai2" class="car">
+          <div class="car-label">AI 2</div>
+          <svg width="44" height="32" viewBox="0 0 44 32" fill="none">
+            <rect x="4" y="12" width="36" height="12" rx="3" fill="#EF4444"/>
+            <rect x="10" y="6" width="20" height="9" rx="2" fill="#DC2626"/>
+            <rect x="12" y="8" width="6" height="5" rx="1" fill="#FEE2E2"/>
+            <rect x="22" y="8" width="6" height="5" rx="1" fill="#FEE2E2"/>
+            <circle cx="12" cy="26" r="5" fill="#1F2937"/>
+            <circle cx="32" cy="26" r="5" fill="#1F2937"/>
+            <circle cx="12" cy="26" r="2" fill="#EF4444"/>
+            <circle cx="32" cy="26" r="2" fill="#EF4444"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 문제 -->
+    <div id="question-area" class="question-card">
+      <p id="q-text" class="text-base font-semibold text-gray-900 mb-4"></p>
+      <div id="q-options" class="flex flex-col gap-2"></div>
+    </div>
+  </div>
+
+  <!-- ── 결과 화면 ── -->
+  <div id="result" class="hidden bg-white rounded-3xl p-8 shadow-sm text-center">
+    <div id="result-icon-wrap" class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+      <svg id="result-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5L18.2 22 12 17.5 5.8 22l2.4-8.1L2 9.4h7.6z"/>
+      </svg>
+    </div>
+    <h2 class="text-lg font-bold text-gray-900 mb-1">레이스 종료</h2>
+    <p id="result-title" class="text-sm mb-6" style="color:#6B7280;"></p>
+
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <div class="rounded-2xl p-4" style="background:#F5F3F0;">
+        <p class="text-xs" style="color:#B0ADA9;">최종 점수</p>
+        <p id="final-score" class="text-2xl font-bold text-gray-900 mt-1">0</p>
+      </div>
+      <div class="rounded-2xl p-4" style="background:#EFF6FF;">
+        <p class="text-xs" style="color:#B0ADA9;">진행도</p>
+        <p id="final-progress" class="text-2xl font-bold mt-1" style="color:#2563EB;">0%</p>
+      </div>
+      <div class="rounded-2xl p-4" style="background:#F0FDF4;">
+        <p class="text-xs" style="color:#B0ADA9;">정답 수</p>
+        <p id="final-correct" class="text-2xl font-bold mt-1" style="color:#16A34A;">0</p>
+      </div>
+    </div>
+
+    <p id="rank-info" class="text-xs mb-6" style="color:#8C8984;"></p>
+
+    <div class="flex gap-2">
+      <button onclick="location.href='index.html'" class="btn-outline flex-1">메인으로</button>
+      <button onclick="location.reload()" class="btn-primary flex-1">다시 도전</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+if (!sessionStorage.getItem('user')) location.href = 'login.html';
+
+// ── 문제 풀 (16문항) ──
+const QUESTIONS = [
+  { q:'강력한 비밀번호의 조건으로 가장 적절한 것은?',
+    options:['짧고 외우기 쉬운 단어', '8자 이상 + 대소문자 + 숫자 + 특수문자', '생년월일이나 전화번호', '동일한 문자 반복'],
+    answer:1 },
+  { q:'피싱 메일을 식별하는 가장 좋은 방법은?',
+    options:['이메일 디자인을 본다', '발신자 주소와 링크 도메인을 확인한다', '제목만 본다', '첨부파일을 열어본다'],
+    answer:1 },
+  { q:'공공 와이파이에서 가장 안전한 행동은?',
+    options:['은행 업무 처리', 'VPN 사용 또는 모바일 데이터 활용', '비밀번호 변경 작업', '쇼핑 결제 진행'],
+    answer:1 },
+  { q:'2단계 인증(2FA)을 사용하는 주된 이유는?',
+    options:['로그인 속도를 빠르게 하기 위해', '비밀번호가 유출되어도 계정을 보호하기 위해', '비밀번호를 잊지 않기 위해', '이메일을 줄이기 위해'],
+    answer:1 },
+  { q:'모르는 사람이 보낸 이메일 첨부파일은?',
+    options:['바로 열어본다', '발신자를 확인하고 의심되면 삭제한다', '친구에게 전달해 의견을 묻는다', '바이러스 검사 없이 다운로드한다'],
+    answer:1 },
+  { q:'소프트웨어 업데이트가 중요한 이유는?',
+    options:['새 기능을 위해서만 필요하다', '보안 취약점이 패치되어 공격을 막아준다', '용량을 늘리기 위해서다', '디자인 개선 때문이다'],
+    answer:1 },
+  { q:'사회공학적 공격의 대표적 예시는?',
+    options:['방화벽 우회 해킹', '직원을 속여 기밀 정보를 얻어내는 행위', '서버 직접 침입', 'DDoS 공격'],
+    answer:1 },
+  { q:'랜섬웨어에 감염되었을 때 가장 먼저 해야 할 일은?',
+    options:['요구한 금액을 즉시 지불한다', '네트워크에서 분리하고 보안팀에 신고한다', '컴퓨터를 포맷한다', '아무것도 하지 않는다'],
+    answer:1 },
+  { q:'USB 메모리 사용 시 주의사항은?',
+    options:['습득한 USB도 자유롭게 사용한다', '출처가 불분명한 USB는 연결하지 않는다', '회사 자료는 개인 USB에 저장한다', '암호화 없이 사용한다'],
+    answer:1 },
+  { q:'개인 데이터 백업의 올바른 방법은?',
+    options:['한 곳에만 저장한다', '3-2-1 규칙(복사본 3개, 매체 2종, 1개는 외부 보관)', '백업하지 않는다', '동일한 디스크에만 복사한다'],
+    answer:1 },
+  { q:'HTTPS와 HTTP의 가장 큰 차이는?',
+    options:['속도만 다르다', 'HTTPS는 통신을 암호화한다', '디자인이 다르다', '비용이 다르다'],
+    answer:1 },
+  { q:'스마트폰 앱 권한 요청 시 올바른 태도는?',
+    options:['항상 모두 허용한다', '필요 최소한만 허용한다', '검토 없이 거부한다', '아무 설정도 하지 않는다'],
+    answer:1 },
+  { q:'회사 노트북을 분실했을 때 가장 먼저 할 일은?',
+    options:['직접 찾아본다', 'IT 보안팀에 즉시 신고한다', '며칠 기다려본다', '비밀번호만 바꾼다'],
+    answer:1 },
+  { q:'안전한 비밀번호 관리 방법은?',
+    options:['모든 사이트에 같은 비밀번호 사용', '비밀번호 관리자(Password Manager) 사용', '메모지에 적어둔다', '브라우저에 평문 저장'],
+    answer:1 },
+  { q:'의심스러운 링크를 안전하게 확인하는 방법은?',
+    options:['바로 클릭한다', '마우스를 올려 실제 URL을 미리 확인한다', '전체 화면으로 본다', '다른 사람에게 전달한다'],
+    answer:1 },
+  { q:'기업 보안의 가장 약한 고리는?',
+    options:['방화벽', '사람', '서버', '네트워크 장비'],
+    answer:1 },
+];
+
+// ── 게임 상태 ──
+const RACE_TIME    = 60;     // 초
+const PLAYER_BASE  = 28;     // %/sec (60초 동안 자동으로 ~93%까지 진행 — 결승선 통과 위해선 정답 필요)
+const PLAYER_BOOST = 70;     // %/sec (부스트 시)
+const AI1_SPEED    = 32;     // %/sec (빠른 AI — 정답 없으면 짐)
+const AI2_SPEED    = 24;     // %/sec (느린 AI)
+const BOOST_DURATION = 1800; // ms
+const SLOW_DURATION  = 1000; // ms
+const CORRECT_JUMP   = 4;    // % 즉시 점프
+
+let playerPos = 0, ai1Pos = 0, ai2Pos = 0;
+let playerBoostUntil = 0, playerSlowUntil = 0;
+let raceRunning = false;
+let raceStart = 0, lastFrame = 0;
+let correctCount = 0, totalAnswered = 0;
+let questionPool = [];
+let currentQIdx = 0;
+let currentShuffled = null;   // { shuffledOptions, correctIdx }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// 페이지 로드 시 재도전 안내 체크
+(async function init() {
+  try {
+    const u = JSON.parse(sessionStorage.getItem('user') || '{}');
+    if (!u.email) return;
+    const { data } = await sb.from('game_scores')
+      .select('id').eq('user_email', u.email).eq('game_type', 'security_race').limit(1);
+    if (data && data.length > 0) {
+      document.getElementById('replay-notice').classList.remove('hidden');
+    }
+  } catch (e) {}
+})();
+
+function startRace() {
+  playerPos = ai1Pos = ai2Pos = 0;
+  correctCount = 0;
+  totalAnswered = 0;
+  currentQIdx = 0;
+  playerBoostUntil = 0;
+  playerSlowUntil = 0;
+  questionPool = shuffle(QUESTIONS);
+
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+
+  showQuestion();
+
+  raceStart = performance.now();
+  lastFrame = performance.now();
+  raceRunning = true;
+  requestAnimationFrame(loop);
+}
+
+function loop(now) {
+  if (!raceRunning) return;
+  const dt = Math.min(0.05, (now - lastFrame) / 1000);
+  lastFrame = now;
+  const elapsed = (now - raceStart) / 1000;
+  const remaining = Math.max(0, RACE_TIME - elapsed);
+
+  // 플레이어 속도
+  let playerSpeed = PLAYER_BASE;
+  if (now < playerBoostUntil) playerSpeed = PLAYER_BOOST;
+  if (now < playerSlowUntil)  playerSpeed = 0;
+  playerPos = Math.min(100, playerPos + playerSpeed * dt);
+
+  ai1Pos = Math.min(100, ai1Pos + AI1_SPEED * dt);
+  ai2Pos = Math.min(100, ai2Pos + AI2_SPEED * dt);
+
+  updateCarPos('player', playerPos);
+  updateCarPos('ai1', ai1Pos);
+  updateCarPos('ai2', ai2Pos);
+
+  document.getElementById('time-left').textContent     = remaining.toFixed(1) + '초';
+  document.getElementById('progress-pct').textContent  = Math.round(playerPos) + '%';
+  document.getElementById('correct-count').textContent = correctCount;
+
+  if (playerPos >= 100 || remaining <= 0) {
+    endRace();
+    return;
+  }
+  requestAnimationFrame(loop);
+}
+
+function updateCarPos(id, pct) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const lane = el.parentElement;
+  const carWidth = el.offsetWidth || 48;
+  const laneWidth = lane.offsetWidth - carWidth - 18;  // -18 for finish-line area
+  el.style.left = Math.max(0, Math.min(laneWidth, pct / 100 * laneWidth)) + 'px';
+}
+
+function showQuestion() {
+  const q = questionPool[currentQIdx % questionPool.length];
+  // 답안 순서를 랜덤화 (정답 위치 추적)
+  const tagged = q.options.map((opt, i) => ({ opt, isCorrect: i === q.answer }));
+  const shuffledOpts = shuffle(tagged);
+  const correctIdx = shuffledOpts.findIndex(o => o.isCorrect);
+  currentShuffled = { shuffledOpts, correctIdx };
+
+  document.getElementById('q-text').textContent = `Q${totalAnswered + 1}. ${q.q}`;
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = shuffledOpts.map((o, i) =>
+    `<button class="answer-btn" onclick="answer(${i})">${o.opt}</button>`
+  ).join('');
+}
+
+function answer(idx) {
+  if (!currentShuffled) return;
+  const buttons = document.querySelectorAll('.answer-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  const correct = (idx === currentShuffled.correctIdx);
+  if (correct) {
+    buttons[idx].classList.add('correct');
+    correctCount++;
+    playerPos = Math.min(100, playerPos + CORRECT_JUMP);
+    playerBoostUntil = performance.now() + BOOST_DURATION;
+    const player = document.getElementById('player');
+    player.classList.add('speed-burst');
+    setTimeout(() => player.classList.remove('speed-burst'), 600);
+  } else {
+    buttons[idx].classList.add('wrong');
+    buttons[currentShuffled.correctIdx].classList.add('correct');
+    playerSlowUntil = performance.now() + SLOW_DURATION;
+    const player = document.getElementById('player');
+    player.classList.add('shake');
+    setTimeout(() => player.classList.remove('shake'), 400);
+  }
+  totalAnswered++;
+
+  // 다음 문제 (0.9초 후)
+  setTimeout(() => {
+    if (!raceRunning) return;
+    currentQIdx++;
+    showQuestion();
+  }, 900);
+}
+
+function endRace() {
+  raceRunning = false;
+  const elapsed = Math.min(RACE_TIME, (performance.now() - raceStart) / 1000);
+  const finished = playerPos >= 100;
+
+  // 순위
+  const positions = [
+    { name: 'YOU', pos: playerPos },
+    { name: 'AI 1', pos: ai1Pos },
+    { name: 'AI 2', pos: ai2Pos },
+  ].sort((a, b) => b.pos - a.pos);
+  const myRank = positions.findIndex(p => p.name === 'YOU') + 1;
+
+  // 점수: 결승선 통과 시 70 + 남은 시간 보너스(최대 30), 미완주 시 진행도 × 0.7
+  let finalScore, title;
+  if (finished) {
+    const timeBonus = Math.round((RACE_TIME - elapsed) / RACE_TIME * 30);
+    finalScore = Math.min(100, 70 + timeBonus);
+    title = myRank === 1 ? '1등! 모든 차를 제쳤습니다.'
+          : myRank === 2 ? '2등 — 결승선 통과 성공!'
+          : '결승선 통과! 시간 내 완주했습니다.';
+  } else {
+    finalScore = Math.round(playerPos * 0.7);
+    title = '시간 초과 — 다음엔 더 빠르게 답해보세요.';
+  }
+
+  // 결과 아이콘
+  const iconWrap = document.getElementById('result-icon-wrap');
+  if (myRank === 1 && finished) {
+    iconWrap.style.background = 'linear-gradient(135deg,#F59E0B,#FBBF24)';
+  } else if (finished) {
+    iconWrap.style.background = 'linear-gradient(135deg,#10B981,#34D399)';
+  } else {
+    iconWrap.style.background = 'linear-gradient(135deg,#6B7280,#9CA3AF)';
+  }
+
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('final-score').textContent = finalScore;
+  document.getElementById('final-progress').textContent = Math.round(playerPos) + '%';
+  document.getElementById('final-correct').textContent = `${correctCount}/${totalAnswered}`;
+  document.getElementById('rank-info').textContent =
+    `최종 순위: ${myRank}등 · ${positions.map(p => `${p.name} ${Math.round(p.pos)}%`).join(' / ')}`;
+
+  saveScore(finalScore);
+}
+
+async function saveScore(score) {
+  try {
+    const u = JSON.parse(sessionStorage.getItem('user') || '{}');
+    if (!u.email) return;
+    const { data: existing } = await sb.from('game_scores')
+      .select('id').eq('user_email', u.email).eq('game_type', 'security_race').limit(1);
+    if (existing && existing.length > 0) return;  // 재도전 — 저장 안 함
+    await sb.from('game_scores').insert({
+      user_email: u.email,
+      game_type:  'security_race',
+      score:      score,
+    });
+  } catch (e) {}
+}
+</script>
+</body>
+</html>
