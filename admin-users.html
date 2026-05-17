@@ -152,7 +152,7 @@
             <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">이메일</th>
             <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">부서</th>
             <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">이수율</th>
-            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">사전→사후</th>
+            <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">게임 점수</th>
             <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">피싱 훈련</th>
             <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;">등록일</th>
             <th class="text-left text-xs font-medium px-4 py-3.5" style="color:#B0ADA9;"></th>
@@ -340,23 +340,36 @@
     const tbody = document.getElementById('users-tbody');
     tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-sm" style="color:#B0ADA9;">불러오는 중...</td></tr>`;
 
-    const { data, error } = await sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true });
-    if (error) {
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-sm" style="color:#DC2626;">데이터를 불러오지 못했습니다 (${error.message})</td></tr>`;
+    const [profileRes, scoreRes] = await Promise.all([
+      sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true }),
+      sb.from('game_scores').select('user_email, score'),
+    ]);
+    if (profileRes.error) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-sm" style="color:#DC2626;">데이터를 불러오지 못했습니다 (${profileRes.error.message})</td></tr>`;
       return;
     }
 
-    users = (data || []).map(r => ({
-      id:         r.id,
-      name:       r.name,
-      email:      r.email,
-      dept:       r.dept || '미지정',
-      completion: r.completion  || 0,
-      preScore:   r.pre_score   || 0,
-      postScore:  r.post_score  || 0,
-      phishing:   r.phishing_clicked || false,
-      createdAt:  r.created_at ? r.created_at.slice(0, 10) : '-',
-    }));
+    const scoresByUser = {};
+    (scoreRes.data || []).forEach(s => {
+      if (!scoresByUser[s.user_email]) scoresByUser[s.user_email] = { plays: 0, total: 0 };
+      scoresByUser[s.user_email].plays++;
+      scoresByUser[s.user_email].total += s.score || 0;
+    });
+
+    users = (profileRes.data || []).map(r => {
+      const us = scoresByUser[r.email] || { plays: 0, total: 0 };
+      return {
+        id:         r.id,
+        name:       r.name,
+        email:      r.email,
+        dept:       r.dept || '미지정',
+        completion: r.completion  || 0,
+        gamePlays:  us.plays,
+        gameTotal:  us.total,
+        phishing:   r.phishing_clicked || false,
+        createdAt:  r.created_at ? r.created_at.slice(0, 10) : '-',
+      };
+    });
 
     renderUsers();
   }
@@ -385,7 +398,6 @@
     if (!list.length) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
     tbody.innerHTML = list.map(u => {
-      const diff      = u.postScore - u.preScore;
       const status    = u.completion === 100 ? ['완료','badge-green'] : u.completion > 0 ? ['진행중','badge-amber'] : ['미시작','badge-gray'];
       const progColor = u.completion === 100 ? '#16A34A' : u.completion >= 60 ? '#1A1A1A' : '#DC2626';
       return `<tr class="row-hover" style="border-bottom:1px solid #F5F3F0;">
@@ -410,10 +422,8 @@
           </div>
         </td>
         <td class="px-4 py-3.5 text-sm">
-          <span class="text-gray-500">${u.preScore}점</span>
-          <span style="color:#B0ADA9;"> → </span>
-          <span class="font-medium" style="color:#16A34A;">${u.postScore}점</span>
-          <span class="text-xs ml-1" style="color:${diff>0?'#2563EB':'#DC2626'};">(${diff>0?'+':''}${diff})</span>
+          <span class="font-medium text-gray-900">${u.gameTotal}점</span>
+          <span class="text-xs ml-1" style="color:#B0ADA9;">(${u.gamePlays}회)</span>
         </td>
         <td class="px-4 py-3.5">
           <span class="text-xs px-2.5 py-1 rounded-full font-medium ${u.phishing ? 'badge-red' : 'badge-green'}">
@@ -483,7 +493,7 @@
     // 1. 프로필 먼저 저장 (anon 세션 유지 중)
     const { error } = await sb.from('profiles').insert({
       name, email, dept,
-      completion: 0, pre_score: 0, post_score: 0, phishing_clicked: false
+      completion: 0, phishing_clicked: false
     });
 
     if (error) {
@@ -885,7 +895,7 @@
   async function resetScores() {
     if (!confirm('모든 게임 점수를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
     const { error: e1 } = await sb.from('game_scores').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    const { error: e2 } = await sb.from('profiles').update({ pre_score: 0, post_score: 0, completion: 0 }).neq('role', 'admin');
+    const { error: e2 } = await sb.from('profiles').update({ completion: 0 }).neq('role', 'admin');
     if (e1 || e2) { alert('초기화 중 오류가 발생했습니다.'); return; }
     showToast('게임 점수가 초기화되었습니다');
     await loadUsers();

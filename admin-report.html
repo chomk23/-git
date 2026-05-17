@@ -269,12 +269,10 @@
   loadReport();
 
   function exportFullCSV() {
-    const headers = ['이름','부서','이수율(%)','사전점수','사후점수','향상도','피싱결과','상태'];
+    const headers = ['이름','부서','이수율(%)','게임점수','게임횟수','피싱결과','상태'];
     const rows = _reportUsers.map(u => {
-      const diff = u.postScore - u.preScore;
       const status = u.completion === 100 ? '완료' : u.completion > 0 ? '진행중' : '미시작';
-      return [u.name, u.dept, u.completion, u.preScore, u.postScore,
-        (diff > 0 ? '+' : '') + diff + '점', u.phishing ? '클릭함' : '안전', status];
+      return [u.name, u.dept, u.completion, u.gameTotal, u.gamePlays, u.phishing ? '클릭함' : '안전', status];
     });
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });

@@ -129,10 +129,9 @@
         <p id="kpi-comp-sub" class="text-xs mt-2" style="color:#B0ADA9;">계산 중...</p>
       </div>
       <div class="stat-card">
-        <p class="text-xs font-medium mb-2" style="color:#B0ADA9;">평균 퀴즈 향상도</p>
+        <p class="text-xs font-medium mb-2" style="color:#B0ADA9;">평균 게임 점수</p>
         <p id="kpi-imp" class="text-3xl font-bold text-gray-900">—</p>
         <p id="kpi-imp-sub" class="text-xs mt-2" style="color:#B0ADA9;">계산 중...</p>
-        <p id="kpi-imp-pct" class="text-xs mt-1" style="color:#2563EB;"></p>
       </div>
       <div class="stat-card">
         <p class="text-xs font-medium mb-2" style="color:#B0ADA9;">피싱 클릭률</p>
@@ -155,7 +154,7 @@
     <!-- 차트 탭 -->
     <div class="flex gap-1 mb-3 bg-white rounded-2xl p-1.5 shadow-sm w-fit">
       <button class="tab-btn active" onclick="switchChart('completion', this)">이수율 추이</button>
-      <button class="tab-btn"        onclick="switchChart('score', this)">퀴즈 점수 변화</button>
+      <button class="tab-btn"        onclick="switchChart('score', this)">게임별 평균 점수</button>
       <button class="tab-btn"        onclick="switchChart('phishing', this)">피싱 클릭률</button>
       <button class="tab-btn"        onclick="switchChart('dept', this)">부서별 이수율</button>
     </div>
@@ -191,9 +190,8 @@
               <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">이름</th>
               <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">부서</th>
               <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">이수율</th>
-              <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">사전점수</th>
-              <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">사후점수</th>
-              <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">향상도</th>
+              <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">게임 점수</th>
+              <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">게임 횟수</th>
               <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">피싱 클릭</th>
               <th class="text-left text-xs font-medium pb-2.5" style="color:#B0ADA9;">상태</th>
             </tr>
@@ -218,24 +216,38 @@
 
   // ── Supabase에서 데이터 로드 ──
   async function loadDashboard() {
-    const { data, error } = await sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true });
-    if (error || !data) return;
+    const [profileRes, scoreRes] = await Promise.all([
+      sb.from('profiles').select('*').neq('role', 'admin').order('created_at', { ascending: true }),
+      sb.from('game_scores').select('user_email, game_type, score'),
+    ]);
+    if (profileRes.error || !profileRes.data) return;
 
-    const users = data.map(r => ({
-      name:       r.name,
-      dept:       r.dept || '미지정',
-      completion: r.completion  || 0,
-      preScore:   r.pre_score   || 0,
-      postScore:  r.post_score  || 0,
-      phishing:   r.phishing_clicked || false,
-    }));
+    const scores = scoreRes.data || [];
+    const scoresByUser = {};
+    scores.forEach(s => {
+      if (!scoresByUser[s.user_email]) scoresByUser[s.user_email] = { plays: 0, total: 0 };
+      scoresByUser[s.user_email].plays++;
+      scoresByUser[s.user_email].total += s.score || 0;
+    });
+
+    const users = profileRes.data.map(r => {
+      const us = scoresByUser[r.email] || { plays: 0, total: 0 };
+      return {
+        name:       r.name,
+        email:      r.email,
+        dept:       r.dept || '미지정',
+        completion: r.completion  || 0,
+        gamePlays:  us.plays,
+        gameTotal:  us.total,
+        phishing:   r.phishing_clicked || false,
+      };
+    });
 
     // ── KPI 계산 ──
     const total      = users.length;
     const avgComp    = total ? Math.round(users.reduce((s, u) => s + u.completion, 0) / total) : 0;
-    const avgPre     = total ? Math.round(users.reduce((s, u) => s + u.preScore,   0) / total) : 0;
-    const avgPost    = total ? Math.round(users.reduce((s, u) => s + u.postScore,  0) / total) : 0;
-    const avgImp     = avgPost - avgPre;
+    const totalPlays = scores.length;
+    const avgScore   = totalPlays ? Math.round(scores.reduce((s, x) => s + (x.score || 0), 0) / totalPlays) : 0;
     const phishCount = users.filter(u => u.phishing).length;
     const phishRate  = total ? Math.round((phishCount / total) * 100) : 0;
     const doneCount  = users.filter(u => u.completion === 100).length;
@@ -243,8 +255,8 @@
     document.getElementById('kpi-comp').textContent      = avgComp + '%';
     document.getElementById('kpi-comp-bar').style.width  = avgComp + '%';
     document.getElementById('kpi-comp-sub').textContent  = `완료 ${doneCount}명 / 전체 ${total}명`;
-    document.getElementById('kpi-imp').textContent       = (avgImp >= 0 ? '+' : '') + avgImp + '점';
-    document.getElementById('kpi-imp-sub').textContent   = `사전 ${avgPre}점 → 사후 ${avgPost}점`;
+    document.getElementById('kpi-imp').textContent       = avgScore + '점';
+    document.getElementById('kpi-imp-sub').textContent   = `총 ${totalPlays}회 플레이`;
     document.getElementById('kpi-phish').textContent     = phishRate + '%';
     document.getElementById('kpi-phish-bar').style.width = phishRate + '%';
     document.getElementById('kpi-phish-sub').textContent = `${phishCount}명 클릭 / 전체 ${total}명`;
@@ -255,7 +267,6 @@
     // ── 테이블 렌더링 ──
     const tbody = document.getElementById('user-table-body');
     tbody.innerHTML = users.map(u => {
-      const diff   = u.postScore - u.preScore;
       const status = u.completion === 100 ? ['완료','badge-green'] : u.completion > 0 ? ['진행중','badge-amber'] : ['미시작','badge-red'];
       return `<tr style="border-bottom:1px solid #F5F3F0;">
         <td class="py-3 font-medium text-gray-900">${u.name}</td>
@@ -266,9 +277,8 @@
             <span class="text-xs text-gray-600">${u.completion}%</span>
           </div>
         </td>
-        <td class="py-3 text-gray-600 text-sm">${u.preScore}점</td>
-        <td class="py-3 text-gray-600 text-sm">${u.postScore}점</td>
-        <td class="py-3 text-sm font-medium" style="color:${diff>0?'#16A34A':'#DC2626'};">${diff>0?'+':''}${diff}점</td>
+        <td class="py-3 text-sm font-medium text-gray-700">${u.gameTotal}점</td>
+        <td class="py-3 text-sm text-gray-600">${u.gamePlays}회</td>
         <td class="py-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium ${u.phishing?'badge-red':'badge-green'}">${u.phishing?'클릭함':'안전'}</span></td>
         <td class="py-3"><span class="text-xs px-2.5 py-1 rounded-full font-medium ${status[1]}">${status[0]}</span></td>
       </tr>`;
@@ -307,8 +317,7 @@
     chartData.phishing.datasets[0].data = [safeCount, phishCount];
 
     // ── 게임별 평균 점수 계산 ──
-    const { data: scores } = await sb.from('game_scores').select('game_type, score');
-    if (scores && scores.length) {
+    if (scores.length) {
       const gameMap = {};
       scores.forEach(s => {
         if (!gameMap[s.game_type]) gameMap[s.game_type] = [];
@@ -316,10 +325,9 @@
       });
       const gameNames = { phishing:'피싱탐정', ox:'OX퀴즈', password:'비밀번호', budget:'예산작전', cyberguard:'CyberGuard' };
       const gLabels = Object.keys(gameMap).map(k => gameNames[k] || k);
-      const gData   = Object.values(gameMap).map(arr => Math.round(arr.reduce((a,b)=>a+b,0)/arr.length));
+      const gAvg    = Object.values(gameMap).map(arr => Math.round(arr.reduce((a,b)=>a+b,0)/arr.length));
       chartData.score.labels = gLabels;
-      chartData.score.datasets[0].data = new Array(gLabels.length).fill(0);
-      chartData.score.datasets[1].data = gData;
+      chartData.score.datasets[0].data = gAvg;
     }
 
     window._dashUsers = users;
@@ -344,7 +352,6 @@
       type: 'bar',
       labels: ['데이터 없음'],
       datasets: [
-        { label: '최고 점수', data: [0], backgroundColor: '#E4E1DD', borderRadius: 6 },
         { label: '평균 점수', data: [0], backgroundColor: '#1A1A1A', borderRadius: 6 },
       ]
     },
@@ -391,10 +398,9 @@
 
   function exportCSV() {
     const users = window._dashUsers || [];
-    const headers = ['이름','부서','이수율(%)','사전점수','사후점수','향상도','피싱클릭'];
+    const headers = ['이름','부서','이수율(%)','게임점수','게임횟수','피싱클릭'];
     const rows = users.map(u => [
-      u.name, u.dept, u.completion, u.preScore, u.postScore,
-      u.postScore - u.preScore, u.phishing ? '클릭함' : '안전'
+      u.name, u.dept, u.completion, u.gameTotal, u.gamePlays, u.phishing ? '클릭함' : '안전'
     ]);
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
