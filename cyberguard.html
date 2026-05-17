@@ -133,6 +133,9 @@
           <div class="t-badge">🛡 Security Education Game</div>
           <div class="t-logo">CYBER<b>GUARD</b><br>CORP</div>
           <div class="t-sub">집에서 서버실까지 — 6가지 보안 미션</div>
+          <div id="replay-notice" style="display:none;margin:14px auto 0;padding:12px 14px;border-radius:12px;background:#FFFBEB;color:#92400E;font-size:13px;font-weight:500;text-align:center;border:1px solid #FDE68A;max-width:360px;">
+            이미 한 번 플레이한 교육입니다.<br>이번 점수는 기록되지 않으니 연습용으로 활용하세요.
+          </div>
           <button class="btn go" onclick="goStart()">▶ 게임 시작</button>
           <button class="btn hw" onclick="goHowto()">? 게임 방법</button>
           <div class="t-tip">← → 이동 | ↑ 점프 | Space 상호작용</div>
@@ -203,6 +206,19 @@
 
 <script>
 if (!sessionStorage.getItem('user')) location.href = 'login.html';
+
+// 페이지 로드 시 이미 플레이했는지 체크 → 시작 화면에 안내 표시
+(async function(){
+  try {
+    var u=JSON.parse(sessionStorage.getItem('user')||'{}');
+    if(!u.email) return;
+    var res=await sb.from('game_scores').select('id').eq('user_email',u.email).eq('game_type','cyberguard').limit(1);
+    if(res.data && res.data.length > 0){
+      var notice=document.getElementById('replay-notice');
+      if(notice) notice.style.display='block';
+    }
+  } catch(e){}
+})();
 
 // ──────────────────────────────────────────────────────────────────────────
 // 화면 전환
@@ -1032,17 +1048,6 @@ function showEnding(){
       var alreadyPlayed=(existing.data && existing.data.length > 0);
       if(!alreadyPlayed){
         await sb.from('game_scores').insert({user_email:u.email, game_type:'cyberguard', score:finalScore});
-      }
-      // 결과 화면에 안내
-      if(alreadyPlayed){
-        var sub=document.getElementById('endSub');
-        if(sub && !sub.querySelector('.replay-notice')){
-          var note=document.createElement('div');
-          note.className='replay-notice';
-          note.style.cssText='margin-top:14px;padding:10px 14px;border-radius:10px;background:#FFFBEB;color:#92400E;font-size:13px;font-weight:500;';
-          note.textContent='재도전이므로 이번 점수는 기록되지 않습니다.';
-          sub.parentNode.appendChild(note);
-        }
       }
     } catch(e){}
   })();
