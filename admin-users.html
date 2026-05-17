@@ -532,7 +532,7 @@
 
     // ── 데이터 fetch (game_scores + 최신 profile) ──
     const [gamesRes, profileRes] = await Promise.all([
-      sb.from('game_scores').select('game_type, score, created_at').eq('user_email', u.email).order('created_at', { ascending: false }),
+      sb.from('game_scores').select('game_type, score, played_at').eq('user_email', u.email).order('played_at', { ascending: false }),
       sb.from('profiles').select('phishing_clicked, phishing_clicked_at, completion').eq('id', u.id).limit(1).single(),
     ]);
     detailContext.games = gamesRes.data || [];
@@ -567,7 +567,7 @@
       b.plays++;
       b.total += g.score || 0;
       if ((g.score || 0) > b.best) b.best = g.score || 0;
-      if (!b.last || new Date(g.created_at) > new Date(b.last)) b.last = g.created_at;
+      if (!b.last || new Date(g.played_at) > new Date(b.last)) b.last = g.played_at;
     }
     return Object.values(byType);
   }
@@ -655,7 +655,7 @@
 
     const recent = games.slice(0, 8).map(g => {
       const meta = getGameMeta(g.game_type);
-      const date = g.created_at ? new Date(g.created_at).toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '-';
+      const date = g.played_at ? new Date(g.played_at).toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '-';
       return `
         <div class="flex items-center justify-between py-2.5" style="border-bottom:1px solid #F5F3F0;">
           <div class="flex items-center gap-2.5">

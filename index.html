@@ -299,7 +299,7 @@
 
     // 데이터 fetch
     const [scoresRes, profileRes] = await Promise.all([
-      sb.from('game_scores').select('*').eq('user_email', user.email).order('created_at', { ascending: true }),
+      sb.from('game_scores').select('*').eq('user_email', user.email).order('played_at', { ascending: true }),
       sb.from('profiles').select('phishing_clicked, completion').eq('email', user.email).limit(1).single(),
     ]);
     const scores = scoresRes.data || [];
