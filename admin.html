@@ -331,7 +331,7 @@
         if (!gameMap[s.game_type]) gameMap[s.game_type] = [];
         gameMap[s.game_type].push(s.score);
       });
-      const gameNames = { phishing:'피싱탐정', ox:'OX퀴즈', password:'비밀번호', budget:'예산작전', cyberguard:'CyberGuard' };
+      const gameNames = { cyberguard:'CyberGuard', phishing:'피싱탐정', ox:'OX퀴즈', security_race:'보안레이싱' };
       const gLabels = Object.keys(gameMap).map(k => gameNames[k] || k);
       const gAvg    = Object.values(gameMap).map(arr => Math.round(arr.reduce((a,b)=>a+b,0)/arr.length));
       chartData.score.labels = gLabels;

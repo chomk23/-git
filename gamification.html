@@ -90,32 +90,6 @@
           </div>
         </div>
       </div>
-      <div class="zone-card" onclick="startGame('password')">
-        <div style="height:130px;background:linear-gradient(135deg,#064e3b,#059669);display:flex;align-items:center;justify-content:center;">
-          <svg width="52" height="52" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-        </div>
-        <div class="p-4">
-          <p class="font-bold text-gray-900 text-sm">비밀번호 요새</p>
-          <p class="text-xs mt-0.5" style="color:#8C8984;">강한 비밀번호 만들기 도전</p>
-          <div class="flex items-center gap-2 mt-2">
-            <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#F0FDF4;color:#059669;">3단계</span>
-            <span class="text-xs" style="color:#B0ADA9;">최대 200점</span>
-          </div>
-        </div>
-      </div>
-      <div class="zone-card" onclick="startGame('budget')">
-        <div style="height:130px;background:linear-gradient(135deg,#7c2d12,#ea580c);display:flex;align-items:center;justify-content:center;">
-          <svg width="52" height="52" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-        </div>
-        <div class="p-4">
-          <p class="font-bold text-gray-900 text-sm">보안 예산 작전</p>
-          <p class="text-xs mt-0.5" style="color:#8C8984;">100P로 회사를 지켜라</p>
-          <div class="flex items-center gap-2 mt-2">
-            <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#FFF7ED;color:#ea580c;">전략형</span>
-            <span class="text-xs" style="color:#B0ADA9;">최대 400점</span>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -233,109 +207,6 @@
     </div>
   </div>
 
-  <!-- GAME 3: 비밀번호 요새 -->
-  <div id="sec-password" class="section">
-    <div id="pw-intro">
-      <div class="bg-white rounded-3xl p-8 shadow-sm text-center">
-        <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style="background:linear-gradient(135deg,#064e3b,#059669);">
-          <svg width="28" height="28" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-        </div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">비밀번호 요새</h2>
-        <p class="text-sm" style="color:#6B7280;">3단계 미션으로 강한 비밀번호 만드는 법을 배웁니다.<br>조건을 충족할수록 요새가 견고해집니다!</p>
-        <button class="btn-primary mt-6 w-full" onclick="startPW()">미션 시작</button>
-      </div>
-    </div>
-    <div id="pw-game" style="display:none;">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex gap-1.5" id="pw-stage-dots"></div>
-        <span class="text-sm font-medium text-gray-500" id="pw-stage-label">단계 1/3</span>
-      </div>
-      <div class="bg-white rounded-3xl p-6 shadow-sm">
-        <p class="text-sm font-semibold text-gray-900 mb-1" id="pw-mission-title"></p>
-        <p class="text-xs mb-4" style="color:#8C8984;" id="pw-mission-desc"></p>
-        <input type="text" id="pw-input" placeholder="비밀번호 입력..." autocomplete="off"
-          class="w-full px-4 py-3 rounded-2xl border-2 text-sm transition-colors focus:outline-none"
-          style="border-color:#E4E1DD;" oninput="checkPW()" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#E4E1DD'">
-        <div class="mt-4">
-          <div class="flex justify-between mb-1.5">
-            <span class="text-xs font-medium text-gray-600">보안 강도</span>
-            <span class="text-xs font-semibold" id="pw-strength-label" style="color:#DC2626;">매우 약함</span>
-          </div>
-          <div style="height:8px;background:#E4E1DD;border-radius:99px;overflow:hidden;">
-            <div id="pw-strength-bar" style="height:100%;width:0%;border-radius:99px;transition:all 0.3s;background:#DC2626;"></div>
-          </div>
-        </div>
-        <div class="mt-4 flex flex-col gap-2" id="pw-checklist"></div>
-        <button class="btn-primary w-full mt-5" id="pw-next-btn" onclick="nextPW()" disabled>다음 단계</button>
-      </div>
-    </div>
-    <div id="pw-result" style="display:none;" class="bg-white rounded-3xl p-8 shadow-sm text-center">
-      <div class="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style="background:#F0FDF4;">
-        <svg width="28" height="28" fill="none" stroke="#16A34A" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-      </div>
-      <p class="text-lg font-bold text-gray-900">비밀번호 요새 완성!</p>
-      <p class="text-3xl font-bold text-gray-900 mt-3">200</p>
-      <p class="text-sm mt-0.5" style="color:#8C8984;">점 획득</p>
-      <div class="mt-5 rounded-2xl p-4 text-left" style="background:#F5F3F0;">
-        <p class="text-xs font-semibold text-gray-700 mb-2">강한 비밀번호 핵심 원칙</p>
-        <ul class="text-xs space-y-1" style="color:#6B7280;">
-          <li>- 최소 12자 이상 사용 권장</li>
-          <li>- 대소문자 + 숫자 + 특수문자 조합</li>
-          <li>- 사전 단어, 개인정보(생년월일 등) 금지</li>
-          <li>- 사이트마다 다른 비밀번호 사용</li>
-          <li>- 비밀번호 관리자 도구 활용 권장</li>
-        </ul>
-      </div>
-      <button class="btn-primary mt-6 w-full" onclick="goLobby()">로비로 돌아가기</button>
-    </div>
-  </div>
-
-  <!-- GAME 4: 보안 예산 작전 -->
-  <div id="sec-budget" class="section">
-    <div id="budget-intro">
-      <div class="bg-white rounded-3xl p-8 shadow-sm text-center">
-        <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
-          <svg width="28" height="28" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-        </div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">보안 예산 작전</h2>
-        <p class="text-sm" style="color:#6B7280;">당신은 보안 담당자입니다.<br>100포인트 예산으로 최적의 보안 체계를 구축하고<br>5가지 사이버 공격을 막아내세요!</p>
-        <div class="rounded-2xl p-4 mt-4 text-left" style="background:#FFF7ED;">
-          <p class="text-xs font-semibold" style="color:#C2410C;">미션 순서</p>
-          <p class="text-xs mt-1" style="color:#EA580C;">보안 통제 선택 → 공격 시뮬레이션 → 방어 성과 확인</p>
-        </div>
-        <button class="btn-primary mt-6 w-full" onclick="startBudget()">작전 시작</button>
-      </div>
-    </div>
-    <div id="budget-select" style="display:none;">
-      <div class="flex items-center justify-between mb-3">
-        <p class="text-sm font-semibold text-gray-900">보안 통제 선택</p>
-        <div class="flex items-center gap-1.5">
-          <span class="text-xs" style="color:#8C8984;">남은 예산</span>
-          <span class="text-base font-bold text-gray-900" id="budget-remain">100</span>
-          <span class="text-xs" style="color:#8C8984;">P</span>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-3" id="budget-controls-grid"></div>
-      <button class="btn-primary w-full mt-4" id="budget-confirm-btn" onclick="confirmBudget()" disabled>공격 시뮬레이션 시작</button>
-    </div>
-    <div id="budget-attack" style="display:none;">
-      <p class="text-sm font-semibold text-gray-900 mb-3">공격 시뮬레이션</p>
-      <div class="flex flex-col gap-3" id="budget-attack-list"></div>
-    </div>
-    <div id="budget-result" style="display:none;" class="bg-white rounded-3xl p-8 shadow-sm text-center">
-      <p class="text-lg font-bold text-gray-900">작전 결과</p>
-      <div class="flex justify-center gap-10 mt-5">
-        <div><p class="text-3xl font-bold" style="color:#16A34A;" id="budget-blocked">0</p><p class="text-xs mt-0.5" style="color:#8C8984;">차단 성공</p></div>
-        <div><p class="text-3xl font-bold" style="color:#DC2626;" id="budget-breached">0</p><p class="text-xs mt-0.5" style="color:#8C8984;">침해 발생</p></div>
-      </div>
-      <p class="text-3xl font-bold text-gray-900 mt-5" id="budget-final-score">0점</p>
-      <p class="text-sm mt-0.5" style="color:#8C8984;">점 획득</p>
-      <p class="text-sm font-semibold text-gray-900 mt-4" id="budget-grade"></p>
-      <p class="text-xs mt-1" style="color:#8C8984;" id="budget-comment"></p>
-      <button class="btn-primary mt-6 w-full" onclick="goLobby()">로비로 돌아가기</button>
-    </div>
-  </div>
-
 </div><!-- max-w -->
 
 <script>
@@ -344,7 +215,7 @@ if (!sessionStorage.getItem('user')) location.href = 'login.html';
 /* ── Hash Nav ── */
 function handleHash() {
   const hash = location.hash.replace('#', '');
-  const map = { phishing:'phishing', ox:'ox', password:'password', budget:'budget' };
+  const map = { phishing:'phishing', ox:'ox' };
   if (map[hash]) startGame(map[hash]);
 }
 window.addEventListener('load', handleHash);
@@ -403,7 +274,7 @@ async function saveScore(gameType, score) {
 }
 
 async function startGame(type) {
-  const titles = { phishing:'피싱 탐정', ox:'OX 번개퀴즈', password:'비밀번호 요새', budget:'보안 예산 작전' };
+  const titles = { phishing:'피싱 탐정', ox:'OX 번개퀴즈' };
   document.getElementById('header-title').textContent = titles[type];
   showSection('sec-' + type);
   await renderReplayNoticeOnIntro(type);
@@ -411,7 +282,7 @@ async function startGame(type) {
 
 // 이미 플레이한 게임이면 인트로에 "재도전 — 점수 기록 안 됨" 노란 안내 띄우기
 async function renderReplayNoticeOnIntro(type) {
-  const introMap = { phishing:'phishing-intro', ox:'ox-intro', password:'pw-intro', budget:'budget-intro' };
+  const introMap = { phishing:'phishing-intro', ox:'ox-intro' };
   const introId = introMap[type];
   if (!introId) return;
   const intro = document.getElementById(introId);
@@ -655,163 +526,6 @@ function showOXResult(){
   document.getElementById('ox-max-streak').textContent=oxMaxStreak;
 }
 
-/* ── GAME 3: 비밀번호 요새 ── */
-const pwStages=[
-  {title:'1단계: 길이와 기본 조합',desc:'8자 이상이며 대문자·소문자·숫자를 모두 포함한 비밀번호를 만드세요.',
-   checks:[{l:'8자 이상',t:p=>p.length>=8},{l:'대문자 포함 (A-Z)',t:p=>/[A-Z]/.test(p)},{l:'소문자 포함 (a-z)',t:p=>/[a-z]/.test(p)},{l:'숫자 포함 (0-9)',t:p=>/[0-9]/.test(p)}]},
-  {title:'2단계: 특수문자 추가',desc:'12자 이상에 특수문자(!@#$%^&* 등)를 추가로 포함하세요.',
-   checks:[{l:'12자 이상',t:p=>p.length>=12},{l:'대문자 포함',t:p=>/[A-Z]/.test(p)},{l:'소문자 포함',t:p=>/[a-z]/.test(p)},{l:'숫자 포함',t:p=>/[0-9]/.test(p)},{l:'특수문자 포함',t:p=>/[!@#$%^&*()\-_=+\[\]{};:,.<>?]/.test(p)}]},
-  {title:'3단계: 완벽한 비밀번호',desc:'16자 이상에 모든 조건을 충족하고, 같은 문자가 3회 이상 연속되지 않아야 합니다.',
-   checks:[{l:'16자 이상',t:p=>p.length>=16},{l:'대문자 포함',t:p=>/[A-Z]/.test(p)},{l:'소문자 포함',t:p=>/[a-z]/.test(p)},{l:'숫자 포함',t:p=>/[0-9]/.test(p)},{l:'특수문자 포함',t:p=>/[!@#$%^&*()\-_=+\[\]{};:,.<>?]/.test(p)},{l:'같은 문자 3연속 없음',t:p=>!/(.)(\1){2}/.test(p)}]},
-];
-let pwStage=0;
-
-function startPW(){
-  pwStage=0;
-  document.getElementById('pw-intro').style.display='none';
-  document.getElementById('pw-game').style.display='block';
-  renderPWStage();
-}
-function renderPWStage(){
-  const s=pwStages[pwStage];
-  document.getElementById('pw-stage-label').textContent='단계 '+(pwStage+1)+'/3';
-  document.getElementById('pw-mission-title').textContent=s.title;
-  document.getElementById('pw-mission-desc').textContent=s.desc;
-  document.getElementById('pw-input').value='';
-  document.getElementById('pw-next-btn').disabled=true;
-  document.getElementById('pw-strength-bar').style.width='0%';
-  document.getElementById('pw-strength-label').textContent='매우 약함';
-  document.getElementById('pw-strength-label').style.color='#DC2626';
-  document.getElementById('pw-stage-dots').innerHTML=Array.from({length:3},(_,i)=>
-    `<div class="prog-dot ${i<pwStage?'done':i===pwStage?'current':''}"></div>`).join('');
-  document.getElementById('pw-checklist').innerHTML=s.checks.map((c,i)=>`
-    <div class="flex items-center gap-2">
-      <div id="pwci${i}" class="w-5 h-5 rounded-full border-2 flex items-center justify-content-center flex-shrink-0 transition-all" style="border-color:#E4E1DD;"></div>
-      <span class="text-xs" style="color:#6B7280;">${c.l}</span>
-    </div>`).join('');
-}
-function checkPW(){
-  const pw=document.getElementById('pw-input').value;
-  const s=pwStages[pwStage];
-  let passed=0;
-  s.checks.forEach((c,i)=>{
-    const ok=c.t(pw);if(ok)passed++;
-    const el=document.getElementById('pwci'+i);
-    el.style.borderColor=ok?'#16A34A':'#E4E1DD';
-    el.style.background=ok?'#16A34A':'';
-    el.innerHTML=ok?'<svg width="11" height="11" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>':'';
-  });
-  const pct=(passed/s.checks.length)*100;
-  const bar=document.getElementById('pw-strength-bar');
-  bar.style.width=pct+'%';
-  const lbl=document.getElementById('pw-strength-label');
-  if(pct===100){bar.style.background='#16A34A';lbl.textContent='완벽';lbl.style.color='#16A34A';}
-  else if(pct>=75){bar.style.background='#65A30D';lbl.textContent='강함';lbl.style.color='#65A30D';}
-  else if(pct>=50){bar.style.background='#D97706';lbl.textContent='보통';lbl.style.color='#D97706';}
-  else if(pct>=25){bar.style.background='#EA580C';lbl.textContent='약함';lbl.style.color='#EA580C';}
-  else{bar.style.background='#DC2626';lbl.textContent='매우 약함';lbl.style.color='#DC2626';}
-  document.getElementById('pw-next-btn').disabled=(passed<s.checks.length);
-}
-function nextPW(){
-  pwStage++;
-  if(pwStage>=pwStages.length){
-    document.getElementById('pw-game').style.display='none';
-    document.getElementById('pw-result').style.display='block';
-    saveScore('password', 100);
-  } else {
-    document.getElementById('pw-input').value='';
-    renderPWStage();
-  }
-}
-
-/* ── GAME 4: 보안 예산 작전 ── */
-const controls=[
-  {id:'fw',  name:'방화벽 설치',    cost:20,desc:'네트워크 침입 차단',   blocks:['net','vuln']},
-  {id:'edu', name:'직원 보안 교육', cost:15,desc:'피싱·사회공학 대응',  blocks:['phish','social']},
-  {id:'av',  name:'안티바이러스',   cost:10,desc:'악성코드 탐지·제거',  blocks:['malware','ransomware']},
-  {id:'mfa', name:'2단계 인증(MFA)',cost:15,desc:'계정 탈취 방어',      blocks:['account']},
-  {id:'bk',  name:'데이터 백업',    cost:20,desc:'랜섬웨어 피해 최소화',blocks:['ransomware']},
-  {id:'vs',  name:'취약점 스캐너',  cost:25,desc:'시스템 취약점 탐지',  blocks:['vuln','net']},
-  {id:'ef',  name:'이메일 필터링',  cost:10,desc:'피싱 메일 자동 차단', blocks:['phish']},
-  {id:'audit',name:'보안 감사',     cost:15,desc:'내부자 위협 탐지',    blocks:['insider','account']},
-];
-const attacks=[
-  {name:'피싱 이메일 공격',type:'phish',    impact:'임직원 계정 탈취 시도',blockedBy:['phish']},
-  {name:'랜섬웨어 감염',   type:'ransomware',impact:'핵심 파일 암호화',    blockedBy:['ransomware']},
-  {name:'계정 탈취 시도',  type:'account',  impact:'관리자 권한 도용',     blockedBy:['account']},
-  {name:'웹 취약점 공격',  type:'vuln',     impact:'데이터베이스 침해',    blockedBy:['vuln']},
-  {name:'내부자 위협',     type:'insider',  impact:'기밀 데이터 유출',     blockedBy:['insider']},
-];
-let selectedCtrl=new Set(),budgetLeft=100;
-
-function startBudget(){
-  selectedCtrl=new Set();budgetLeft=100;
-  document.getElementById('budget-intro').style.display='none';
-  document.getElementById('budget-select').style.display='block';
-  renderBudgetGrid();
-}
-function renderBudgetGrid(){
-  document.getElementById('budget-remain').textContent=budgetLeft;
-  document.getElementById('budget-controls-grid').innerHTML=controls.map(c=>{
-    const sel=selectedCtrl.has(c.id);
-    const disabled=!sel&&budgetLeft<c.cost;
-    return `<div class="control-card ${sel?'selected':''} ${disabled?'disabled-ctrl':''}" onclick="toggleCtrl('${c.id}')">
-      <div class="flex justify-between">
-        <p class="text-sm font-semibold ${sel?'text-white':'text-gray-900'}">${c.name}</p>
-        <span class="text-xs font-bold ${sel?'text-gray-300':'text-orange-500'}">${c.cost}P</span>
-      </div>
-      <p class="text-xs mt-0.5 ${sel?'text-gray-300':''}" style="${sel?'':'color:#8C8984;'}">${c.desc}</p>
-    </div>`;
-  }).join('');
-  document.getElementById('budget-confirm-btn').disabled=selectedCtrl.size===0;
-}
-function toggleCtrl(id){
-  const c=controls.find(x=>x.id===id);
-  if(selectedCtrl.has(id)){selectedCtrl.delete(id);budgetLeft+=c.cost;}
-  else{if(budgetLeft<c.cost)return;selectedCtrl.add(id);budgetLeft-=c.cost;}
-  renderBudgetGrid();
-}
-function confirmBudget(){
-  document.getElementById('budget-select').style.display='none';
-  document.getElementById('budget-attack').style.display='block';
-  const allBlocks=new Set();
-  selectedCtrl.forEach(cid=>{controls.find(c=>c.id===cid).blocks.forEach(b=>allBlocks.add(b));});
-  const list=document.getElementById('budget-attack-list');
-  list.innerHTML='';
-  let blocked=0;
-  attacks.forEach((atk,i)=>{
-    const ok=atk.blockedBy.some(b=>allBlocks.has(b));
-    if(ok)blocked++;
-    setTimeout(()=>{
-      const div=document.createElement('div');
-      div.className='bg-white rounded-2xl p-4 shadow-sm';
-      div.innerHTML=`<div class="flex items-center justify-between">
-        <div><p class="text-sm font-semibold text-gray-900">${atk.name}</p><p class="text-xs mt-0.5" style="color:#8C8984;">${atk.impact}</p></div>
-        <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-full flex items-center justify-center" style="background:${ok?'#F0FDF4':'#FEF2F2'};">
-            ${ok?'<svg width="12" height="12" fill="none" stroke="#16A34A" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>':'<svg width="12" height="12" fill="none" stroke="#DC2626" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>'}
-          </div>
-          <span class="text-xs font-semibold" style="color:${ok?'#16A34A':'#DC2626'};">${ok?'차단':'침해'}</span>
-        </div>
-      </div>`;
-      list.appendChild(div);
-      if(i===attacks.length-1)setTimeout(()=>showBudgetResult(blocked),800);
-    },i*700);
-  });
-}
-function showBudgetResult(blocked){
-  document.getElementById('budget-attack').style.display='none';
-  document.getElementById('budget-result').style.display='block';
-  const breached=attacks.length-blocked;
-  const score=Math.round((blocked/attacks.length)*100);
-  saveScore('budget', score);
-  document.getElementById('budget-blocked').textContent=blocked;
-  document.getElementById('budget-breached').textContent=breached;
-  document.getElementById('budget-final-score').textContent=score+'점';
-  const p=blocked/attacks.length;
-  document.getElementById('budget-grade').textContent=p===1?'완벽한 방어!':p>=0.8?'우수한 보안 담당자':p>=0.6?'개선이 필요합니다':'보안 체계 재검토 필요';
-  document.getElementById('budget-comment').textContent=p>=0.8?'균형 잡힌 통제 선택으로 대부분의 공격을 방어했습니다.':'다양한 공격 유형을 커버하는 통제를 선택하는 것이 중요합니다.';
-}
 </script>
 </body>
 </html>

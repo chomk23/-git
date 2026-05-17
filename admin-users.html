@@ -519,13 +519,12 @@
   }
 
   // ── 상세 모달 ──
-  // 게임 타입 메타데이터 (향후 게이미케이션 추가 시 여기에 항목 추가)
+  // 게임 타입 메타데이터 (game_scores.game_type 키 ↔ 표시 정보)
   const GAME_META = {
-    quiz_challenge: { label: '보안 퀴즈',     color: '#1A1A1A', bg: '#F5F3F0' },
-    phishing_game:  { label: '피싱 식별',      color: '#DC2626', bg: '#FEF2F2' },
-    ox_game:        { label: 'OX 퀴즈',       color: '#16A34A', bg: '#F0FDF4' },
-    password_game:  { label: '비밀번호 챌린지', color: '#2563EB', bg: '#EFF6FF' },
-    cyberguard:     { label: '사이버가드',     color: '#9333EA', bg: '#FAF5FF' },
+    cyberguard:     { label: 'CyberGuard Corp', color: '#1565C0', bg: '#EFF6FF' },
+    phishing:       { label: '피싱 탐정',        color: '#1E3A5F', bg: '#EFF6FF' },
+    ox:             { label: 'OX 번개퀴즈',      color: '#5B21B6', bg: '#F5F3FF' },
+    security_race:  { label: '보안 레이싱',      color: '#DC2626', bg: '#FEF2F2' },
   };
   function getGameMeta(type) {
     return GAME_META[type] || { label: type, color: '#1A1A1A', bg: '#F5F3F0' };
