@@ -2,7 +2,7 @@
 
 > 직장인을 위한 인터랙티브 정보보안 교육 사이트. 게임, 시뮬레이션, AI 자동 출제로 지루한 보안 교육을 재미있게.
 
-**🔗 Live Demo:** [https://your-project.vercel.app](https://your-project.vercel.app)
+**🔗 Live Demo:** [https://your-project.vercel.app](https://git-ashen-xi.vercel.app/login.html)
 
 ---
 
@@ -121,16 +121,3 @@
    ANTHROPIC_API_KEY
    SITE_URL
    ```
-7. **Deploy** — 끝
-
----
-
-## 📸 스크린샷
-
-> _스크린샷 추가 예정_
-
----
-
-## 📝 라이선스
-
-MIT
