@@ -103,21 +103,3 @@
 | `phishing_sessions` | 피싱 캠페인 세션 |
 | `phishing_clicks` | 피싱 클릭/신고 이벤트 |
 | `app_settings` | 사이트 글로벌 설정 |
-
----
-
-##  배포 방법
-
-1. **Supabase 프로젝트 생성** → URL/anon key 확보
-2. **테이블 생성** → 위 스키마대로 SQL 실행
-3. **Resend 가입** → API key 발급
-4. **Anthropic 가입** → API key 발급
-5. **Vercel에 GitHub 연동 후 Import**
-6. **환경변수 등록**
-   ```
-   SUPABASE_URL
-   SUPABASE_SERVICE_ROLE_KEY
-   RESEND_API_KEY
-   ANTHROPIC_API_KEY
-   SITE_URL
-   ```
